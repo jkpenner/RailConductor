@@ -1,0 +1,33 @@
+[gd_scene format=3 uid="uid://bsj2m1jhx8b4l"]
+
+[ext_resource type="Script" uid="uid://cywxbsbvsaka6" path="res://Main.cs" id="1_0xm2m"]
+[ext_resource type="Script" uid="uid://b566yaetqrp38" path="res://scripts/Interactable.cs" id="1_ig7tw"]
+
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_0xm2m"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_h2yge"]
+
+[node name="Main" type="Node" unique_id=2111924343]
+script = ExtResource("1_0xm2m")
+
+[node name="Area 1" type="Area2D" parent="." unique_id=1547766829]
+position = Vector2(92, 56)
+script = ExtResource("1_ig7tw")
+
+[node name="Sprite2D" type="Sprite2D" parent="Area 1" unique_id=1412000505]
+scale = Vector2(20, 18.788)
+texture = SubResource("PlaceholderTexture2D_0xm2m")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area 1" unique_id=1151329880]
+shape = SubResource("RectangleShape2D_h2yge")
+
+[node name="Area 2" type="Area2D" parent="." unique_id=1455259577]
+position = Vector2(105, 69)
+script = ExtResource("1_ig7tw")
+
+[node name="Sprite2D" type="Sprite2D" parent="Area 2" unique_id=1581430705]
+scale = Vector2(20, 18.788)
+texture = SubResource("PlaceholderTexture2D_0xm2m")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area 2" unique_id=113534566]
+shape = SubResource("RectangleShape2D_h2yge")

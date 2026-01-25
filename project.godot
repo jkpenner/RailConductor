@@ -11,7 +11,8 @@ config_version=5
 [application]
 
 config/name="Rail Conductor"
-config/features=PackedStringArray("4.6", "GL Compatibility")
+run/main_scene="uid://bsj2m1jhx8b4l"
+config/features=PackedStringArray("4.6", "C#", "GL Compatibility")
 config/icon="res://icon.svg"
 
 [dotnet]
