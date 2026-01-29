@@ -19,6 +19,10 @@ config/icon="res://icon.svg"
 
 project/assembly_name="Rail Conductor"
 
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/track_plugin/plugin.cfg")
+
 [input]
 
 zoom_in={

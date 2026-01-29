@@ -1,0 +1,31 @@
+[gd_scene format=3 uid="uid://d38phvi2cgoye"]
+
+[ext_resource type="Script" uid="uid://byb8les288xtu" path="res://scripts/tracks/TrackSegment.cs" id="1_jt72q"]
+[ext_resource type="Script" uid="uid://cdi23cwipvf7k" path="res://scripts/tracks/TrackConnection.cs" id="3_owskb"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1bvp3"]
+resource_local_to_scene = true
+size = Vector2(65.36819, 20.62)
+
+[node name="TrackSegment" type="Area2D" unique_id=506896450]
+script = ExtResource("1_jt72q")
+SegmentWidth = 20.62
+
+[node name="Node2D" type="Node2D" parent="." unique_id=57466449]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=822692767]
+rotation = 3.1415925
+shape = SubResource("RectangleShape2D_1bvp3")
+
+[node name="ConnectionA" type="Node2D" parent="." unique_id=207775042]
+position = Vector2(45.866688, -1.1444092e-05)
+script = ExtResource("3_owskb")
+
+[node name="ConnectionB" type="Node2D" parent="." unique_id=1570309833]
+position = Vector2(-45.866688, 1.1444092e-05)
+script = ExtResource("3_owskb")
+
+[node name="Line2D" type="Line2D" parent="." unique_id=50280442]
+points = PackedVector2Array(45.866688, -1.1444092e-05, -45.866688, 1.1444092e-05)
+begin_cap_mode = 2
+end_cap_mode = 2
