@@ -4,7 +4,7 @@ using Godot;
 namespace RailConductor;
 
 [GlobalClass, Tool]
-public partial class TrackConnection : Node2D
+public partial class TrackNode : Node2D
 {
     public Action? LocalPositionChanged; 
     
@@ -26,4 +26,6 @@ public partial class TrackConnection : Node2D
             }
         }
     }
+    
+    public TrackKey GetTrackKey() => TrackKey.From(GlobalPosition);
 }

@@ -5,7 +5,7 @@ using Godot;
 namespace RailConductor;
 
 [GlobalClass, Tool]
-public partial class TrackSegment : Interactable, ITrackObject
+public partial class TrackSegment : Interactable
 {
     [Export]
     public float SegmentWidth
@@ -27,8 +27,8 @@ public partial class TrackSegment : Interactable, ITrackObject
     private float _segmentWidth = 20f;
 
     private Line2D? _line;
-    private TrackConnection? _endA;
-    private TrackConnection? _endB;
+    private TrackNode? _endA;
+    private TrackNode? _endB;
     private CollisionShape2D? _shape;
 
     private bool _useOverrideColor = false;
@@ -39,8 +39,8 @@ public partial class TrackSegment : Interactable, ITrackObject
     /// </summary>
     public bool IsUsable { get; private set; }
 
-    public TrackConnection EndA => _endA ?? throw new NullReferenceException();
-    public TrackConnection EndB => _endB ?? throw new NullReferenceException();
+    public TrackNode EndA => _endA ?? throw new NullReferenceException();
+    public TrackNode EndB => _endB ?? throw new NullReferenceException();
 
     /// <summary>
     /// Occurs when the value of the IsUsable property changes.
@@ -50,8 +50,8 @@ public partial class TrackSegment : Interactable, ITrackObject
     public override void _Ready()
     {
         _line = GetNodeOrNull<Line2D>(nameof(Line2D));
-        _endA = GetNodeOrNull<TrackConnection>("ConnectionA");
-        _endB = GetNodeOrNull<TrackConnection>("ConnectionB");
+        _endA = GetNodeOrNull<TrackNode>("ConnectionA");
+        _endB = GetNodeOrNull<TrackNode>("ConnectionB");
         _shape = GetNodeOrNull<CollisionShape2D>(nameof(CollisionShape2D));
 
         if (Engine.IsEditorHint())
@@ -61,39 +61,11 @@ public partial class TrackSegment : Interactable, ITrackObject
         }
     }
 
-    public IEnumerable<TrackKey> GetConnections()
-    {
-        if (Engine.IsEditorHint())
-        {
-            throw new InvalidOperationException($"{nameof(GetConnections)} not supported while in editor.");
-        }
-
-        return
-        [
-            TrackKey.From(EndA.GlobalPosition),
-            TrackKey.From(EndB.GlobalPosition)
-        ];
-    }
-
     protected override void OnInteraction()
     {
         // Interaction
     }
-    
-    /// <summary>
-    /// Retrieves the position of the junction at the A end of the track segment.
-    /// </summary>
-    public Vector2 GetEndAPosition() => EndA.GlobalPosition;
 
-    public TrackKey GetEndAKey() => TrackKey.From(GetEndAPosition());
-
-    /// <summary>
-    /// Retrieves the position of the junction at the B end of the track segment.
-    /// </summary>
-    public Vector2 GetEndBPosition() => EndB.GlobalPosition;
-
-    public TrackKey GetEndBKey() => TrackKey.From(GetEndBPosition());
-    
     public void SetOverrideColor(Color color)
     {
         _useOverrideColor = true;
@@ -137,73 +109,7 @@ public partial class TrackSegment : Interactable, ITrackObject
         IsUsable = isUsable;
         UsabilityChanged?.Invoke();
     }
-
-    public Vector2 FindClosestPoint(Vector2 point)
-    {
-        var pointA = GetEndAPosition();
-        var pointB = GetEndBPosition();
-
-        var lineSegment = pointB - pointA;
-        var pointAP = point - pointA;
-
-        var t = pointAP.Dot(lineSegment) / lineSegment.Length();
-
-        return t switch
-        {
-            < 0.0f => pointA,
-            > 1.0f => pointB,
-            _ => pointA + t * lineSegment
-        };
-    }
-
-    public Vector2 FindPointAtExactDistance(Vector2 point, float distance)
-    {
-        var a = GetEndAPosition();
-        var b = GetEndBPosition();
-        var ab = b - a;
-        var lenSq = ab.LengthSquared();
-
-        if (lenSq < 0.00001f)
-        {
-            return point.DistanceTo(a) <= distance ? a : b;
-        }
-
-        var ap = point - a;
-        var proj = ap.Dot(ab) / lenSq; // t in [0..1] range would be clamped
-
-        var closest = Geometry2D.GetClosestPointToSegment(point, a, b);
-        var distClosest = point.DistanceTo(closest);
-
-        if (Mathf.Abs(distClosest - distance) < 0.001f)
-            return closest;
-
-        // Quadratic: |a + t·ab - point|² = distance²
-        var A = lenSq;
-        var B = 2.0f * ap.Dot(ab);
-        var C = ap.LengthSquared() - distance * distance;
-
-        var discriminant = B * B - 4.0f * A * C;
-        if (discriminant < 0)
-        {
-            // No real intersection → return closer endpoint
-            return point.DistanceTo(a) < point.DistanceTo(b) ? a : b;
-        }
-
-        var sqrtD = Mathf.Sqrt(discriminant);
-        var t1 = (-B - sqrtD) / (2.0f * A);
-        var t2 = (-B + sqrtD) / (2.0f * A);
-
-        // Return first valid point on segment (prefer smaller t = closer to A)
-        if (t1 >= 0f && t1 <= 1f)
-            return a + ab * t1;
-
-        if (t2 >= 0f && t2 <= 1f)
-            return a + ab * t2;
-
-        // No intersection on segment → fallback to closest endpoint
-        return point.DistanceTo(a) < point.DistanceTo(b) ? a : b;
-    }
-
+    
     private void OnJunctionChanged()
     {
         if (Engine.IsEditorHint())

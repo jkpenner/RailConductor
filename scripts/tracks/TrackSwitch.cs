@@ -10,11 +10,17 @@ public enum SwitchRoute
 }
 
 [GlobalClass]
-public partial class TrackSwitch : Interactable, ITrackObject
+public partial class TrackSwitch : Interactable
 {
     private TrackSegment _inSegment = null!;
     private TrackSegment _outSegmentA = null!;
     private TrackSegment _outSegmentB = null!;
+    
+    
+    public TrackNode Node { get; private set; } = null!;
+    public TrackSegment InSegment => _inSegment;
+    public TrackSegment OutSegmentA => _outSegmentA;
+    public TrackSegment OutSegmentB => _outSegmentB;
     
     [Export]
     public SwitchRoute Route { get; set; } = SwitchRoute.ARoute;
@@ -29,11 +35,6 @@ public partial class TrackSwitch : Interactable, ITrackObject
     protected override void OnInteraction()
     {
         
-    }
-    
-    public IEnumerable<TrackKey> GetConnections()
-    {
-        return [];
     }
     
     public void ToggleRoute()
