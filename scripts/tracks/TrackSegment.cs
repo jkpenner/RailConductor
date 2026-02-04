@@ -5,8 +5,10 @@ using Godot;
 namespace RailConductor;
 
 [GlobalClass, Tool]
-public partial class TrackSegment : Interactable
+public partial class TrackSegment : Interactable, ITrackGraphBuildHandler
 {
+    public int GraphBuildPhase => BuildPhase.Links;
+    
     [Export]
     public float SegmentWidth
     {
@@ -166,5 +168,26 @@ public partial class TrackSegment : Interactable
 
             shape.Size = new Vector2((endB - endA).Length(), SegmentWidth);
         }
+    }
+    
+    public void OnGraphBuildPhase(TrackGraph graph)
+    {
+        var keyA = EndA.GetTrackKey();
+        var nodeA = graph.GetNode(keyA);
+        if (nodeA is null)
+        {
+            GD.PushWarning($"Track node {keyA} not registered");
+            return;
+        }
+
+        var keyB = EndB.GetTrackKey();
+        var nodeB = graph.GetNode(keyB);
+        if (nodeB is null)
+        {
+            GD.PushWarning($"Track node {keyB} not registered");
+            return;
+        }
+
+        graph.AddLink(nodeA, nodeB);
     }
 }

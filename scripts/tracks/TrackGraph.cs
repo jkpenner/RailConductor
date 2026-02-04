@@ -17,6 +17,68 @@ public class TrackGraph
 
     private int _nextId = 1;
 
+    public TrackLocation Move(TrackLocation location, float distance)
+    {
+        var current = location;
+        var remaining = distance;
+        var safetyCounter = 1000;
+
+        while (!Mathf.IsZeroApprox(remaining))
+        {
+            if (--safetyCounter <= 0)
+            {
+                GD.PushError("Move exceeded safety limit; possible infinite loop.");
+                break;
+            }
+
+            var newCurrent = current.Move(remaining, out var overflow);
+            if (Mathf.IsZeroApprox(overflow))
+            {
+                return current;
+            }
+
+            TrackGraphNode node;
+            TrackGraphLink? nextLink;
+            TrackLocation nextLocation;
+
+            // Positive overflow: Moving forwards arrived at Face node.
+            if (overflow > 0f)
+            {
+                node = newCurrent.Face;
+                nextLink = node.GetConnectedLink(newCurrent.Link);
+                
+                // Check for dead end
+                if (nextLink is null)
+                {
+                    return newCurrent;
+                }
+
+                var farEnd = nextLink.GetOtherNode(node);
+                nextLocation = new TrackLocation(nextLink, farEnd, 0f);
+            }
+            // Negative overflow: Moving backwards arrived at Other node.
+            else
+            {
+                node = newCurrent.Other;
+                nextLink = node.GetConnectedLink(newCurrent.Link);
+                
+                // Check for dead end
+                if (nextLink is null)
+                {
+                    return newCurrent;
+                }
+                
+                // Start at end (t=1) for backward continuation
+                nextLocation = new TrackLocation(nextLink, node, 1f);
+            }
+            
+            current = nextLocation;
+            remaining = overflow;
+        }
+
+        return current;
+    }
+
     public TrackGraphNode CreateOrGetNode(Vector2 position)
     {
         var key = TrackKey.From(position);
@@ -45,6 +107,25 @@ public class TrackGraph
 
     public TrackGraphNode? GetNode(TrackKey key)
         => _nodesByPos.GetValueOrDefault(key);
+
+    public TrackGraphNode? GetNode(int id)
+        => _nodesById.GetValueOrDefault(id);
+
+    public TrackGraphLink? GetLink(int linkId)
+        => _linksById.GetValueOrDefault(linkId);
+
+    public TrackGraphLink? GetLink(TrackKey keyA, TrackKey keyB)
+    {
+        var nodeA = GetNode(keyA);
+        var nodeB = GetNode(keyB);
+
+        if (nodeA is null || nodeB is null)
+        {
+            return null;
+        }
+        
+        return GetLink(nodeA.Id, nodeB.Id);
+    }
 
     public TrackGraphLink? GetLink(TrackGraphNode nodeA, TrackGraphNode nodeB)
         => GetLink(nodeA.Id, nodeB.Id);
@@ -86,45 +167,4 @@ public class TrackGraph
 
         return link;
     }
-}
-
-public class TrackPosition
-{
-    public required TrackGraph Graph { get; init; }
-    public required TrackGraphLink Link { get; init; }
-    public required TrackGraphNode ForwardNode { get; init; }
-
-    public float T { get; set; }
-
-    public Vector2 GetGlobalPosition()
-    {
-        var other = Link.GetOtherNode(ForwardNode);
-        return other.GlobalPosition.Lerp(ForwardNode.GlobalPosition, T);
-    }
-
-    /// <summary>
-    /// Moves the position along the current link based on the ccurrent ForwardNode.
-    /// </summary>
-    /// <param name="amount">A positive or negative value</param>
-    /// <returns>Any remaining movement</returns>
-    public float Move(float amount)
-    {
-        var linkLength = Link.GetLength();
-        if (linkLength == 0f)
-        {
-            return amount;
-        }
-
-        var target = T + (amount / linkLength);
-        T = Mathf.Clamp(target, 0f, 1f);
-        return target - T;
-    }
-
-    /// <summary>
-    /// Returns true if the position is approximately at a node. The comparison is done using
-    /// a tolerance calculation with Epsilon.
-    /// </summary>
-    /// <returns>A bool for whether or not the position is approximately at a node.</returns>
-    public bool IsApproxAtNode()
-        => Mathf.IsEqualApprox(T, 1f) || Mathf.IsZeroApprox(T);
 }

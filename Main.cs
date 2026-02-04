@@ -14,7 +14,28 @@ public partial class Main : Node
         {
             return;
         }
+    }
+
+    public Train? SpawnTrain(int linkId, int nodeId)
+    {
+        if (track is null)
+        {
+            GD.PushError("Track is null");
+            return null;
+        }
         
-        train.SetTrack(track, segment);
+        var graph = track.GetGraph();
+        
+        var link = graph.GetLink(linkId);
+        var node = graph.GetNode(nodeId);
+
+        if (link is null || node is null || !link.Contains(node))
+        {
+            GD.PushError($"Failed to spawn train, invalid position details.");
+            return null;
+        }
+
+        train?.SetTrack(graph, link, node);
+        return train;
     }
 }

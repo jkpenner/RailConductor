@@ -5,25 +5,38 @@ namespace RailConductor;
 [GlobalClass]
 public partial class Train : Node2D
 {
-    [Export]
-    public TrainWheel? _wheel = null;
+    private TrackGraph? _graph;
+    private TrackLocation? _lead;
+    private TrackLocation? _rear;
 
 
-    public void SetTrack(Track track, TrackSegment segment)
+    public void SetTrack(TrackGraph graph, TrackGraphLink link, TrackGraphNode face)
     {
-        _wheel?.SetTrack(track, segment);
+        _graph = graph;
+        _lead = new TrackLocation(link, face);
+        _rear = new TrackLocation(link, face);
     }
 
     public override void _Process(double delta)
     {
         var move = Input.GetAxis("move_backward", "move_forward");
 
-        _wheel?.Move(move);
+        if (_graph is not null)
+        {
+            if (_lead is not null)
+            {
+                _graph.Move(_lead, move);
+            }
+
+            if (_rear is not null)
+            {
+                _graph.Move(_rear, move);
+            }
+        }
         
-        // Sync Train movement based on it's wheels.
-        var wheel = _wheel?.GetGlobalPosition() ?? GlobalPosition;
+        // Sync Train movement based on its wheels.
+        var wheel = _lead?.GetGlobalPosition() ?? GlobalPosition;
 
         GlobalPosition = wheel;
-        _wheel?.SetGlobalPosition(wheel);
     }
 }
