@@ -8,7 +8,7 @@ public class TrackSwitchBuildPhase : ProcessNodeBuildPhase<TrackSwitch>
     
     protected override void ProcessNode(Track track, TrackGraph graph, TrackSwitch trackSwitch)
     {
-        var key = trackSwitch.Node.GetTrackKey();
+        var key =  TrackKey.From(trackSwitch.GlobalPosition);
         var node = graph.GetNode(key);
         if (node is null)
         {
@@ -44,5 +44,9 @@ public class TrackSwitchBuildPhase : ProcessNodeBuildPhase<TrackSwitch>
 
         node.ActiveOutgoingLink = 0;
         node.OutgoingLinks = [outSegmentA, outSegmentB];
+        
+        // Inject required graph information.
+        trackSwitch.Graph = graph;
+        trackSwitch.Node = node;
     }
 }

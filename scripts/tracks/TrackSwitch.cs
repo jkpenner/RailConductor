@@ -17,8 +17,6 @@ public partial class TrackSwitch : Interactable
     private TrackSegment _outSegmentA = null!;
     private TrackSegment _outSegmentB = null!;
 
-
-    public TrackNode Node { get; private set; } = null!;
     public TrackSegment InSegment => _inSegment;
     public TrackSegment OutSegmentA => _outSegmentA;
     public TrackSegment OutSegmentB => _outSegmentB;
