@@ -5,8 +5,10 @@
 [ext_resource type="Script" uid="uid://b1h881bnaxfu1" path="res://scripts/tracks/Track.cs" id="3_1bvp3"]
 [ext_resource type="PackedScene" uid="uid://d38phvi2cgoye" path="res://scenes/tracks/track_segment.tscn" id="3_lquwl"]
 [ext_resource type="Script" uid="uid://cx4112x50xprk" path="res://scripts/tracks/TrackIsolator.cs" id="5_lquwl"]
+[ext_resource type="Script" uid="uid://b15yvw4uofycm" path="res://scripts/tracks/TrackSwitch.cs" id="6_5vw27"]
 [ext_resource type="Script" uid="uid://d3c2or76iytl1" path="res://scripts/train/Train.cs" id="6_272bh"]
 [ext_resource type="Texture2D" uid="uid://djuh3tra4ijeq" path="res://assets/sprites/circle.png" id="8_5vw27"]
+[ext_resource type="Script" uid="uid://yslvcibqqiko" path="res://scripts/interactions/Interactions.cs" id="9_kek77"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_272bh"]
 resource_local_to_scene = true
@@ -25,24 +27,31 @@ resource_local_to_scene = true
 size = Vector2(80.622574, 20.62)
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_lquwl"]
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_efxa6"]
-resource_local_to_scene = true
-size = Vector2(62.936478, 20.62)
+radius = 15.0
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_dg77c"]
 resource_local_to_scene = true
 size = Vector2(56, 20.62)
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_efxa6"]
+resource_local_to_scene = true
+size = Vector2(62.936478, 20.62)
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ycdy4"]
 resource_local_to_scene = true
 size = Vector2(68, 20.62)
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_5vw27"]
+load_path = "res://.godot/imported/circle.png-5d399e40d8f71a91c414653a74d2346b.ctex"
 
 [node name="Main" type="Node" unique_id=2111924343 node_paths=PackedStringArray("track", "segment", "train")]
 script = ExtResource("1_0xm2m")
 track = NodePath("Track")
 segment = NodePath("Track/TrackSegment4")
 train = NodePath("Train")
+
+[node name="Interactions" type="Node" parent="." unique_id=137138085]
+script = ExtResource("9_kek77")
 
 [node name="Polygon2D" type="Polygon2D" parent="." unique_id=1777833426]
 polygon = PackedVector2Array(-100, 0, 0, 150, 100, 0)
@@ -95,7 +104,7 @@ shape = SubResource("RectangleShape2D_kek77")
 position = Vector2(45.933502, 0.00390625)
 
 [node name="ConnectionB" parent="Track/TrackSegment3" index="3" unique_id=1570309833]
-position = Vector2(-45.933502, -0.00390625)
+position = Vector2(-47, 0)
 
 [node name="Line2D" parent="Track/TrackSegment3" index="4" unique_id=50280442]
 points = PackedVector2Array(45.933502, 0.00390625, -45.933502, -0.00390625)
@@ -108,7 +117,7 @@ rotation = -2.7334435
 shape = SubResource("RectangleShape2D_4c57u")
 
 [node name="ConnectionA" parent="Track/TrackSegment2" index="2" unique_id=207775042]
-position = Vector2(37, 16)
+position = Vector2(37.066498, 15.996094)
 
 [node name="ConnectionB" parent="Track/TrackSegment2" index="3" unique_id=1570309833]
 position = Vector2(-37, -16)
@@ -120,60 +129,105 @@ points = PackedVector2Array(37, 16, -37, -16)
 position = Vector2(62, -91)
 script = ExtResource("5_lquwl")
 
-[node name="Switch" type="Area2D" parent="Track" unique_id=158775372]
+[node name="Switch" type="Area2D" parent="Track" unique_id=158775372 node_paths=PackedStringArray("IdText", "StateText", "Indicator")]
 position = Vector2(-6, -91)
+script = ExtResource("6_5vw27")
+IdText = NodePath("Indicator/Fill/IdLabel")
+StateText = NodePath("Indicator/Fill/StateLabel")
+Indicator = NodePath("Indicator")
+InteractPriority = -10
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Track/Switch" unique_id=662039015]
 z_index = 10
 shape = SubResource("CircleShape2D_lquwl")
 
-[node name="TrackSegment1" parent="Track/Switch" unique_id=885460486 instance=ExtResource("3_lquwl")]
-position = Vector2(22.5, -22)
-
-[node name="CollisionShape2D" parent="Track/Switch/TrackSegment1" index="1" unique_id=822692767]
-rotation = -0.7741627
-shape = SubResource("RectangleShape2D_efxa6")
-
-[node name="ConnectionA" parent="Track/Switch/TrackSegment1" index="2" unique_id=207775042]
-position = Vector2(-22.5, 22)
-
-[node name="ConnectionB" parent="Track/Switch/TrackSegment1" index="3" unique_id=1570309833]
-position = Vector2(22.5, -22)
-
-[node name="Line2D" parent="Track/Switch/TrackSegment1" index="4" unique_id=50280442]
-points = PackedVector2Array(-22.5, 22, 22.5, -22)
-
-[node name="TrackSegment2" parent="Track/Switch" unique_id=356207709 instance=ExtResource("3_lquwl")]
+[node name="InSegment" parent="Track/Switch" unique_id=356207709 instance=ExtResource("3_lquwl")]
 position = Vector2(-28, 0)
 
-[node name="CollisionShape2D" parent="Track/Switch/TrackSegment2" index="1" unique_id=822692767]
+[node name="CollisionShape2D" parent="Track/Switch/InSegment" index="1" unique_id=822692767]
 rotation = -3.1415925
 shape = SubResource("RectangleShape2D_dg77c")
 
-[node name="ConnectionA" parent="Track/Switch/TrackSegment2" index="2" unique_id=207775042]
+[node name="ConnectionA" parent="Track/Switch/InSegment" index="2" unique_id=207775042]
 position = Vector2(28, 0)
 
-[node name="ConnectionB" parent="Track/Switch/TrackSegment2" index="3" unique_id=1570309833]
+[node name="ConnectionB" parent="Track/Switch/InSegment" index="3" unique_id=1570309833]
 position = Vector2(-28, 0)
 
-[node name="Line2D" parent="Track/Switch/TrackSegment2" index="4" unique_id=50280442]
+[node name="Line2D" parent="Track/Switch/InSegment" index="4" unique_id=50280442]
 points = PackedVector2Array(28, 0, -28, 0)
 
-[node name="TrackSegment3" parent="Track/Switch" unique_id=1575990800 instance=ExtResource("3_lquwl")]
+[node name="OutSegmentB" parent="Track/Switch" unique_id=885460486 instance=ExtResource("3_lquwl")]
+position = Vector2(22.5, -22)
+
+[node name="CollisionShape2D" parent="Track/Switch/OutSegmentB" index="1" unique_id=822692767]
+rotation = -0.7741627
+shape = SubResource("RectangleShape2D_efxa6")
+
+[node name="ConnectionA" parent="Track/Switch/OutSegmentB" index="2" unique_id=207775042]
+position = Vector2(-22.5, 22)
+
+[node name="ConnectionB" parent="Track/Switch/OutSegmentB" index="3" unique_id=1570309833]
+position = Vector2(22.5, -22)
+
+[node name="Line2D" parent="Track/Switch/OutSegmentB" index="4" unique_id=50280442]
+points = PackedVector2Array(-22.5, 22, 22.5, -22)
+
+[node name="OutSegmentA" parent="Track/Switch" unique_id=1575990800 instance=ExtResource("3_lquwl")]
 position = Vector2(34, 0)
 
-[node name="CollisionShape2D" parent="Track/Switch/TrackSegment3" index="1" unique_id=822692767]
+[node name="CollisionShape2D" parent="Track/Switch/OutSegmentA" index="1" unique_id=822692767]
 rotation = 0.0
 shape = SubResource("RectangleShape2D_ycdy4")
 
-[node name="ConnectionA" parent="Track/Switch/TrackSegment3" index="2" unique_id=207775042]
+[node name="ConnectionA" parent="Track/Switch/OutSegmentA" index="2" unique_id=207775042]
 position = Vector2(-34, 0)
 
-[node name="ConnectionB" parent="Track/Switch/TrackSegment3" index="3" unique_id=1570309833]
+[node name="ConnectionB" parent="Track/Switch/OutSegmentA" index="3" unique_id=1570309833]
 position = Vector2(34, 0)
 
-[node name="Line2D" parent="Track/Switch/TrackSegment3" index="4" unique_id=50280442]
+[node name="Line2D" parent="Track/Switch/OutSegmentA" index="4" unique_id=50280442]
 points = PackedVector2Array(-34, 0, 34, 0)
+
+[node name="Indicator" type="Sprite2D" parent="Track/Switch" unique_id=1256335409]
+self_modulate = Color(1, 1, 0.10980392, 1)
+scale = Vector2(0.1, 0.1)
+texture = ExtResource("8_5vw27")
+
+[node name="Fill" type="Sprite2D" parent="Track/Switch/Indicator" unique_id=1173400862]
+scale = Vector2(0.6, 0.6)
+texture = SubResource("CompressedTexture2D_5vw27")
+
+[node name="StateLabel" type="Label" parent="Track/Switch/Indicator/Fill" unique_id=2103354441]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -152.0
+offset_top = -152.0
+offset_right = -152.0
+offset_bottom = -152.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 128
+text = "D"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="IdLabel" type="Label" parent="Track/Switch/Indicator/Fill" unique_id=648851354]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -152.0
+offset_top = -152.0
+offset_right = -152.0
+offset_bottom = -152.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 72
+text = "100"
+horizontal_alignment = 1
 
 [node name="Train" type="Node2D" parent="." unique_id=1558786846 node_paths=PackedStringArray("LeadVisual", "RearVisual")]
 position = Vector2(50, -53)
@@ -197,6 +251,6 @@ texture = ExtResource("8_5vw27")
 [editable path="Track/TrackSegment4"]
 [editable path="Track/TrackSegment3"]
 [editable path="Track/TrackSegment2"]
-[editable path="Track/Switch/TrackSegment1"]
-[editable path="Track/Switch/TrackSegment2"]
-[editable path="Track/Switch/TrackSegment3"]
+[editable path="Track/Switch/InSegment"]
+[editable path="Track/Switch/OutSegmentB"]
+[editable path="Track/Switch/OutSegmentA"]

@@ -13,6 +13,9 @@ public enum SwitchRoute
 [GlobalClass]
 public partial class TrackSwitch : Interactable
 {
+    public TrackGraph? Graph { get; set; }
+    public TrackGraphNode? Node { get; set; }
+
     private TrackSegment _inSegment = null!;
     private TrackSegment _outSegmentA = null!;
     private TrackSegment _outSegmentB = null!;
@@ -24,14 +27,29 @@ public partial class TrackSwitch : Interactable
     [Export]
     public SwitchRoute Route { get; set; } = SwitchRoute.ARoute;
 
+    [Export]
+    public Label IdText { get; set; } = null!;
+
+    [Export]
+    public Label StateText { get; set; } = null!;
+
+    [Export]
+    public Sprite2D Indicator { get; set; } = null!;
+
     public override void _Ready()
     {
         _inSegment = GetNode<TrackSegment>("InSegment");
         _outSegmentA = GetNode<TrackSegment>("OutSegmentA");
         _outSegmentB = GetNode<TrackSegment>("OutSegmentB");
+        
+        SetRoute(Route);
     }
 
-    protected override void OnInteraction() { }
+    protected override void OnInteraction()
+    {
+        ToggleRoute();
+        GD.Print($"Toggling Switch {Node?.Id ?? 0} to {Route}");
+    }
 
     public void ToggleRoute()
     {
@@ -46,19 +64,24 @@ public partial class TrackSwitch : Interactable
     public void SetRoute(SwitchRoute route)
     {
         Route = route;
-        // _inSegment?.SetIsUsable(GetActiveSegmentA() == segmentA1);
-        // _outSegmentA?.SetIsUsable(GetActiveSegmentA() == segmentA2);
-        // _outSegmentB?.SetIsUsable(GetActiveSegmentB() == segmentB1);
-        //
-        // if (route == SwitchRoute.ARoute)
-        // {
-        //     indicator.color = settings.SwitchNormalRouteColor;
-        //     stateText.text = "N";
-        // }
-        // else
-        // {
-        //     indicator.color = settings.SwitchDivergingRouteColor;
-        //     stateText.text = "D";
-        // }
+
+        if (Node is not null)
+        {
+            // Toggle to the next link
+            Node.ActiveIncomingLink = (Node.ActiveIncomingLink + 1) % Node.IncomingLinks.Length;
+            Node.ActiveOutgoingLink = (Node.ActiveOutgoingLink + 1) % Node.OutgoingLinks.Length;
+            Node.RebuildConnections();
+        }
+
+        if (route == SwitchRoute.ARoute)
+        {
+            Indicator.SelfModulate = Colors.Aqua; // settings.SwitchNormalRouteColor;
+            StateText.Text = "N";
+        }
+        else
+        {
+            Indicator.SelfModulate = Colors.Orange; // settings.SwitchNormalRouteColor;
+            StateText.Text = "D";
+        }
     }
 }
