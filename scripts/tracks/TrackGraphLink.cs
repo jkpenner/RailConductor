@@ -15,7 +15,7 @@ public class TrackGraphLink
             throw new InvalidDataException($"{nameof(TrackGraphNode)} is not part of the {nameof(TrackGraphLink)}");
         }
 
-        return node == NodeA ? NodeA : NodeB;
+        return node == NodeA ? NodeB : NodeA;
     }
 
     public bool Contains(TrackGraphNode node) => NodeA == node || NodeB == node;
