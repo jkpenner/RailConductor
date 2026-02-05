@@ -19,7 +19,7 @@ public class TrackGraphNode
 
     private Dictionary<TrackGraphLink, TrackGraphLink> _connections = [];
 
-    private void RebuildConnections()
+    public void RebuildConnections()
     {
         _connections = new Dictionary<TrackGraphLink, TrackGraphLink>();
 

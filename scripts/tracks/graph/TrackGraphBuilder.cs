@@ -35,6 +35,11 @@ public class TrackGraphBuilder
             }
         }
 
+        foreach (var node in graph.GetNodes())
+        {
+            node.RebuildConnections();
+        }
+
         return graph;
     }
 }
