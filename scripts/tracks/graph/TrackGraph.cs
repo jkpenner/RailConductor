@@ -156,10 +156,10 @@ public class TrackGraph
 
         linksA.Add(link);
 
-        if (!_linksByNodeId.TryGetValue(nodeA.Id, out var linksB))
+        if (!_linksByNodeId.TryGetValue(nodeB.Id, out var linksB))
         {
             linksB = [];
-            _linksByNodeId[nodeA.Id] = linksB;
+            _linksByNodeId[nodeB.Id] = linksB;
         }
 
         linksB.Add(link);
