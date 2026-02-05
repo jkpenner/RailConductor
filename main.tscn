@@ -5,7 +5,6 @@
 [ext_resource type="Script" uid="uid://b1h881bnaxfu1" path="res://scripts/tracks/Track.cs" id="3_1bvp3"]
 [ext_resource type="PackedScene" uid="uid://d38phvi2cgoye" path="res://scenes/tracks/track_segment.tscn" id="3_lquwl"]
 [ext_resource type="Script" uid="uid://cx4112x50xprk" path="res://scripts/tracks/TrackIsolator.cs" id="5_lquwl"]
-[ext_resource type="Script" uid="uid://b5412hvmvyynm" path="res://scripts/train/TrainWheel.cs" id="6_7mycd"]
 [ext_resource type="Script" uid="uid://d3c2or76iytl1" path="res://scripts/train/Train.cs" id="6_272bh"]
 [ext_resource type="Texture2D" uid="uid://djuh3tra4ijeq" path="res://assets/sprites/circle.png" id="8_5vw27"]
 
@@ -70,7 +69,7 @@ position = Vector2(-45.933502, -0.00390625)
 points = PackedVector2Array(45.933502, 0.00390625, -45.933502, -0.00390625)
 
 [node name="TrackSegment4" parent="Track" unique_id=1297777188 instance=ExtResource("3_lquwl")]
-position = Vector2(150.5, -197)
+position = Vector2(379, -59)
 
 [node name="CollisionShape2D" parent="Track/TrackSegment4" index="1" unique_id=822692767]
 rotation = -3.1415925
@@ -80,7 +79,7 @@ shape = SubResource("RectangleShape2D_5vw27")
 position = Vector2(150.5, 0)
 
 [node name="ConnectionB" parent="Track/TrackSegment4" index="3" unique_id=1570309833]
-position = Vector2(-150.5, 0)
+position = Vector2(-151, 0)
 
 [node name="Line2D" parent="Track/TrackSegment4" index="4" unique_id=50280442]
 points = PackedVector2Array(150.5, 0, -150.5, 0)
@@ -118,7 +117,7 @@ position = Vector2(-37, -16)
 points = PackedVector2Array(37, 16, -37, -16)
 
 [node name="TrackIsolator" type="Marker2D" parent="Track" unique_id=808338418]
-position = Vector2(108, -32)
+position = Vector2(62, -91)
 script = ExtResource("5_lquwl")
 
 [node name="Switch" type="Area2D" parent="Track" unique_id=158775372]
@@ -176,15 +175,21 @@ position = Vector2(34, 0)
 [node name="Line2D" parent="Track/Switch/TrackSegment3" index="4" unique_id=50280442]
 points = PackedVector2Array(-34, 0, 34, 0)
 
-[node name="Train" type="Node2D" parent="." unique_id=1558786846 node_paths=PackedStringArray("_wheel")]
+[node name="Train" type="Node2D" parent="." unique_id=1558786846 node_paths=PackedStringArray("LeadVisual", "RearVisual")]
+position = Vector2(50, -53)
 script = ExtResource("6_272bh")
-_wheel = NodePath("Wheel1")
+TrainLength = 200.0
+LeadVisual = NodePath("Lead")
+RearVisual = NodePath("Rear")
 
-[node name="Wheel1" type="Node2D" parent="Train" unique_id=1873467965]
-script = ExtResource("6_7mycd")
+[node name="Lead" type="Sprite2D" parent="Train" unique_id=406436698]
+modulate = Color(0, 0.20392157, 0.84313726, 1)
+scale = Vector2(0.05, 0.05)
+texture = ExtResource("8_5vw27")
 
-[node name="Sprite2D" type="Sprite2D" parent="Train" unique_id=406436698]
-modulate = Color(0.8747694, 0.3999769, 0.19482505, 1)
+[node name="Rear" type="Sprite2D" parent="Train" unique_id=251388624]
+modulate = Color(0.9211696, 0.34046587, 0.25685716, 1)
+position = Vector2(31.999998, -0.99999994)
 scale = Vector2(0.05, 0.05)
 texture = ExtResource("8_5vw27")
 
