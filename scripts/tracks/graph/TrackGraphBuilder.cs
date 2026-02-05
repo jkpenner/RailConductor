@@ -1,67 +1,37 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Godot;
 
 namespace RailConductor;
 
-public interface ITrackGraphBuildHandler
+public class TrackGraphBuilder
 {
-    int GraphBuildPhase { get; }
-    void OnGraphBuildPhase(TrackGraph graph);
-}
-
-public static class BuildPhase
-{
-    /// <summary>
-    /// Create Nodes
-    /// </summary>
-    public const int Nodes = 0x10;
-    /// <summary>
-    /// Create Links
-    /// </summary>
-    public const int Links = 0x20;
-    /// <summary>
-    /// Setup Switches / Junctions
-    /// </summary>
-    public const int Junctions = 0x30;
-    /// <summary>
-    /// Add Signals / Isolators / Speed Restrictions
-    /// </summary>
-    public const int Restrictions = 0x40;
-    /// <summary>
-    /// Add Track Circuits
-    /// </summary>
-    public const int Circuits = 0x50;
-    /// <summary>
-    /// Validation and Post processing of tracks
-    /// </summary>
-    public const int Validation = 0x60;
-}
-
-public static class TrackGraphBuilder
-{
-    public static TrackGraph Build(Track track)
+    private readonly List<TrackGraphBuildPhase> _phases = [];
+    
+    public void AddBuildPhase(TrackGraphBuildPhase phase)
     {
-        var graph = new TrackGraph();
-        var handlers = track.FindChildren("*", nameof(Node), true, false)
-            .OfType<ITrackGraphBuildHandler>()
-            .OrderBy(h => h.GraphBuildPhase)
-            .ToList();
-
-        if (handlers.Count == 0)
+        _phases.Add(phase);
+    }
+    
+    public TrackGraph Build(Track track)
+    {
+        if (_phases.Count == 0)
         {
-            GD.PushWarning($"No {nameof(ITrackGraphBuildHandler)} implementations found under Track node.");
+            GD.PushWarning($"No {nameof(TrackGraphBuildPhase)} assigned.");
         }
+        
+        var graph = new TrackGraph();
 
-        foreach (var handler in handlers)
+        foreach (var phase in _phases.OrderBy(p => p.GraphBuildPhase))
         {
             try
             {
-                handler.OnGraphBuildPhase(graph);
+                phase.ExecuteBuildPhase(track, graph);
             }
             catch (Exception e)
             {
-                GD.PushError($"Error in graph build handler {handler.GetType().Name} (phase {handler.GraphBuildPhase}): {e.Message}\n{e.StackTrace}");
+                GD.PushError($"Error in graph build handler {phase.GetType().Name} (phase {phase.GraphBuildPhase}): {e.Message}\n{e.StackTrace}");
             }
         }
 

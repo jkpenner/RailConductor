@@ -11,10 +11,8 @@ public enum SwitchRoute
 }
 
 [GlobalClass]
-public partial class TrackSwitch : Interactable, ITrackGraphBuildHandler
+public partial class TrackSwitch : Interactable
 {
-    public int GraphBuildPhase => BuildPhase.Junctions;
-
     private TrackSegment _inSegment = null!;
     private TrackSegment _outSegmentA = null!;
     private TrackSegment _outSegmentB = null!;
@@ -64,45 +62,5 @@ public partial class TrackSwitch : Interactable, ITrackGraphBuildHandler
         //     indicator.color = settings.SwitchDivergingRouteColor;
         //     stateText.text = "D";
         // }
-    }
-
-    public void OnGraphBuildPhase(TrackGraph graph)
-    {
-        var key = Node.GetTrackKey();
-        var node = graph.GetNode(key);
-        if (node is null)
-        {
-            GD.PushWarning($"Track node {key} not registered");
-            return;
-        }
-
-        var inSegment = graph.GetLink(
-            InSegment.EndA.GetTrackKey(),
-            InSegment.EndB.GetTrackKey()
-        );
-
-        var outSegmentA = graph.GetLink(
-            OutSegmentA.EndA.GetTrackKey(),
-            OutSegmentA.EndB.GetTrackKey()
-        );
-
-        var outSegmentB = graph.GetLink(
-            OutSegmentB.EndA.GetTrackKey(),
-            OutSegmentB.EndB.GetTrackKey()
-        );
-        
-        if (inSegment is null || outSegmentA is null || outSegmentB is null)
-        {
-            GD.PushWarning("Failed to get associated links for switch.");
-            return;
-        }
-
-        node.IsSwitch = true;
-
-        node.ActiveIncomingLink = 0;
-        node.IncomingLinks = [inSegment];
-
-        node.ActiveOutgoingLink = 0;
-        node.OutgoingLinks = [outSegmentA, outSegmentB];
     }
 }

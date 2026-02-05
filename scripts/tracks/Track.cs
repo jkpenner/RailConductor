@@ -5,7 +5,17 @@ namespace RailConductor;
 [GlobalClass]
 public partial class Track : Node2D
 {
+    private readonly TrackGraphBuilder _builder;
     private TrackGraph? _graph;
+
+    public Track()
+    {
+        _builder = new TrackGraphBuilder();
+        _builder.AddBuildPhase(new TrackNodeBuildPhase());
+        _builder.AddBuildPhase(new TrackSegmentBuildPhase());
+        _builder.AddBuildPhase(new TrackIsolatorBuildPhase());
+        _builder.AddBuildPhase(new TrackSwitchBuildPhase());
+    }
 
     public override void _Ready()
     {
@@ -18,13 +28,6 @@ public partial class Track : Node2D
         return _graph;
     }
 
-    public TrackGraph BuildGraph()
-    {
-        return TrackGraphBuilder.Build(this);
-    }
-    
-    public void RecalculateGraph()
-    {
-        _graph = BuildGraph();
-    }
+    public TrackGraph BuildGraph() => _builder.Build(this);
+    public void RecalculateGraph() => _graph = BuildGraph();
 }

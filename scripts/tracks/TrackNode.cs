@@ -4,10 +4,8 @@ using Godot;
 namespace RailConductor;
 
 [GlobalClass, Tool]
-public partial class TrackNode : Node2D, ITrackGraphBuildHandler
+public partial class TrackNode : Node2D
 {
-    public int GraphBuildPhase => BuildPhase.Nodes;
-    
     public Action? LocalPositionChanged; 
     
     public override void _Ready()
@@ -30,10 +28,4 @@ public partial class TrackNode : Node2D, ITrackGraphBuildHandler
     }
     
     public TrackKey GetTrackKey() => TrackKey.From(GlobalPosition);
-    
-    
-    public void OnGraphBuildPhase(TrackGraph graph)
-    {
-        graph.CreateOrGetNode(GlobalPosition);
-    }
 }
