@@ -34,7 +34,7 @@ public class TrackGraph
             var newCurrent = current.Move(remaining, out var overflow);
             if (Mathf.IsZeroApprox(overflow))
             {
-                return current;
+                return newCurrent;
             }
 
             TrackGraphNode node;
