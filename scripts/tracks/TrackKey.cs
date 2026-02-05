@@ -15,8 +15,8 @@ public readonly struct TrackKey: IEquatable<TrackKey>
     {
         return new TrackKey
         {
-            X = Mathf.RoundToInt(globalPosition.X * 10f),
-            Y = Mathf.RoundToInt(globalPosition.Y * 10f)
+            X = Mathf.RoundToInt(globalPosition.X),
+            Y = Mathf.RoundToInt(globalPosition.Y)
         };
     }
 

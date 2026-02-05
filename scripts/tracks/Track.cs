@@ -15,6 +15,7 @@ public partial class Track : Node2D
         _builder.AddBuildPhase(new TrackSegmentBuildPhase());
         _builder.AddBuildPhase(new TrackIsolatorBuildPhase());
         _builder.AddBuildPhase(new TrackSwitchBuildPhase());
+        _builder.AddBuildPhase(new ValidateConnectionBuildPhase());
     }
 
     public override void _Ready()

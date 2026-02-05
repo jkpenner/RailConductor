@@ -12,8 +12,8 @@ public class TrackGraphNode
     public int ActiveIncomingLink { get; set; }
     public int ActiveOutgoingLink { get; set; }
 
-    public TrackGraphLink[] IncomingLinks { get; set; }
-    public TrackGraphLink[] OutgoingLinks { get; set; }
+    public TrackGraphLink[] IncomingLinks { get; set; } = [];
+    public TrackGraphLink[] OutgoingLinks { get; set; } = [];
 
     public bool IsCircuitIsolator { get; set; }
 
