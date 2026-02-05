@@ -38,8 +38,8 @@ public class TrackGraphNode
         else
         {
             // We assume a one-to-one relationship, otherwise the link terminates
-            var maxIndex = Mathf.Min(IncomingLinks.Length, ActiveIncomingLink);
-            for (var i = 0; i < maxIndex; i++)
+            var minLength = Mathf.Min(IncomingLinks.Length, OutgoingLinks.Length);
+            for (var i = 0; i < minLength; i++)
             {
                 _connections.Add(IncomingLinks[i], OutgoingLinks[i]);
                 _connections.Add(OutgoingLinks[i], IncomingLinks[i]);
