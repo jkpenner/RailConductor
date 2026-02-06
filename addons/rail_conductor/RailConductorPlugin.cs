@@ -15,6 +15,7 @@ public partial class RailConductorPlugin : EditorPlugin
         Move,
         Delete,
         Link,
+        Unlink
     }
 
     private Track? _target;
@@ -23,6 +24,7 @@ public partial class RailConductorPlugin : EditorPlugin
     private Button? _moveButton;
     private Button? _deleteButton;
     private Button? _linkButton;
+    private Button? _unlinkButton;
 
     private Mode _currentMode = Mode.None;
     private bool _dragging = false;
@@ -43,6 +45,7 @@ public partial class RailConductorPlugin : EditorPlugin
         _modeHandlers.Add(Mode.Move, new MoveTrackNodeMode());
         _modeHandlers.Add(Mode.Delete, new DeleteTrackNodeMode());
         _modeHandlers.Add(Mode.Link, new LinkTrackNodeMode());
+        _modeHandlers.Add(Mode.Unlink, new UnlinkTrackNodeMode());
 
         foreach (var handler in _modeHandlers.Values)
         {
@@ -133,6 +136,12 @@ public partial class RailConductorPlugin : EditorPlugin
         _linkButton.Pressed += () => SetMode(Mode.Link);
         _linkButton.ToggleMode = true;
         _toolbar.AddChild(_linkButton);
+        
+        _unlinkButton = new Button();
+        _unlinkButton.Icon = ResourceLoader.Load<Texture2D>("res://addons/rail_conductor/icons/unlink.svg");
+        _unlinkButton.Pressed += () => SetMode(Mode.Unlink);
+        _unlinkButton.ToggleMode = true;
+        _toolbar.AddChild(_unlinkButton);
 
         AddControlToContainer(CustomControlContainer.CanvasEditorMenu, _toolbar);
     }
@@ -151,6 +160,8 @@ public partial class RailConductorPlugin : EditorPlugin
         _addButton = null;
         _moveButton = null;
         _deleteButton = null;
+        _linkButton = null;
+        _unlinkButton = null;
     }
 
     private void SetMode(Mode mode)
@@ -172,6 +183,16 @@ public partial class RailConductorPlugin : EditorPlugin
             _deleteButton.ButtonPressed = mode == Mode.Delete;
         }
 
+        if (_linkButton is not null)
+        {
+            _linkButton.ButtonPressed = mode == Mode.Link;
+        }
+        
+        if (_unlinkButton is not null)
+        {
+            _unlinkButton.ButtonPressed = mode == Mode.Unlink;
+        }
+        
         _hoveredNodeId = -1;
         _dragging = false;
     }
