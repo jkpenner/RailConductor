@@ -2,9 +2,13 @@
 
 namespace RailConductor;
 
-[GlobalClass]
+[GlobalClass, Tool]
 public partial class Track : Node2D
 {
+    [Export]
+    public TrackData? Data { get; set; }
+    
+    
     private readonly TrackGraphBuilder _builder;
     private TrackGraph? _graph;
 

@@ -4,40 +4,87 @@
 [ext_resource type="PackedScene" uid="uid://coim6fdt86gu8" path="res://scenes/camera_controller.tscn" id="2_0xm2m"]
 [ext_resource type="Script" uid="uid://b1h881bnaxfu1" path="res://scripts/tracks/Track.cs" id="3_1bvp3"]
 [ext_resource type="PackedScene" uid="uid://d38phvi2cgoye" path="res://scenes/tracks/track_segment.tscn" id="3_lquwl"]
+[ext_resource type="Script" uid="uid://dlpa5obf7cd0w" path="res://scripts/tracks/data/TrackNodeData.cs" id="5_efxa6"]
 [ext_resource type="Script" uid="uid://cx4112x50xprk" path="res://scripts/tracks/TrackIsolator.cs" id="5_lquwl"]
 [ext_resource type="Script" uid="uid://b15yvw4uofycm" path="res://scripts/tracks/TrackSwitch.cs" id="6_5vw27"]
 [ext_resource type="Script" uid="uid://d3c2or76iytl1" path="res://scripts/train/Train.cs" id="6_272bh"]
+[ext_resource type="Script" uid="uid://16mgebho3rd5" path="res://scripts/tracks/data/TrackData.cs" id="6_dg77c"]
 [ext_resource type="Texture2D" uid="uid://djuh3tra4ijeq" path="res://assets/sprites/circle.png" id="8_5vw27"]
 [ext_resource type="Script" uid="uid://yslvcibqqiko" path="res://scripts/interactions/Interactions.cs" id="9_kek77"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_272bh"]
-resource_local_to_scene = true
-size = Vector2(91.867004, 20.62)
+[sub_resource type="Resource" id="Resource_efxa6"]
+script = ExtResource("5_efxa6")
+Id = 1
+Position = Vector2(-63, -95)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_5vw27"]
+[sub_resource type="Resource" id="Resource_dg77c"]
+script = ExtResource("5_efxa6")
+Id = 2
+Position = Vector2(1, -95)
+
+[sub_resource type="Resource" id="Resource_ycdy4"]
+script = ExtResource("5_efxa6")
+Id = 3
+Position = Vector2(65, -95)
+
+[sub_resource type="Resource" id="Resource_w48qg"]
+script = ExtResource("5_efxa6")
+Id = 4
+Position = Vector2(161, -95)
+
+[sub_resource type="Resource" id="Resource_vivmo"]
+script = ExtResource("5_efxa6")
+Id = 5
+Position = Vector2(225, -63)
+
+[sub_resource type="Resource" id="Resource_2cqfq"]
+script = ExtResource("5_efxa6")
+Id = 6
+Position = Vector2(529, -63)
+
+[sub_resource type="Resource" id="Resource_yaehf"]
+script = ExtResource("5_efxa6")
+Id = 7
+Position = Vector2(33, -143)
+
+[sub_resource type="Resource" id="Resource_074og"]
+script = ExtResource("5_efxa6")
+Id = 8
+Position = Vector2(129, -143)
+
+[sub_resource type="Resource" id="Resource_ryguw"]
+script = ExtResource("6_dg77c")
+Nodes = Array[ExtResource("5_efxa6")]([SubResource("Resource_efxa6"), SubResource("Resource_dg77c"), SubResource("Resource_ycdy4"), SubResource("Resource_w48qg"), SubResource("Resource_vivmo"), SubResource("Resource_2cqfq"), SubResource("Resource_yaehf"), SubResource("Resource_074og")])
+metadata/_custom_type_script = "uid://16mgebho3rd5"
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_cegan"]
+resource_local_to_scene = true
+size = Vector2(91.867004, 21.325)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_82xsv"]
 resource_local_to_scene = true
 size = Vector2(301, 20.62)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_kek77"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_getpj"]
 resource_local_to_scene = true
 size = Vector2(91.867004, 20.62)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_4c57u"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ryguw"]
 resource_local_to_scene = true
 size = Vector2(80.622574, 20.62)
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_lquwl"]
 radius = 15.0
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_dg77c"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_d13ii"]
 resource_local_to_scene = true
 size = Vector2(56, 20.62)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_efxa6"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1u8w0"]
 resource_local_to_scene = true
 size = Vector2(62.936478, 20.62)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_ycdy4"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_0odxb"]
 resource_local_to_scene = true
 size = Vector2(68, 20.62)
 
@@ -53,20 +100,20 @@ train = NodePath("Train")
 [node name="Interactions" type="Node" parent="." unique_id=137138085]
 script = ExtResource("9_kek77")
 
-[node name="Polygon2D" type="Polygon2D" parent="." unique_id=1777833426]
-polygon = PackedVector2Array(-100, 0, 0, 150, 100, 0)
-
 [node name="CameraController" parent="." unique_id=1151989516 instance=ExtResource("2_0xm2m")]
 
 [node name="Track" type="Node2D" parent="." unique_id=1493153376]
+position = Vector2(-1, -1)
 script = ExtResource("3_1bvp3")
+Data = SubResource("Resource_ryguw")
 
 [node name="TrackSegment1" parent="Track" unique_id=506896450 instance=ExtResource("3_lquwl")]
 position = Vector2(108, -91)
+SegmentWidth = 21.325
 
 [node name="CollisionShape2D" parent="Track/TrackSegment1" index="1" unique_id=822692767]
 rotation = -3.1415076
-shape = SubResource("RectangleShape2D_272bh")
+shape = SubResource("RectangleShape2D_cegan")
 
 [node name="ConnectionA" parent="Track/TrackSegment1" index="2" unique_id=207775042]
 position = Vector2(45.933502, 0.00390625)
@@ -82,7 +129,7 @@ position = Vector2(379, -59)
 
 [node name="CollisionShape2D" parent="Track/TrackSegment4" index="1" unique_id=822692767]
 rotation = -3.1415925
-shape = SubResource("RectangleShape2D_5vw27")
+shape = SubResource("RectangleShape2D_82xsv")
 
 [node name="ConnectionA" parent="Track/TrackSegment4" index="2" unique_id=207775042]
 position = Vector2(150.5, 0)
@@ -98,7 +145,7 @@ position = Vector2(86, -135)
 
 [node name="CollisionShape2D" parent="Track/TrackSegment3" index="1" unique_id=822692767]
 rotation = -3.1415076
-shape = SubResource("RectangleShape2D_kek77")
+shape = SubResource("RectangleShape2D_getpj")
 
 [node name="ConnectionA" parent="Track/TrackSegment3" index="2" unique_id=207775042]
 position = Vector2(45.933502, 0.00390625)
@@ -114,7 +161,7 @@ position = Vector2(190.9335, -74.99609)
 
 [node name="CollisionShape2D" parent="Track/TrackSegment2" index="1" unique_id=822692767]
 rotation = -2.7334435
-shape = SubResource("RectangleShape2D_4c57u")
+shape = SubResource("RectangleShape2D_ryguw")
 
 [node name="ConnectionA" parent="Track/TrackSegment2" index="2" unique_id=207775042]
 position = Vector2(37.066498, 15.996094)
@@ -146,7 +193,7 @@ position = Vector2(-28, 0)
 
 [node name="CollisionShape2D" parent="Track/Switch/InSegment" index="1" unique_id=822692767]
 rotation = -3.1415925
-shape = SubResource("RectangleShape2D_dg77c")
+shape = SubResource("RectangleShape2D_d13ii")
 
 [node name="ConnectionA" parent="Track/Switch/InSegment" index="2" unique_id=207775042]
 position = Vector2(28, 0)
@@ -162,7 +209,7 @@ position = Vector2(22.5, -22)
 
 [node name="CollisionShape2D" parent="Track/Switch/OutSegmentB" index="1" unique_id=822692767]
 rotation = -0.7741627
-shape = SubResource("RectangleShape2D_efxa6")
+shape = SubResource("RectangleShape2D_1u8w0")
 
 [node name="ConnectionA" parent="Track/Switch/OutSegmentB" index="2" unique_id=207775042]
 position = Vector2(-22.5, 22)
@@ -178,7 +225,7 @@ position = Vector2(34, 0)
 
 [node name="CollisionShape2D" parent="Track/Switch/OutSegmentA" index="1" unique_id=822692767]
 rotation = 0.0
-shape = SubResource("RectangleShape2D_ycdy4")
+shape = SubResource("RectangleShape2D_0odxb")
 
 [node name="ConnectionA" parent="Track/Switch/OutSegmentA" index="2" unique_id=207775042]
 position = Vector2(-34, 0)
@@ -246,6 +293,12 @@ modulate = Color(0.9211696, 0.34046587, 0.25685716, 1)
 position = Vector2(31.999998, -0.99999994)
 scale = Vector2(0.05, 0.05)
 texture = ExtResource("8_5vw27")
+
+[node name="Node2D" type="Node2D" parent="." unique_id=1993713351]
+position = Vector2(0, -200)
+
+[node name="Marker2D" type="Marker2D" parent="." unique_id=2067568665]
+position = Vector2(201, 93)
 
 [editable path="Track/TrackSegment1"]
 [editable path="Track/TrackSegment4"]

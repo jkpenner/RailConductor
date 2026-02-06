@@ -21,7 +21,7 @@ project/assembly_name="Rail Conductor"
 
 [editor_plugins]
 
-enabled=PackedStringArray()
+enabled=PackedStringArray("res://addons/rail_conductor/plugin.cfg")
 
 [input]
 
