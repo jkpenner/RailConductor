@@ -4,9 +4,9 @@ namespace RailConductor.Plugin.modes;
 
 public class MoveTrackNodeMode : PluginModeHandler
 {
-    public override int SelectedIndex => _selectedIndex;
+    public override int SelectedNodeId => _selectedNodeId;
     
-    private int _selectedIndex = -1;
+    private int _selectedNodeId = -1;
     private Vector2 _originalPosition = Vector2.Zero;
 
     public override bool OnGuiInput(Track target, InputEvent e, EditorUndoRedoManager undoRedo)
@@ -23,24 +23,25 @@ public class MoveTrackNodeMode : PluginModeHandler
 
             if (btn.Pressed)
             {
-                _selectedIndex = target.Data.FindClosestNode(localPosition);
-                if (_selectedIndex >= 0)
+                _selectedNodeId = target.Data.FindClosestNodeId(localPosition);
+                var selectedNode = target.Data.GetNode(_selectedNodeId);
+                if (selectedNode is not null)
                 {
-                    _originalPosition = target.Data.Nodes[_selectedIndex].Position;
+                    _originalPosition = selectedNode.Position;
                 }
             }
             else // Released
             {
-                if (_selectedIndex >= 0)
+                var selectedNode = target.Data.GetNode(_selectedNodeId);
+                if (selectedNode is not null)
                 {
-                    var finalPos = target.Data.Nodes[_selectedIndex].Position;
-                    var nodeRef = target.Data.Nodes[_selectedIndex]; // Reference for closure
+                    var finalPos = selectedNode.Position;
 
                     undoRedo.CreateAction("Move Track Node");
-                    undoRedo.AddDoProperty(nodeRef, nameof(TrackNodeData.Position), finalPos);
-                    undoRedo.AddUndoProperty(nodeRef, nameof(TrackNodeData.Position), _originalPosition);
+                    undoRedo.AddDoProperty(selectedNode, nameof(TrackNodeData.Position), finalPos);
+                    undoRedo.AddUndoProperty(selectedNode, nameof(TrackNodeData.Position), _originalPosition);
                     undoRedo.CommitAction();
-                    _selectedIndex = -1;
+                    _selectedNodeId = -1;
                 }
             }
 
@@ -50,15 +51,16 @@ public class MoveTrackNodeMode : PluginModeHandler
             return true;
         }
 
-        if (e is InputEventMouseMotion mouseMotion && _selectedIndex >= 0 &&
+        if (e is InputEventMouseMotion mouseMotion && _selectedNodeId >= 0 &&
             Input.IsMouseButtonPressed(MouseButton.Left))
         {
             var globalPosition = PluginUtility.ScreenToWorldSnapped(mouseMotion.Position);
             var localPosition = target.ToLocal(globalPosition);
 
-            if (_selectedIndex >= 0)
+            var selectedNode = target.Data.GetNode(_selectedNodeId);
+            if (selectedNode is not null)
             {
-                target.Data.Nodes[_selectedIndex].Position = localPosition;
+                selectedNode.Position = localPosition;
 
                 // target.Update();
                 target.RecalculateGraph();

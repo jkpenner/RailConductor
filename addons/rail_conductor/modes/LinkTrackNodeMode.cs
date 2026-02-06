@@ -4,10 +4,10 @@ namespace RailConductor.Plugin;
 
 public class LinkTrackNodeMode : PluginModeHandler
 {
-    public override int SelectedIndex => _firstSelection;
+    public override int SelectedNodeId => _selectedNodeId1;
 
-    private int _firstSelection = -1;
-    private int _secondSelection = -1;
+    private int _selectedNodeId1 = -1;
+    private int _selectedNodeId2 = -1;
 
     public override bool OnGuiInput(Track target, InputEvent e, EditorUndoRedoManager undoRedo)
     {
@@ -25,36 +25,43 @@ public class LinkTrackNodeMode : PluginModeHandler
         var localPosition = target.ToLocal(globalPosition);
 
         // Select the first node 
-        if (_firstSelection == -1)
+        if (_selectedNodeId1 == -1)
         {
-            _firstSelection = target.Data.FindClosestNode(localPosition);
+            _selectedNodeId1 = target.Data.FindClosestNodeId(localPosition);
             return true;
         }
         
         // Select the second node.
-        _secondSelection = target.Data.FindClosestNode(localPosition);
-        if (_secondSelection == _firstSelection)
+        _selectedNodeId2 = target.Data.FindClosestNodeId(localPosition);
+        if (_selectedNodeId2 == _selectedNodeId1)
         {
             return false;
         }
 
-        GD.Print($"linking nodes {_firstSelection} and {_secondSelection}");
-        var node1 = target.Data.Nodes[_firstSelection];
-        var node2 = target.Data.Nodes[_secondSelection];
+        GD.Print($"linking nodes {_selectedNodeId1} and {_selectedNodeId2}");
+        var node1 = target.Data.GetNode(_selectedNodeId1);
+        var node2 = target.Data.GetNode(_selectedNodeId2);
+
+        if (node1 is null || node2 is null)
+        {
+            _selectedNodeId1 = -1;
+            _selectedNodeId2 = -1;
+            return false;
+        }
         
         GD.Print($"linking nodes {node1.Id} and {node2.Id}");
 
         // Link the two nodes
         undoRedo.CreateAction("Link Track Node");
-        undoRedo.AddDoMethod(node1, nameof(TrackNodeData.AddLink), node2.Id);
-        undoRedo.AddUndoMethod(node1, nameof(TrackNodeData.RemoveLink), node2.Id);
-        undoRedo.AddDoMethod(node2, nameof(TrackNodeData.AddLink), node1.Id);
-        undoRedo.AddUndoMethod(node2, nameof(TrackNodeData.RemoveLink), node1.Id);
+        undoRedo.AddDoMethod(node1, nameof(TrackNodeData.AddLink), _selectedNodeId2);
+        undoRedo.AddUndoMethod(node1, nameof(TrackNodeData.RemoveLink), _selectedNodeId2);
+        undoRedo.AddDoMethod(node2, nameof(TrackNodeData.AddLink), _selectedNodeId1);
+        undoRedo.AddUndoMethod(node2, nameof(TrackNodeData.RemoveLink), _selectedNodeId1);
         undoRedo.CommitAction();
 
         // Clear the selections
-        _firstSelection = -1;
-        _secondSelection = -1;
+        _selectedNodeId1 = -1;
+        _selectedNodeId2 = -1;
 
         return true;
     }

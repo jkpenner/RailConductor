@@ -27,7 +27,7 @@ public partial class RailConductorPlugin : EditorPlugin
     private Mode _currentMode = Mode.None;
     private bool _dragging = false;
     private Vector2 _originalPosition;
-    private int _hoveredIndex = -1;
+    private int _hoveredNodeId = -1;
 
     private readonly Dictionary<Mode, PluginModeHandler> _modeHandlers = new();
 
@@ -82,7 +82,7 @@ public partial class RailConductorPlugin : EditorPlugin
     {
         _target = obj as Track;
         _dragging = false;
-        _hoveredIndex = -1;
+        _hoveredNodeId = -1;
     }
 
     public override void _MakeVisible(bool visible)
@@ -96,7 +96,7 @@ public partial class RailConductorPlugin : EditorPlugin
             ClearToolbar();
             _currentMode = Mode.None;
             _dragging = false;
-            _hoveredIndex = -1;
+            _hoveredNodeId = -1;
         }
     }
 
@@ -172,7 +172,7 @@ public partial class RailConductorPlugin : EditorPlugin
             _deleteButton.ButtonPressed = mode == Mode.Delete;
         }
 
-        _hoveredIndex = -1;
+        _hoveredNodeId = -1;
         _dragging = false;
     }
 
@@ -187,10 +187,10 @@ public partial class RailConductorPlugin : EditorPlugin
             {
                 var globalPosition = PluginUtility.ScreenToWorld(mouse.Position);
                 var localPosition = _target.ToLocal(globalPosition);
-                var hoveredIndex = _target.Data.FindClosestNode(localPosition);
-                if (hoveredIndex != _hoveredIndex)
+                var hoveredIndex = _target.Data.FindClosestNodeId(localPosition);
+                if (hoveredIndex != _hoveredNodeId)
                 {
-                    _hoveredIndex = hoveredIndex;
+                    _hoveredNodeId = hoveredIndex;
                     UpdateOverlays();
                 }
             }
@@ -223,16 +223,17 @@ public partial class RailConductorPlugin : EditorPlugin
             return;
         }
 
-        var selectedIndex = -1;
+        var selectedNodeId = -1;
 
         // While dragging a node display the selection effect.
         if (_modeHandlers.TryGetValue(_currentMode, out var handler))
         {
-            selectedIndex = handler.SelectedIndex;
-            if (selectedIndex >= 0 && selectedIndex < _target.Data.Nodes.Count)
+            selectedNodeId = handler.SelectedNodeId;
+            
+            var selectedNode = _target.Data.GetNode(selectedNodeId);
+            if (selectedNode is not null)
             {
-                var node = _target.Data.Nodes[selectedIndex];
-                var globalPosition = _target.ToGlobal(node.Position);
+                var globalPosition = _target.ToGlobal(selectedNode.Position);
                 var screenPosition = PluginUtility.WorldToScreen(globalPosition);
 
                 var size = PluginUtility.GetZoom() * 14f;
@@ -243,14 +244,17 @@ public partial class RailConductorPlugin : EditorPlugin
         // While in node modes display a hover effect on the hovered node.
         if (_currentMode is Mode.Add or Mode.Move or Mode.Delete)
         {
-            if (_hoveredIndex != selectedIndex && _hoveredIndex >= 0 && _hoveredIndex < _target.Data.Nodes.Count)
+            if (_hoveredNodeId != selectedNodeId)
             {
-                var node = _target.Data.Nodes[_hoveredIndex];
-                var globalPosition = _target.ToGlobal(node.Position);
-                var screenPosition = PluginUtility.WorldToScreen(globalPosition);
+                var hoveredNode = _target.Data.GetNode(_hoveredNodeId);
+                if (hoveredNode is not null)
+                {
+                    var globalPosition = _target.ToGlobal(hoveredNode.Position);
+                    var screenPosition = PluginUtility.WorldToScreen(globalPosition);
 
-                var size = PluginUtility.GetZoom() * 14f;
-                overlay.DrawCircle(screenPosition, size, Colors.Yellow.WithAlpha(0.7f));
+                    var size = PluginUtility.GetZoom() * 14f;
+                    overlay.DrawCircle(screenPosition, size, Colors.Yellow.WithAlpha(0.7f));
+                }
             }
         }
 
@@ -258,7 +262,7 @@ public partial class RailConductorPlugin : EditorPlugin
         var nodeByIds = new Dictionary<int, TrackNodeData>();
         
         // Draw all nodes
-        foreach (var node in _target.Data.Nodes)
+        foreach (var node in _target.Data.GetNodes())
         {
             var globalPosition = _target.ToGlobal(node.Position);
             var screenPosition = PluginUtility.WorldToScreen(globalPosition);

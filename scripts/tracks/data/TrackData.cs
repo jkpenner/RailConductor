@@ -1,48 +1,62 @@
-﻿using Godot;
+﻿using System.Collections.Generic;
+using Godot;
 
 namespace RailConductor;
 
 [GlobalClass, Tool]
 public partial class TrackData : Resource
 {
-    [Export]
-    public Godot.Collections.Array<TrackNodeData> Nodes { get; set; } = [];
+    [Export] private Godot.Collections.Dictionary<int, TrackNodeData> _nodes = new();
 
-    public void AddNode(TrackNodeData newNode)
+    public IEnumerable<TrackNodeData> GetNodes() => _nodes.Values;
+
+    public TrackNodeData? GetNode(int id) => _nodes.GetValueOrDefault(id);
+
+    public void AddNode(int id, TrackNodeData newNode) => _nodes.Add(id, newNode);
+
+    public void RemoveNode(int id) => _nodes.Remove(id);
+
+    public bool LinkNodes(int nodeId1, int nodeId2)
     {
-        Nodes.Add(newNode);
+        var node1 = GetNode(nodeId1);
+        var node2 = GetNode(nodeId2);
+
+        if (node1 is null || node2 is null)
+        {
+            return false;
+        }
+
+        if (!node1.Links.Contains(nodeId2))
+        {
+            node1.Links.Add(nodeId2);
+        }
+
+        if (!node2.Links.Contains(nodeId1))
+        {
+            node2.Links.Add(nodeId1);
+        }
+
+        return true;
     }
 
-    public void InsertNode(int index, TrackNodeData newNode)
-    {
-        Nodes.Insert(index, newNode);
-    }
-
-    public void RemoveNode(int index)
-    {
-        Nodes.RemoveAt(index);
-    }
-
-    public void LinkNodes(int node1, int node2) { }
-
-    public int GetAvailableId()
+    public int GetAvailableNodeId()
     {
         var id = 0;
 
-        foreach (var node in Nodes)
+        foreach (var key in _nodes.Keys)
         {
-            if (id <= node.Id)
+            if (id <= key)
             {
-                id = node.Id + 1;
+                id = key + 1;
             }
         }
 
         return id;
     }
 
-    public int FindClosestNode(Vector2 position)
+    public int FindClosestNodeId(Vector2 position)
     {
-        if (Nodes.Count == 0)
+        if (_nodes.Count == 0)
         {
             return -1;
         }
@@ -50,16 +64,16 @@ public partial class TrackData : Resource
         var minDist = float.MaxValue;
         var closest = -1;
 
-        for (var i = 0; i < Nodes.Count; i++)
+        foreach (var (id, node) in _nodes)
         {
-            var dist = Nodes[i].Position.DistanceTo(position);
+            var dist = node.Position.DistanceTo(position);
             if (dist >= minDist)
             {
                 continue;
             }
 
             minDist = dist;
-            closest = i;
+            closest = id;
         }
 
         return minDist < 20f ? closest : -1;

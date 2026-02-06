@@ -4,8 +4,8 @@ namespace RailConductor.Plugin;
 
 public class DeleteTrackNodeMode : PluginModeHandler
 {
-    public override int SelectedIndex => -1;
-    
+    public override int SelectedNodeId => -1;
+
     public override bool OnGuiInput(Track target, InputEvent e, EditorUndoRedoManager undoRedo)
     {
         if (target.Data is null)
@@ -21,23 +21,35 @@ public class DeleteTrackNodeMode : PluginModeHandler
         var globalPosition = PluginUtility.ScreenToWorldSnapped(btn.Position);
         var localPosition = target.ToLocal(globalPosition);
 
-        var deleteIdx = target.Data.FindClosestNode(localPosition);
-        if (deleteIdx < 0)
+        var deletedId = target.Data.FindClosestNodeId(localPosition);
+        if (deletedId < 0)
         {
             return false;
         }
 
-        var nodeToDelete = target.Data.Nodes[deleteIdx];
+        var nodeToDelete = target.Data.GetNode(deletedId);
+        if (nodeToDelete is null)
+        {
+            return false;
+        }
+
         undoRedo.CreateAction("Delete Track Node");
 
-        foreach (var link in nodeToDelete.Links)
+        // Remove the links from any linked node.
+        foreach (var linkedNodeId in nodeToDelete.Links)
         {
-            // Todo: Remove all links connected to this node.
+            var linkedNode = target.Data.GetNode(linkedNodeId);
+            if (linkedNode is null)
+            {
+                continue;
+            }
+            
+            undoRedo.AddDoMethod(linkedNode, nameof(TrackNodeData.RemoveLink), deletedId);
+            undoRedo.AddUndoMethod(linkedNode, nameof(TrackNodeData.AddLink), deletedId);
         }
-        
-        undoRedo.AddDoMethod(target.Data, nameof(TrackData.RemoveNode), deleteIdx);
-        undoRedo.AddUndoMethod(target.Data, nameof(TrackData.InsertNode), deleteIdx,
-            nodeToDelete);
+
+        undoRedo.AddDoMethod(target.Data, nameof(TrackData.RemoveNode), deletedId);
+        undoRedo.AddUndoMethod(target.Data, nameof(TrackData.AddNode), deletedId, nodeToDelete);
         undoRedo.CommitAction();
         return true;
     }

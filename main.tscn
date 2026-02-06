@@ -15,76 +15,51 @@
 [sub_resource type="Resource" id="Resource_efxa6"]
 script = ExtResource("5_efxa6")
 Id = 1
-Position = Vector2(-63, -95)
+Position = Vector2(193, -31)
+Links = Array[int]([2])
 
 [sub_resource type="Resource" id="Resource_dg77c"]
 script = ExtResource("5_efxa6")
 Id = 2
-Position = Vector2(1, -95)
-
-[sub_resource type="Resource" id="Resource_ycdy4"]
-script = ExtResource("5_efxa6")
-Id = 3
-Position = Vector2(65, -95)
-
-[sub_resource type="Resource" id="Resource_w48qg"]
-script = ExtResource("5_efxa6")
-Id = 4
-Position = Vector2(161, -95)
-
-[sub_resource type="Resource" id="Resource_vivmo"]
-script = ExtResource("5_efxa6")
-Id = 5
-Position = Vector2(225, -63)
-
-[sub_resource type="Resource" id="Resource_2cqfq"]
-script = ExtResource("5_efxa6")
-Id = 6
-Position = Vector2(529, -63)
-
-[sub_resource type="Resource" id="Resource_yaehf"]
-script = ExtResource("5_efxa6")
-Id = 7
-Position = Vector2(33, -143)
-
-[sub_resource type="Resource" id="Resource_074og"]
-script = ExtResource("5_efxa6")
-Id = 8
-Position = Vector2(129, -143)
+Position = Vector2(17, -31)
+Links = Array[int]([1])
 
 [sub_resource type="Resource" id="Resource_ryguw"]
 script = ExtResource("6_dg77c")
-Nodes = Array[ExtResource("5_efxa6")]([SubResource("Resource_efxa6"), SubResource("Resource_dg77c"), SubResource("Resource_ycdy4"), SubResource("Resource_w48qg"), SubResource("Resource_vivmo"), SubResource("Resource_2cqfq"), SubResource("Resource_yaehf"), SubResource("Resource_074og")])
+_nodes = Dictionary[int, ExtResource("5_efxa6")]({
+1: SubResource("Resource_efxa6"),
+2: SubResource("Resource_dg77c")
+})
 metadata/_custom_type_script = "uid://16mgebho3rd5"
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_cegan"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ycdy4"]
 resource_local_to_scene = true
 size = Vector2(91.867004, 21.325)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_82xsv"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_w48qg"]
 resource_local_to_scene = true
 size = Vector2(301, 20.62)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_getpj"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_vivmo"]
 resource_local_to_scene = true
 size = Vector2(91.867004, 20.62)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_ryguw"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_2cqfq"]
 resource_local_to_scene = true
 size = Vector2(80.622574, 20.62)
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_lquwl"]
 radius = 15.0
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_d13ii"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_yaehf"]
 resource_local_to_scene = true
 size = Vector2(56, 20.62)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_1u8w0"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_074og"]
 resource_local_to_scene = true
 size = Vector2(62.936478, 20.62)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_0odxb"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_cegan"]
 resource_local_to_scene = true
 size = Vector2(68, 20.62)
 
@@ -108,12 +83,13 @@ script = ExtResource("3_1bvp3")
 Data = SubResource("Resource_ryguw")
 
 [node name="TrackSegment1" parent="Track" unique_id=506896450 instance=ExtResource("3_lquwl")]
+visible = false
 position = Vector2(108, -91)
 SegmentWidth = 21.325
 
 [node name="CollisionShape2D" parent="Track/TrackSegment1" index="1" unique_id=822692767]
 rotation = -3.1415076
-shape = SubResource("RectangleShape2D_cegan")
+shape = SubResource("RectangleShape2D_ycdy4")
 
 [node name="ConnectionA" parent="Track/TrackSegment1" index="2" unique_id=207775042]
 position = Vector2(45.933502, 0.00390625)
@@ -125,11 +101,12 @@ position = Vector2(-45.933502, -0.00390625)
 points = PackedVector2Array(45.933502, 0.00390625, -45.933502, -0.00390625)
 
 [node name="TrackSegment4" parent="Track" unique_id=1297777188 instance=ExtResource("3_lquwl")]
+visible = false
 position = Vector2(379, -59)
 
 [node name="CollisionShape2D" parent="Track/TrackSegment4" index="1" unique_id=822692767]
 rotation = -3.1415925
-shape = SubResource("RectangleShape2D_82xsv")
+shape = SubResource("RectangleShape2D_w48qg")
 
 [node name="ConnectionA" parent="Track/TrackSegment4" index="2" unique_id=207775042]
 position = Vector2(150.5, 0)
@@ -141,11 +118,12 @@ position = Vector2(-151, 0)
 points = PackedVector2Array(150.5, 0, -150.5, 0)
 
 [node name="TrackSegment3" parent="Track" unique_id=1452578658 instance=ExtResource("3_lquwl")]
+visible = false
 position = Vector2(86, -135)
 
 [node name="CollisionShape2D" parent="Track/TrackSegment3" index="1" unique_id=822692767]
 rotation = -3.1415076
-shape = SubResource("RectangleShape2D_getpj")
+shape = SubResource("RectangleShape2D_vivmo")
 
 [node name="ConnectionA" parent="Track/TrackSegment3" index="2" unique_id=207775042]
 position = Vector2(45.933502, 0.00390625)
@@ -157,11 +135,12 @@ position = Vector2(-47, 0)
 points = PackedVector2Array(45.933502, 0.00390625, -45.933502, -0.00390625)
 
 [node name="TrackSegment2" parent="Track" unique_id=996153845 instance=ExtResource("3_lquwl")]
+visible = false
 position = Vector2(190.9335, -74.99609)
 
 [node name="CollisionShape2D" parent="Track/TrackSegment2" index="1" unique_id=822692767]
 rotation = -2.7334435
-shape = SubResource("RectangleShape2D_ryguw")
+shape = SubResource("RectangleShape2D_2cqfq")
 
 [node name="ConnectionA" parent="Track/TrackSegment2" index="2" unique_id=207775042]
 position = Vector2(37.066498, 15.996094)
@@ -173,10 +152,12 @@ position = Vector2(-37, -16)
 points = PackedVector2Array(37, 16, -37, -16)
 
 [node name="TrackIsolator" type="Marker2D" parent="Track" unique_id=808338418]
+visible = false
 position = Vector2(62, -91)
 script = ExtResource("5_lquwl")
 
 [node name="Switch" type="Area2D" parent="Track" unique_id=158775372 node_paths=PackedStringArray("IdText", "StateText", "Indicator")]
+visible = false
 position = Vector2(-6, -91)
 script = ExtResource("6_5vw27")
 IdText = NodePath("Indicator/Fill/IdLabel")
@@ -193,7 +174,7 @@ position = Vector2(-28, 0)
 
 [node name="CollisionShape2D" parent="Track/Switch/InSegment" index="1" unique_id=822692767]
 rotation = -3.1415925
-shape = SubResource("RectangleShape2D_d13ii")
+shape = SubResource("RectangleShape2D_yaehf")
 
 [node name="ConnectionA" parent="Track/Switch/InSegment" index="2" unique_id=207775042]
 position = Vector2(28, 0)
@@ -209,7 +190,7 @@ position = Vector2(22.5, -22)
 
 [node name="CollisionShape2D" parent="Track/Switch/OutSegmentB" index="1" unique_id=822692767]
 rotation = -0.7741627
-shape = SubResource("RectangleShape2D_1u8w0")
+shape = SubResource("RectangleShape2D_074og")
 
 [node name="ConnectionA" parent="Track/Switch/OutSegmentB" index="2" unique_id=207775042]
 position = Vector2(-22.5, 22)
@@ -225,7 +206,7 @@ position = Vector2(34, 0)
 
 [node name="CollisionShape2D" parent="Track/Switch/OutSegmentA" index="1" unique_id=822692767]
 rotation = 0.0
-shape = SubResource("RectangleShape2D_0odxb")
+shape = SubResource("RectangleShape2D_cegan")
 
 [node name="ConnectionA" parent="Track/Switch/OutSegmentA" index="2" unique_id=207775042]
 position = Vector2(-34, 0)
