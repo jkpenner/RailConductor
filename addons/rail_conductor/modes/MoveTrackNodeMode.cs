@@ -1,10 +1,10 @@
 ﻿using Godot;
 
-namespace RailConductor.Plugin.modes;
+namespace RailConductor.Plugin;
 
 public class MoveTrackNodeMode : PluginModeHandler
 {
-    public override int SelectedNodeId => _selectedNodeId;
+    public override int[] SelectedNodeId => [_selectedNodeId];
     
     private int _selectedNodeId = -1;
     private Vector2 _originalPosition = Vector2.Zero;

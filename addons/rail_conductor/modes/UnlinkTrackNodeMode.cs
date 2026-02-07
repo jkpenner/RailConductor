@@ -4,7 +4,7 @@ namespace RailConductor.Plugin;
 
 public class UnlinkTrackNodeMode : PluginModeHandler
 {
-    public override int SelectedNodeId => _selectedNodeId1;
+    public override int[] SelectedNodeId => [_selectedNodeId1];
 
     private int _selectedNodeId1 = -1;
     private int _selectedNodeId2 = -1;
@@ -37,8 +37,7 @@ public class UnlinkTrackNodeMode : PluginModeHandler
         {
             return false;
         }
-
-        GD.Print($"linking nodes {_selectedNodeId1} and {_selectedNodeId2}");
+        
         var node1 = target.Data.GetNode(_selectedNodeId1);
         var node2 = target.Data.GetNode(_selectedNodeId2);
 
@@ -48,8 +47,6 @@ public class UnlinkTrackNodeMode : PluginModeHandler
             _selectedNodeId2 = -1;
             return false;
         }
-        
-        GD.Print($"linking nodes {node1.Id} and {node2.Id}");
 
         // Link the two nodes
         undoRedo.CreateAction("Link Track Node");

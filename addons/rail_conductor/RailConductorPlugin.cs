@@ -1,34 +1,35 @@
 #if TOOLS
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
-using RailConductor.Plugin.modes;
 
 namespace RailConductor.Plugin;
+
+public enum ToolMode
+{
+    None,
+    Select,
+    Add,
+    Move,
+    Delete,
+    Link,
+    Unlink
+}
 
 [Tool]
 public partial class RailConductorPlugin : EditorPlugin
 {
-    public enum Mode
-    {
-        None,
-        Select,
-        Add,
-        Move,
-        Delete,
-        Link,
-        Unlink
-    }
-
     private Track? _target;
-    private HBoxContainer? _toolbar;
-    private Dictionary<Mode, Button> _buttons = new();
+    private TrackNodeOptions? _options;
+    private TrackToolbar? _toolbar;
 
-    private Mode _currentMode = Mode.None;
+
+    private ToolMode _currentToolMode = ToolMode.None;
     private bool _dragging = false;
     private Vector2 _originalPosition;
     private int _hoveredNodeId = -1;
 
-    private readonly Dictionary<Mode, PluginModeHandler> _modeHandlers = new();
+    private readonly Dictionary<ToolMode, PluginModeHandler> _modeHandlers = new();
 
     private EditorUndoRedoManager? _undoRedo;
 
@@ -38,12 +39,12 @@ public partial class RailConductorPlugin : EditorPlugin
         _undoRedo.VersionChanged += OnVersionChanged;
 
         _modeHandlers.Clear();
-        _modeHandlers.Add(Mode.Select, new SelectTrackNodeMode());
-        _modeHandlers.Add(Mode.Add, new AddTrackNodeMode());
-        _modeHandlers.Add(Mode.Move, new MoveTrackNodeMode());
-        _modeHandlers.Add(Mode.Delete, new DeleteTrackNodeMode());
-        _modeHandlers.Add(Mode.Link, new LinkTrackNodeMode());
-        _modeHandlers.Add(Mode.Unlink, new UnlinkTrackNodeMode());
+        _modeHandlers.Add(ToolMode.Select, new SelectTrackNodeMode());
+        _modeHandlers.Add(ToolMode.Add, new AddTrackNodeMode());
+        _modeHandlers.Add(ToolMode.Move, new MoveTrackNodeMode());
+        _modeHandlers.Add(ToolMode.Delete, new DeleteTrackNodeMode());
+        _modeHandlers.Add(ToolMode.Link, new LinkTrackNodeMode());
+        _modeHandlers.Add(ToolMode.Unlink, new UnlinkTrackNodeMode());
 
         foreach (var handler in _modeHandlers.Values)
         {
@@ -58,7 +59,7 @@ public partial class RailConductorPlugin : EditorPlugin
 
     public override void _ExitTree()
     {
-        ClearToolbar();
+        ClearMenus();
         _target = null;
 
         if (_undoRedo is not null)
@@ -90,74 +91,68 @@ public partial class RailConductorPlugin : EditorPlugin
     {
         if (visible)
         {
-            SetupToolbar();
+            SetupMenus();
         }
         else
         {
-            ClearToolbar();
-            _currentMode = Mode.None;
+            ClearMenus();
+            _currentToolMode = ToolMode.None;
             _dragging = false;
             _hoveredNodeId = -1;
         }
     }
 
-    private void SetupToolbar()
-    {
-        if (_toolbar is not null)
-        {
-            return;
-        }
-
-        _toolbar = new HBoxContainer();
-        
-        _buttons.Clear();
-        _buttons.Add(Mode.Select, CreateModeButton(Mode.Select, "res://addons/rail_conductor/icons/select.svg"));
-        _buttons.Add(Mode.Add, CreateModeButton(Mode.Add, "res://addons/rail_conductor/icons/create.svg"));
-        _buttons.Add(Mode.Move, CreateModeButton(Mode.Move, "res://addons/rail_conductor/icons/move.svg"));
-        _buttons.Add(Mode.Delete, CreateModeButton(Mode.Delete, "res://addons/rail_conductor/icons/delete.svg"));
-        _buttons.Add(Mode.Link, CreateModeButton(Mode.Link, "res://addons/rail_conductor/icons/link.svg"));
-        _buttons.Add(Mode.Unlink, CreateModeButton(Mode.Unlink, "res://addons/rail_conductor/icons/unlink.svg"));
-
-        foreach (var button in _buttons.Values)
-        {
-            _toolbar.AddChild(button);
-        }
-
-        AddControlToContainer(CustomControlContainer.CanvasEditorMenu, _toolbar);
-    }
-
-    private Button CreateModeButton(Mode mode, string iconPath)
-    {
-        var button = new Button();
-        button.Icon = ResourceLoader.Load<Texture2D>(iconPath);
-        button.Pressed += () => SetMode(mode);
-        button.ToggleMode = true;
-        return button;
-    }
-
-    private void ClearToolbar()
+    private void SetupMenus()
     {
         if (_toolbar is null)
         {
-            return;
+            var toolbarScene = ResourceLoader.Load<PackedScene>(
+                "res://addons/rail_conductor/scenes/track_toolbar.tscn");
+            _toolbar = toolbarScene.Instantiate<TrackToolbar>();
+            if (_toolbar is not null)
+            {
+                GD.Print("Adding tool bar to CanvasEditorMenu");
+                _toolbar.ToolModeSelected += SetMode;
+                AddControlToContainer(CustomControlContainer.CanvasEditorMenu, _toolbar);
+            }
         }
 
-        RemoveControlFromContainer(CustomControlContainer.CanvasEditorMenu, _toolbar);
-        _toolbar.QueueFree();
-
-        _toolbar = null;
-        _buttons.Clear();
+        if (_options is null)
+        {
+            var optionsScene = ResourceLoader.Load<PackedScene>(
+                "res://addons/rail_conductor/scenes/track_node_options.tscn");
+            _options = optionsScene.InstantiateOrNull<TrackNodeOptions>();
+            if (_options is not null)
+            {
+                AddControlToContainer(CustomControlContainer.CanvasEditorSideRight, _options);
+            }
+        }
     }
 
-    private void SetMode(Mode mode)
+    private void ClearMenus()
     {
-        _currentMode = mode;
-
-        foreach (var (buttonMode, button) in _buttons)
+        if (_toolbar is not null)
         {
-            button.ButtonPressed = buttonMode == mode;
+            RemoveControlFromContainer(CustomControlContainer.CanvasEditorMenu, _toolbar);
+            _toolbar.ToolModeSelected -= SetMode;
+            _toolbar.QueueFree();
+            _toolbar = null;
         }
-        
+
+        if (_options is not null)
+        {
+            RemoveControlFromContainer(CustomControlContainer.CanvasEditorMenu, _options);
+            _options.QueueFree();
+            _options = null;
+        }
+    }
+
+    private void SetMode(ToolMode toolMode)
+    {
+        _currentToolMode = toolMode;
+        _toolbar?.SetToolMode(toolMode);
+
+
         _hoveredNodeId = -1;
         _dragging = false;
     }
@@ -168,26 +163,22 @@ public partial class RailConductorPlugin : EditorPlugin
 
         if (_target?.Data is not null && @event is InputEventMouseMotion mouse)
         {
-            // While in node modes display a hover effect on the hovered node.
-            if (_currentMode is Mode.Add or Mode.Move or Mode.Delete)
+            var globalPosition = PluginUtility.ScreenToWorld(mouse.Position);
+            var localPosition = _target.ToLocal(globalPosition);
+            var hoveredIndex = _target.Data.FindClosestNodeId(localPosition);
+            if (hoveredIndex != _hoveredNodeId)
             {
-                var globalPosition = PluginUtility.ScreenToWorld(mouse.Position);
-                var localPosition = _target.ToLocal(globalPosition);
-                var hoveredIndex = _target.Data.FindClosestNodeId(localPosition);
-                if (hoveredIndex != _hoveredNodeId)
-                {
-                    _hoveredNodeId = hoveredIndex;
-                    UpdateOverlays();
-                }
+                _hoveredNodeId = hoveredIndex;
+                UpdateOverlays();
             }
         }
 
-        if (_target?.Data is null || _currentMode == Mode.None || _undoRedo is null)
+        if (_target?.Data is null || _currentToolMode == ToolMode.None || _undoRedo is null)
         {
             return false;
         }
 
-        if (!_modeHandlers.TryGetValue(_currentMode, out var handler))
+        if (!_modeHandlers.TryGetValue(_currentToolMode, out var handler))
         {
             return false;
         }
@@ -209,72 +200,67 @@ public partial class RailConductorPlugin : EditorPlugin
             return;
         }
 
-        var selectedNodeId = -1;
+        var scale = PluginUtility.GetZoom();
+        var links = _target.Data.GetNodes()
+            .SelectMany(n => n.Links.Select(l => PluginUtility.GetLinkId(n.Id, l)))
+            .ToHashSet();
 
-        // While dragging a node display the selection effect.
-        if (_modeHandlers.TryGetValue(_currentMode, out var handler))
+        // Draw the links between all nodes
+        foreach (var (node1Id, node2Id) in links)
         {
-            selectedNodeId = handler.SelectedNodeId;
-            
-            var selectedNode = _target.Data.GetNode(selectedNodeId);
-            if (selectedNode is not null)
+            var node1 = _target.Data.GetNode(node1Id);
+            var node2 = _target.Data.GetNode(node2Id);
+
+            if (node1 is null || node2 is null)
             {
+                continue;
+            }
+
+            var globalPosition1 = _target.ToGlobal(node1.Position);
+            var screenPosition1 = PluginUtility.WorldToScreen(globalPosition1);
+
+            var globalPosition2 = _target.ToGlobal(node2.Position);
+            var screenPosition2 = PluginUtility.WorldToScreen(globalPosition2);
+
+            overlay.DrawLine(screenPosition1, screenPosition2,
+                PluginSettings.LinkColor, PluginSettings.LinkWidth * scale);
+        }
+
+        // Draw the selected node effect
+        if (_modeHandlers.TryGetValue(_currentToolMode, out var handler))
+        {
+            foreach (var id in handler.SelectedNodeId)
+            {
+                var selectedNode = _target.Data.GetNode(id);
+                if (selectedNode is null)
+                {
+                    continue;
+                }
+
                 var globalPosition = _target.ToGlobal(selectedNode.Position);
                 var screenPosition = PluginUtility.WorldToScreen(globalPosition);
 
-                var size = PluginUtility.GetZoom() * 14f;
-                overlay.DrawCircle(screenPosition, size, Colors.YellowGreen.WithAlpha(0.7f));
+                overlay.DrawCircle(screenPosition, (PluginSettings.NodeRadius + 2) * scale,
+                    PluginSettings.SelectedColor);
             }
         }
 
-        // While in node modes display a hover effect on the hovered node.
-        if (_currentMode is Mode.Add or Mode.Move or Mode.Delete)
-        {
-            if (_hoveredNodeId != selectedNodeId)
-            {
-                var hoveredNode = _target.Data.GetNode(_hoveredNodeId);
-                if (hoveredNode is not null)
-                {
-                    var globalPosition = _target.ToGlobal(hoveredNode.Position);
-                    var screenPosition = PluginUtility.WorldToScreen(globalPosition);
-
-                    var size = PluginUtility.GetZoom() * 14f;
-                    overlay.DrawCircle(screenPosition, size, Colors.Yellow.WithAlpha(0.7f));
-                }
-            }
-        }
-
-        var links = new HashSet<(int, int)>();
-        var nodeByIds = new Dictionary<int, TrackNodeData>();
-        
         // Draw all nodes
         foreach (var node in _target.Data.GetNodes())
         {
             var globalPosition = _target.ToGlobal(node.Position);
             var screenPosition = PluginUtility.WorldToScreen(globalPosition);
-            var size = PluginUtility.GetZoom() * 8f;
-            overlay.DrawCircle(screenPosition, size, Colors.Green.WithAlpha(0.7f));
 
-            nodeByIds.Add(node.Id, node);
-            
+            var zoom = PluginUtility.GetZoom();
+            overlay.DrawCircle(screenPosition, PluginSettings.NodeRadius * zoom, PluginSettings.NodePrimaryColor);
+
+            var fillColor = _hoveredNodeId == node.Id ? PluginSettings.NodeHoverColor : PluginSettings.NodeNormalColor;
+            overlay.DrawCircle(screenPosition, (PluginSettings.NodeRadius - 2) * zoom, fillColor);
+
             foreach (var link in node.Links)
             {
                 links.Add(PluginUtility.GetLinkId(node.Id, link));
             }
-        }
-
-        foreach (var (node1Id, node2Id) in links)
-        {
-            var node1 = nodeByIds[node1Id];
-            var node2 = nodeByIds[node2Id];
-            
-            var globalPosition1 = _target.ToGlobal(node1.Position);
-            var screenPosition1 = PluginUtility.WorldToScreen(globalPosition1);
-            
-            var globalPosition2 = _target.ToGlobal(node2.Position);
-            var screenPosition2 = PluginUtility.WorldToScreen(globalPosition2);
-            
-            overlay.DrawLine(screenPosition1, screenPosition2, Colors.Green.WithAlpha(0.7f));
         }
     }
 }

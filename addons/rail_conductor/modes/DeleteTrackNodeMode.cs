@@ -4,7 +4,7 @@ namespace RailConductor.Plugin;
 
 public class DeleteTrackNodeMode : PluginModeHandler
 {
-    public override int SelectedNodeId => -1;
+    public override int[] SelectedNodeId => [];
 
     public override bool OnGuiInput(Track target, InputEvent e, EditorUndoRedoManager undoRedo)
     {

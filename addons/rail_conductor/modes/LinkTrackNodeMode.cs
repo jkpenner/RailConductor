@@ -4,7 +4,7 @@ namespace RailConductor.Plugin;
 
 public class LinkTrackNodeMode : PluginModeHandler
 {
-    public override int SelectedNodeId => _selectedNodeId1;
+    public override int[] SelectedNodeId => [_selectedNodeId1, _selectedNodeId2];
 
     private int _selectedNodeId1 = -1;
     private int _selectedNodeId2 = -1;
@@ -42,7 +42,7 @@ public class LinkTrackNodeMode : PluginModeHandler
         var node1 = target.Data.GetNode(_selectedNodeId1);
         var node2 = target.Data.GetNode(_selectedNodeId2);
 
-        if (node1 is null || node2 is null)
+        if (node1 is null || node2 is null || node1.Links.Contains(_selectedNodeId2) || node2.Links.Contains(_selectedNodeId1))
         {
             _selectedNodeId1 = -1;
             _selectedNodeId2 = -1;

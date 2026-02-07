@@ -4,7 +4,7 @@ namespace RailConductor.Plugin;
 
 public abstract class PluginModeHandler
 {
-    public abstract int SelectedNodeId { get; }
+    public abstract int[] SelectedNodeId { get; }
     
     public virtual void OnSetup() {}
     public virtual void OnCleanup() {}

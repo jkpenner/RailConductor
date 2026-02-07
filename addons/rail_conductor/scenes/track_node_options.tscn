@@ -1,0 +1,17 @@
+[gd_scene format=3 uid="uid://bbmul24vk5o88"]
+
+[ext_resource type="Script" uid="uid://dj3of0rq2l8in" path="res://addons/rail_conductor/scenes/TrackNodeOptions.cs" id="1_63yrt"]
+
+[node name="TrackNodeOptions" type="PanelContainer" unique_id=1536962456]
+offset_right = 1152.0
+script = ExtResource("1_63yrt")
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=528868733]
+layout_mode = 2
+
+[node name="Control" type="VBoxContainer" parent="MarginContainer" unique_id=957086227]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/Control" unique_id=1125291024]
+layout_mode = 2
+text = "Track Node Options"

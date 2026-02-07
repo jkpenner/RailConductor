@@ -4,8 +4,18 @@ namespace RailConductor.Plugin;
 
 public class SelectTrackNodeMode : PluginModeHandler
 {
-    public override int SelectedNodeId => _selectedNodeId;
+    public override int[] SelectedNodeId => [_selectedNodeId];
     private int _selectedNodeId = -1;
+
+    public override void OnSetup()
+    {
+        
+    }
+
+    public override void OnCleanup()
+    {
+        
+    }
 
     public override bool OnGuiInput(Track target, InputEvent e, EditorUndoRedoManager undoRedo)
     {

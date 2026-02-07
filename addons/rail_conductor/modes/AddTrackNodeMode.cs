@@ -5,7 +5,7 @@ namespace RailConductor.Plugin;
 
 public class AddTrackNodeMode : PluginModeHandler
 {
-    public override int SelectedNodeId => _selectedNodeId;
+    public override int[] SelectedNodeId => [_selectedNodeId];
 
     private int _selectedNodeId;
     private Vector2 _originalPosition;
