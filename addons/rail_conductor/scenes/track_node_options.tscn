@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://4mprydcwk43l" path="res://addons/rail_conductor/icons/select_light.svg" id="2_vwfrl"]
 [ext_resource type="Texture2D" uid="uid://bw5yr6fqnic84" path="res://addons/rail_conductor/icons/create_light.svg" id="3_lfl1h"]
 [ext_resource type="Texture2D" uid="uid://bjvaaroturjtd" path="res://addons/rail_conductor/icons/move_light.svg" id="4_6br1v"]
+[ext_resource type="Texture2D" uid="uid://ca54qj67o5bvv" path="res://addons/rail_conductor/icons/insert_light.svg" id="4_lfl1h"]
 [ext_resource type="Texture2D" uid="uid://b8dbjafujxhex" path="res://addons/rail_conductor/icons/delete_light.svg" id="5_s8w00"]
 [ext_resource type="Texture2D" uid="uid://1ir1ejdvvbjo" path="res://addons/rail_conductor/icons/link_light.svg" id="6_ln0e4"]
 [ext_resource type="Texture2D" uid="uid://h0sknqqsqhvn" path="res://addons/rail_conductor/icons/unlink_light.svg" id="7_2h6r0"]
@@ -63,6 +64,15 @@ layout_mode = 2
 toggle_mode = true
 text = "Create"
 icon = ExtResource("3_lfl1h")
+flat = true
+expand_icon = true
+
+[node name="InsertNodeButton" type="Button" parent="MarginContainer/Control/PanelContainer/MarginContainer/VBoxContainer" unique_id=1902198]
+unique_name_in_owner = true
+layout_mode = 2
+toggle_mode = true
+text = "Insert"
+icon = ExtResource("4_lfl1h")
 flat = true
 expand_icon = true
 

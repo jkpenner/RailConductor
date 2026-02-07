@@ -14,7 +14,7 @@ public abstract class PluginModeHandler
         return false;
     }
 
-    public virtual void OnGuiDraw(Control overlay)
+    public virtual void OnGuiDraw(Track target, Control overlay)
     {
 
     }

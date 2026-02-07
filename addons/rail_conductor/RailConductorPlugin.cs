@@ -13,7 +13,8 @@ public enum ToolMode
     Move,
     Delete,
     Link,
-    Unlink
+    Unlink,
+    Insert
 }
 
 [Tool]
@@ -41,6 +42,7 @@ public partial class RailConductorPlugin : EditorPlugin
         _modeHandlers.Clear();
         _modeHandlers.Add(ToolMode.Select, new SelectTrackNodeMode());
         _modeHandlers.Add(ToolMode.Create, new AddTrackNodeMode());
+        _modeHandlers.Add(ToolMode.Insert, new InsertTrackNodeMode());
         _modeHandlers.Add(ToolMode.Move, new MoveTrackNodeMode());
         _modeHandlers.Add(ToolMode.Delete, new DeleteTrackNodeMode());
         _modeHandlers.Add(ToolMode.Link, new LinkTrackNodeMode());
@@ -167,6 +169,8 @@ public partial class RailConductorPlugin : EditorPlugin
 
         if (_target?.Data is not null && @event is InputEventMouseMotion mouse)
         {
+            UpdateOverlays();
+            
             var globalPosition = PluginUtility.ScreenToWorld(mouse.Position);
             var localPosition = _target.ToLocal(globalPosition);
             var hoveredIndex = _target.Data.FindClosestNodeId(localPosition);
@@ -265,6 +269,11 @@ public partial class RailConductorPlugin : EditorPlugin
             {
                 links.Add(PluginUtility.GetLinkId(node.Id, link));
             }
+        }
+
+        if (_modeHandlers.TryGetValue(_currentToolMode, out var handler2))
+        {
+            handler2.OnGuiDraw(_target, overlay);
         }
     }
 }
