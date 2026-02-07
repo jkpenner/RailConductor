@@ -25,7 +25,7 @@ public partial class TrackToolbar : HBoxContainer
         }
         
         _buttons.Add(ToolMode.Select, CreateModeButton(ToolMode.Select, "res://addons/rail_conductor/icons/select.svg"));
-        _buttons.Add(ToolMode.Add, CreateModeButton(ToolMode.Add, "res://addons/rail_conductor/icons/create.svg"));
+        _buttons.Add(ToolMode.Create, CreateModeButton(ToolMode.Create, "res://addons/rail_conductor/icons/create.svg"));
         _buttons.Add(ToolMode.Move, CreateModeButton(ToolMode.Move, "res://addons/rail_conductor/icons/move.svg"));
         _buttons.Add(ToolMode.Delete, CreateModeButton(ToolMode.Delete, "res://addons/rail_conductor/icons/delete.svg"));
         _buttons.Add(ToolMode.Link, CreateModeButton(ToolMode.Link, "res://addons/rail_conductor/icons/link.svg"));
@@ -61,6 +61,8 @@ public partial class TrackToolbar : HBoxContainer
         var button = new Button();
         button.Icon = ResourceLoader.Load<Texture2D>(iconPath);
         button.Pressed += _setActions[mode];
+        // button.Flat = true;
+        button.ExpandIcon = true;
         button.ToggleMode = true;
         return button;
     }

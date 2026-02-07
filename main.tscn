@@ -12,41 +12,29 @@
 [ext_resource type="Texture2D" uid="uid://djuh3tra4ijeq" path="res://assets/sprites/circle.png" id="8_5vw27"]
 [ext_resource type="Script" uid="uid://yslvcibqqiko" path="res://scripts/interactions/Interactions.cs" id="9_kek77"]
 
-[sub_resource type="Resource" id="Resource_efxa6"]
-script = ExtResource("5_efxa6")
-Id = 1
-Position = Vector2(113, -30)
-Links = Array[int]([2, 28, 30])
-
 [sub_resource type="Resource" id="Resource_dg77c"]
 script = ExtResource("5_efxa6")
 Id = 2
 Position = Vector2(17, -30)
-Links = Array[int]([1, 28])
-
-[sub_resource type="Resource" id="Resource_ycdy4"]
-script = ExtResource("5_efxa6")
-Id = 3
-Position = Vector2(113, -94)
-Links = Array[int]([4, 28, 28, 29])
+Links = Array[int]([11])
 
 [sub_resource type="Resource" id="Resource_w48qg"]
 script = ExtResource("5_efxa6")
 Id = 4
 Position = Vector2(17, -94)
-Links = Array[int]([3, 28])
+Links = Array[int]([10])
 
 [sub_resource type="Resource" id="Resource_vivmo"]
 script = ExtResource("5_efxa6")
 Id = 10
 Position = Vector2(289, -94)
-Links = Array[int]([19, 18, 32, 29])
+Links = Array[int]([19, 18, 4])
 
 [sub_resource type="Resource" id="Resource_2cqfq"]
 script = ExtResource("5_efxa6")
 Id = 11
 Position = Vector2(337, -30)
-Links = Array[int]([13, 17, 30])
+Links = Array[int]([13, 17, 2])
 
 [sub_resource type="Resource" id="Resource_yaehf"]
 script = ExtResource("5_efxa6")
@@ -90,48 +78,16 @@ Id = 20
 Position = Vector2(785, -94)
 Links = Array[int]([18])
 
-[sub_resource type="Resource" id="Resource_0odxb"]
-script = ExtResource("5_efxa6")
-Id = 28
-Position = Vector2(65, -63)
-Links = Array[int]([4, 3, 3, 1, 2])
-
-[sub_resource type="Resource" id="Resource_lswn8"]
-script = ExtResource("5_efxa6")
-Id = 29
-Position = Vector2(177, -94)
-Links = Array[int]([3, 10])
-
-[sub_resource type="Resource" id="Resource_a6jrf"]
-script = ExtResource("5_efxa6")
-Id = 30
-Position = Vector2(177, -30)
-Links = Array[int]([1, 11])
-
 [sub_resource type="Resource" id="Resource_xuqvo"]
 script = ExtResource("5_efxa6")
 Id = 31
 Position = Vector2(897, -30)
 Links = Array[int]([17])
 
-[sub_resource type="Resource" id="Resource_qsp4k"]
-script = ExtResource("5_efxa6")
-Id = 32
-Position = Vector2(289, -142)
-Links = Array[int]([10, 33])
-
-[sub_resource type="Resource" id="Resource_kq58d"]
-script = ExtResource("5_efxa6")
-Id = 33
-Position = Vector2(289, -254)
-Links = Array[int]([32])
-
 [sub_resource type="Resource" id="Resource_ryguw"]
 script = ExtResource("6_dg77c")
 _nodes = Dictionary[int, ExtResource("5_efxa6")]({
-1: SubResource("Resource_efxa6"),
 2: SubResource("Resource_dg77c"),
-3: SubResource("Resource_ycdy4"),
 4: SubResource("Resource_w48qg"),
 10: SubResource("Resource_vivmo"),
 11: SubResource("Resource_2cqfq"),
@@ -142,12 +98,7 @@ _nodes = Dictionary[int, ExtResource("5_efxa6")]({
 18: SubResource("Resource_getpj"),
 19: SubResource("Resource_d13ii"),
 20: SubResource("Resource_1u8w0"),
-28: SubResource("Resource_0odxb"),
-29: SubResource("Resource_lswn8"),
-30: SubResource("Resource_a6jrf"),
-31: SubResource("Resource_xuqvo"),
-32: SubResource("Resource_qsp4k"),
-33: SubResource("Resource_kq58d")
+31: SubResource("Resource_xuqvo")
 })
 metadata/_custom_type_script = "uid://16mgebho3rd5"
 

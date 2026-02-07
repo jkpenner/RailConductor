@@ -9,7 +9,7 @@ public enum ToolMode
 {
     None,
     Select,
-    Add,
+    Create,
     Move,
     Delete,
     Link,
@@ -21,7 +21,7 @@ public partial class RailConductorPlugin : EditorPlugin
 {
     private Track? _target;
     private TrackNodeOptions? _options;
-    private TrackToolbar? _toolbar;
+    // private TrackToolbar? _toolbar;
 
 
     private ToolMode _currentToolMode = ToolMode.None;
@@ -40,7 +40,7 @@ public partial class RailConductorPlugin : EditorPlugin
 
         _modeHandlers.Clear();
         _modeHandlers.Add(ToolMode.Select, new SelectTrackNodeMode());
-        _modeHandlers.Add(ToolMode.Add, new AddTrackNodeMode());
+        _modeHandlers.Add(ToolMode.Create, new AddTrackNodeMode());
         _modeHandlers.Add(ToolMode.Move, new MoveTrackNodeMode());
         _modeHandlers.Add(ToolMode.Delete, new DeleteTrackNodeMode());
         _modeHandlers.Add(ToolMode.Link, new LinkTrackNodeMode());
@@ -92,6 +92,7 @@ public partial class RailConductorPlugin : EditorPlugin
         if (visible)
         {
             SetupMenus();
+            _options?.SetToolMode(_currentToolMode);
         }
         else
         {
@@ -104,18 +105,18 @@ public partial class RailConductorPlugin : EditorPlugin
 
     private void SetupMenus()
     {
-        if (_toolbar is null)
-        {
-            var toolbarScene = ResourceLoader.Load<PackedScene>(
-                "res://addons/rail_conductor/scenes/track_toolbar.tscn");
-            _toolbar = toolbarScene.Instantiate<TrackToolbar>();
-            if (_toolbar is not null)
-            {
-                GD.Print("Adding tool bar to CanvasEditorMenu");
-                _toolbar.ToolModeSelected += SetMode;
-                AddControlToContainer(CustomControlContainer.CanvasEditorMenu, _toolbar);
-            }
-        }
+        // if (_toolbar is null)
+        // {
+        //     var toolbarScene = ResourceLoader.Load<PackedScene>(
+        //         "res://addons/rail_conductor/scenes/track_toolbar.tscn");
+        //     _toolbar = toolbarScene.Instantiate<TrackToolbar>();
+        //     if (_toolbar is not null)
+        //     {
+        //         GD.Print("Adding tool bar to CanvasEditorMenu");
+        //         _toolbar.ToolModeSelected += SetMode;
+        //         AddControlToContainer(CustomControlContainer.CanvasEditorMenu, _toolbar);
+        //     }
+        // }
 
         if (_options is null)
         {
@@ -124,6 +125,7 @@ public partial class RailConductorPlugin : EditorPlugin
             _options = optionsScene.InstantiateOrNull<TrackNodeOptions>();
             if (_options is not null)
             {
+                _options.ToolModeSelected += SetMode;
                 AddControlToContainer(CustomControlContainer.CanvasEditorSideRight, _options);
             }
         }
@@ -131,17 +133,18 @@ public partial class RailConductorPlugin : EditorPlugin
 
     private void ClearMenus()
     {
-        if (_toolbar is not null)
-        {
-            RemoveControlFromContainer(CustomControlContainer.CanvasEditorMenu, _toolbar);
-            _toolbar.ToolModeSelected -= SetMode;
-            _toolbar.QueueFree();
-            _toolbar = null;
-        }
+        // if (_toolbar is not null)
+        // {
+        //     RemoveControlFromContainer(CustomControlContainer.CanvasEditorMenu, _toolbar);
+        //     _toolbar.ToolModeSelected -= SetMode;
+        //     _toolbar.QueueFree();
+        //     _toolbar = null;
+        // }
 
         if (_options is not null)
         {
             RemoveControlFromContainer(CustomControlContainer.CanvasEditorMenu, _options);
+            _options.ToolModeSelected -= SetMode;
             _options.QueueFree();
             _options = null;
         }
@@ -150,7 +153,8 @@ public partial class RailConductorPlugin : EditorPlugin
     private void SetMode(ToolMode toolMode)
     {
         _currentToolMode = toolMode;
-        _toolbar?.SetToolMode(toolMode);
+        // _toolbar?.SetToolMode(toolMode);
+        _options?.SetToolMode(toolMode);
 
 
         _hoveredNodeId = -1;
