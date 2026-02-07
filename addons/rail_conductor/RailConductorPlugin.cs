@@ -11,6 +11,7 @@ public partial class RailConductorPlugin : EditorPlugin
     public enum Mode
     {
         None,
+        Select,
         Add,
         Move,
         Delete,
@@ -20,11 +21,7 @@ public partial class RailConductorPlugin : EditorPlugin
 
     private Track? _target;
     private HBoxContainer? _toolbar;
-    private Button? _addButton;
-    private Button? _moveButton;
-    private Button? _deleteButton;
-    private Button? _linkButton;
-    private Button? _unlinkButton;
+    private Dictionary<Mode, Button> _buttons = new();
 
     private Mode _currentMode = Mode.None;
     private bool _dragging = false;
@@ -41,6 +38,7 @@ public partial class RailConductorPlugin : EditorPlugin
         _undoRedo.VersionChanged += OnVersionChanged;
 
         _modeHandlers.Clear();
+        _modeHandlers.Add(Mode.Select, new SelectTrackNodeMode());
         _modeHandlers.Add(Mode.Add, new AddTrackNodeMode());
         _modeHandlers.Add(Mode.Move, new MoveTrackNodeMode());
         _modeHandlers.Add(Mode.Delete, new DeleteTrackNodeMode());
@@ -111,39 +109,30 @@ public partial class RailConductorPlugin : EditorPlugin
         }
 
         _toolbar = new HBoxContainer();
-
-
-        _addButton = new Button();
-        _addButton.Icon = ResourceLoader.Load<Texture2D>("res://addons/rail_conductor/icons/create.svg");
-        _addButton.Pressed += () => SetMode(Mode.Add);
-        _addButton.ToggleMode = true;
-        _toolbar.AddChild(_addButton);
-
-        _moveButton = new Button();
-        _moveButton.Icon = ResourceLoader.Load<Texture2D>("res://addons/rail_conductor/icons/move.svg");
-        _moveButton.Pressed += () => SetMode(Mode.Move);
-        _moveButton.ToggleMode = true;
-        _toolbar.AddChild(_moveButton);
-
-        _deleteButton = new Button();
-        _deleteButton.Icon = ResourceLoader.Load<Texture2D>("res://addons/rail_conductor/icons/delete.svg");
-        _deleteButton.Pressed += () => SetMode(Mode.Delete);
-        _deleteButton.ToggleMode = true;
-        _toolbar.AddChild(_deleteButton);
         
-        _linkButton = new Button();
-        _linkButton.Icon = ResourceLoader.Load<Texture2D>("res://addons/rail_conductor/icons/link.svg");
-        _linkButton.Pressed += () => SetMode(Mode.Link);
-        _linkButton.ToggleMode = true;
-        _toolbar.AddChild(_linkButton);
-        
-        _unlinkButton = new Button();
-        _unlinkButton.Icon = ResourceLoader.Load<Texture2D>("res://addons/rail_conductor/icons/unlink.svg");
-        _unlinkButton.Pressed += () => SetMode(Mode.Unlink);
-        _unlinkButton.ToggleMode = true;
-        _toolbar.AddChild(_unlinkButton);
+        _buttons.Clear();
+        _buttons.Add(Mode.Select, CreateModeButton(Mode.Select, "res://addons/rail_conductor/icons/select.svg"));
+        _buttons.Add(Mode.Add, CreateModeButton(Mode.Add, "res://addons/rail_conductor/icons/create.svg"));
+        _buttons.Add(Mode.Move, CreateModeButton(Mode.Move, "res://addons/rail_conductor/icons/move.svg"));
+        _buttons.Add(Mode.Delete, CreateModeButton(Mode.Delete, "res://addons/rail_conductor/icons/delete.svg"));
+        _buttons.Add(Mode.Link, CreateModeButton(Mode.Link, "res://addons/rail_conductor/icons/link.svg"));
+        _buttons.Add(Mode.Unlink, CreateModeButton(Mode.Unlink, "res://addons/rail_conductor/icons/unlink.svg"));
+
+        foreach (var button in _buttons.Values)
+        {
+            _toolbar.AddChild(button);
+        }
 
         AddControlToContainer(CustomControlContainer.CanvasEditorMenu, _toolbar);
+    }
+
+    private Button CreateModeButton(Mode mode, string iconPath)
+    {
+        var button = new Button();
+        button.Icon = ResourceLoader.Load<Texture2D>(iconPath);
+        button.Pressed += () => SetMode(mode);
+        button.ToggleMode = true;
+        return button;
     }
 
     private void ClearToolbar()
@@ -157,40 +146,16 @@ public partial class RailConductorPlugin : EditorPlugin
         _toolbar.QueueFree();
 
         _toolbar = null;
-        _addButton = null;
-        _moveButton = null;
-        _deleteButton = null;
-        _linkButton = null;
-        _unlinkButton = null;
+        _buttons.Clear();
     }
 
     private void SetMode(Mode mode)
     {
         _currentMode = mode;
 
-        if (_addButton is not null)
+        foreach (var (buttonMode, button) in _buttons)
         {
-            _addButton.ButtonPressed = mode == Mode.Add;
-        }
-
-        if (_moveButton is not null)
-        {
-            _moveButton.ButtonPressed = mode == Mode.Move;
-        }
-
-        if (_deleteButton is not null)
-        {
-            _deleteButton.ButtonPressed = mode == Mode.Delete;
-        }
-
-        if (_linkButton is not null)
-        {
-            _linkButton.ButtonPressed = mode == Mode.Link;
-        }
-        
-        if (_unlinkButton is not null)
-        {
-            _unlinkButton.ButtonPressed = mode == Mode.Unlink;
+            button.ButtonPressed = buttonMode == mode;
         }
         
         _hoveredNodeId = -1;
