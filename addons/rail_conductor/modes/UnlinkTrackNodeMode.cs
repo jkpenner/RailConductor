@@ -11,7 +11,7 @@ public class UnlinkTrackNodeMode : PluginModeHandler
     {
         if (!string.IsNullOrEmpty(_selectedNodeId1))
         {
-            MarkAsSelected(_selectedNodeId1);
+            Select(_selectedNodeId1);
         }
         
         if (target.Data is null)

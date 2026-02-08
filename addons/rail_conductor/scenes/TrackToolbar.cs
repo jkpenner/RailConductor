@@ -27,7 +27,6 @@ public partial class TrackToolbar : HBoxContainer
         _buttons.Add(ToolMode.Select, CreateModeButton(ToolMode.Select, "res://addons/rail_conductor/icons/select.svg"));
         _buttons.Add(ToolMode.Create, CreateModeButton(ToolMode.Create, "res://addons/rail_conductor/icons/create.svg"));
         _buttons.Add(ToolMode.Move, CreateModeButton(ToolMode.Move, "res://addons/rail_conductor/icons/move.svg"));
-        _buttons.Add(ToolMode.Delete, CreateModeButton(ToolMode.Delete, "res://addons/rail_conductor/icons/delete.svg"));
         _buttons.Add(ToolMode.Link, CreateModeButton(ToolMode.Link, "res://addons/rail_conductor/icons/link.svg"));
         _buttons.Add(ToolMode.Unlink, CreateModeButton(ToolMode.Unlink, "res://addons/rail_conductor/icons/unlink.svg"));
         

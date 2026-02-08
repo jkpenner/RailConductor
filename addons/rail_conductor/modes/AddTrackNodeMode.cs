@@ -1,5 +1,4 @@
-﻿using System;
-using Godot;
+﻿using Godot;
 
 namespace RailConductor.Plugin;
 
@@ -15,60 +14,79 @@ public class AddTrackNodeMode : PluginModeHandler
             return false;
         }
 
-        if (e is InputEventMouseButton { ButtonIndex: MouseButton.Left } btn)
+        switch (e)
         {
-            var globalPosition = PluginUtility.ScreenToWorldSnapped(btn.Position);
-            var localPosition = target.ToLocal(globalPosition);
-
-            if (btn.Pressed)
-            {
-                var newNode = new TrackNodeData
-                {
-                    Position = localPosition
-                };
-
-                MarkAsSelected(newNode.Id);
-                _originalPosition = localPosition;
-
-                undoRedo.CreateAction("Add Track Node");
-                undoRedo.AddDoMethod(target.Data, nameof(TrackData.AddNode), newNode.Id, newNode);
-                undoRedo.AddUndoMethod(target.Data, nameof(TrackData.RemoveNode), newNode.Id);
-                undoRedo.AddDoMethod(newNode, nameof(TrackNodeData.UpdateConfiguration), target.Data);
-                undoRedo.CommitAction();
-                return true;
-            }
-            else
-            {
-                var finalPos = target.Data.GetNode(_selectedNodeId)?.Position ?? throw new NullReferenceException();
-                var nodeRef = target.Data.GetNode(_selectedNodeId) ?? throw new NullReferenceException(); // Reference for closure
-
-                undoRedo.CreateAction("Move Track Node");
-                undoRedo.AddDoProperty(nodeRef, nameof(TrackNodeData.Position), finalPos);
-                undoRedo.AddUndoProperty(nodeRef, nameof(TrackNodeData.Position), _originalPosition);
-                undoRedo.AddDoMethod(nodeRef, nameof(TrackNodeData.UpdateConfiguration), target.Data);
-                undoRedo.CommitAction();
-                _selectedNodeId = string.Empty;
-                return true;
-            }
-        }
-
-        if (e is InputEventMouseMotion mouseMotion && !string.IsNullOrEmpty(_selectedNodeId) &&
-            Input.IsMouseButtonPressed(MouseButton.Left))
-        {
-            var globalPosition = PluginUtility.ScreenToWorldSnapped(mouseMotion.Position);
-            var localPosition = target.ToLocal(globalPosition);
-
-            var node = target.Data.GetNode(_selectedNodeId);
-            if (node is not null)
-            {
-                node.Position = localPosition;
-            }
+            case InputEventMouseMotion mouseMotion:
+                ProcessMouseMotion(target, mouseMotion);
+                break;
                 
-            target.RecalculateGraph();
-            target.NotifyPropertyListChanged();
-            return true;
+            case InputEventMouseButton { ButtonIndex: MouseButton.Left } mouseButton:
+                return ProcessLeftMouseButton(target, mouseButton, undoRedo);
         }
 
         return false;
     }
+
+    private void ProcessMouseMotion(Track target, InputEventMouseMotion mouseMotion)
+    {
+        if (string.IsNullOrEmpty(_selectedNodeId))
+        {
+            return;
+        }
+
+        var globalPosition = PluginUtility.ScreenToWorldSnapped(mouseMotion.Position);
+        var localPosition = target.ToLocal(globalPosition);
+
+        var node = target.Data?.GetNode(_selectedNodeId);
+        if (node is null)
+        {
+            return;
+        }
+
+        node.Position = localPosition;
+    }
+    
+    private bool ProcessLeftMouseButton(Track target, InputEventMouseButton mouseButton, EditorUndoRedoManager undoRedo)
+    {
+        if (target.Data is null)
+        {
+            return false;
+        }
+        
+        var globalPosition = PluginUtility.ScreenToWorldSnapped(mouseButton.Position);
+        var localPosition = target.ToLocal(globalPosition);
+
+        if (mouseButton.Pressed)
+        {
+            var newNode = new TrackNodeData
+            {
+                Position = localPosition
+            };
+
+            ClearSelection();
+            Select(newNode.Id);
+            _selectedNodeId = newNode.Id;
+            
+            _originalPosition = localPosition;
+
+            TrackEditorActions.AddTrackNode(target.Data, newNode, undoRedo);
+        }
+        else
+        {
+            var node = target.Data.GetNode(_selectedNodeId);
+            if (node is null)
+            {
+                return false;
+            }
+
+            Deselect(_selectedNodeId);
+            _selectedNodeId = string.Empty;
+            
+            TrackEditorActions.MoveTrackNode(target.Data, node, node.Position, _originalPosition, undoRedo);
+        }
+
+        return true;
+    }
+
+    
 }

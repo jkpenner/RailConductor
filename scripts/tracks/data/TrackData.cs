@@ -11,6 +11,11 @@ public partial class TrackData : Resource
     [Export] private Godot.Collections.Dictionary<string, TrackLinkData> _links = new();
     [Export] private Godot.Collections.Dictionary<string, TrackSignalData> _signals = new();
 
+    public bool IsValidId(string id) => IsNodeId(id) || IsLinkId(id) || IsSignalId(id);
+    public bool IsNodeId(string id) => _nodes.ContainsKey(id);
+    public bool IsLinkId(string id) => _links.ContainsKey(id);
+    public bool IsSignalId(string id) => _signals.ContainsKey(id);
+    
     public IEnumerable<TrackNodeData> GetNodes() => _nodes.Values;
     public IEnumerable<TrackLinkData> GetLinks() => _links.Values;
     public IEnumerable<TrackSignalData> GetSignals() => _signals.Values;
@@ -99,6 +104,12 @@ public partial class TrackData : Resource
         if (!string.IsNullOrEmpty(signalId))
         {
             return signalId;
+        }
+
+        var linkId = FindClosestLink(position);
+        if (!string.IsNullOrEmpty(linkId))
+        {
+            return linkId;
         }
 
         return string.Empty;

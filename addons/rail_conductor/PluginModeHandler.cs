@@ -6,20 +6,60 @@ namespace RailConductor.Plugin;
 
 public abstract class PluginModeHandler
 {
-    private readonly HashSet<string> _selected = [];
-    private readonly HashSet<string> _hovered = [];
+    private readonly HashSet<string> _selected = new();
+    private readonly HashSet<string> _hovered = new();
 
-    public IReadOnlyCollection<string> Selected => _selected;
-    public IReadOnlyCollection<string> Hovered => _hovered;
+    public IReadOnlySet<string> Selected => _selected;
+    public IReadOnlySet<string> Hovered => _hovered;
 
     public event Action? OverlayUpdateRequested;
 
     public bool HandleGuiInput(Track target, InputEvent e, EditorUndoRedoManager undoRedo)
     {
-        _selected.Clear();
         _hovered.Clear();
 
-        return OnGuiInput(target, e, undoRedo);
+        bool handled = OnGuiInput(target, e, undoRedo);
+
+        if (handled)
+            OverlayUpdateRequested?.Invoke();
+
+        return handled;
+    }
+
+    // Selection control API
+    protected void ClearSelection() => _selected.Clear();
+    protected void Select(string id) => _selected.Add(id);
+    protected void Deselect(string id) => _selected.Remove(id);
+
+    protected void ToggleSelect(string id)
+    {
+        if (!_selected.Add(id))
+        {
+            _selected.Remove(id);
+        }
+    }
+
+    protected void SelectOnly(string id)
+    {
+        ClearSelection();
+        Select(id);
+    }
+
+    protected void SetSelection(IEnumerable<string> ids)
+    {
+        ClearSelection();
+        AddToSelection(ids);
+    }
+
+    protected void AddToSelection(IEnumerable<string> ids) => _selected.UnionWith(ids);
+    protected void RemoveFromSelection(IEnumerable<string> ids) => _selected.ExceptWith(ids);
+
+    protected void Hover(string id) => _hovered.Add(id);
+
+    protected void SetHovered(IEnumerable<string> ids)
+    {
+        _hovered.Clear();
+        _hovered.UnionWith(ids);
     }
 
     protected virtual bool OnGuiInput(Track target, InputEvent e, EditorUndoRedoManager undoRedo)
@@ -27,7 +67,13 @@ public abstract class PluginModeHandler
         return false;
     }
 
-    protected void MarkAsHovered(string id) => _hovered.Add(id);
-    protected void MarkAsSelected(string id) => _selected.Add(id);
     protected void RequestOverlayUpdate() => OverlayUpdateRequested?.Invoke();
+
+
+    protected string GetClosestId(Track target, Vector2 screenPosition)
+    {
+        var globalPosition = PluginUtility.ScreenToWorldSnapped(screenPosition);
+        var localPosition = target.ToLocal(globalPosition);
+        return target.Data?.FindClosestId(localPosition) ?? string.Empty;
+    }
 }

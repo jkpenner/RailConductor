@@ -11,7 +11,7 @@ public class MoveTrackNodeMode : PluginModeHandler
     {
         if (!string.IsNullOrEmpty(_selectedNodeId))
         {
-            MarkAsSelected(_selectedNodeId);
+            Select(_selectedNodeId);
         }
         
         if (target.Data is null)

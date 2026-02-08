@@ -11,12 +11,12 @@ public class LinkTrackNodeMode : PluginModeHandler
     {
         if (!string.IsNullOrEmpty(_selectedNodeId1))
         {
-            MarkAsSelected(_selectedNodeId1);
+            Select(_selectedNodeId1);
         }
         
         if (!string.IsNullOrEmpty(_selectedNodeId2))
         {
-            MarkAsSelected(_selectedNodeId2);
+            Select(_selectedNodeId2);
         }
         
         if (target.Data is null)
@@ -36,7 +36,7 @@ public class LinkTrackNodeMode : PluginModeHandler
         if (string.IsNullOrEmpty(_selectedNodeId1))
         {
             _selectedNodeId1 = target.Data.FindClosestNodeId(localPosition);
-            MarkAsSelected(_selectedNodeId1);
+            Select(_selectedNodeId1);
             return true;
         }
         
