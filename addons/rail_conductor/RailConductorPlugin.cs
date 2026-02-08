@@ -14,7 +14,8 @@ public enum ToolMode
     Delete,
     Link,
     Unlink,
-    Insert
+    Insert,
+    PlaceSignal
 }
 
 [Tool]
@@ -48,15 +49,19 @@ public partial class RailConductorPlugin : EditorPlugin
         _modeHandlers.Add(ToolMode.Delete, new DeleteTrackNodeMode());
         _modeHandlers.Add(ToolMode.Link, new LinkTrackNodeMode());
         _modeHandlers.Add(ToolMode.Unlink, new UnlinkTrackNodeMode());
-        
-        
+        _modeHandlers.Add(ToolMode.PlaceSignal, new PlaceSignalMode());
+
+        _font = ResourceLoader.Load<Font>("res://addons/rail_conductor/fonts/default.tres");
 
         foreach (var handler in _modeHandlers.Values)
         {
-            handler.OnSetup();
+            handler.OverlayUpdateRequested += OnUpdateOverlayRequested;
         }
-        
-        _font = ResourceLoader.Load<Font>("res://addons/rail_conductor/fonts/default.tres");
+    }
+
+    private void OnUpdateOverlayRequested()
+    {
+        UpdateOverlays();
     }
 
     private void OnVersionChanged()
@@ -74,12 +79,12 @@ public partial class RailConductorPlugin : EditorPlugin
             _undoRedo.VersionChanged -= OnVersionChanged;
         }
 
-        _undoRedo = null;
-
         foreach (var handler in _modeHandlers.Values)
         {
-            handler.OnCleanup();
+            handler.OverlayUpdateRequested -= OnUpdateOverlayRequested;
         }
+
+        _undoRedo = null;
     }
 
     public override bool _Handles(GodotObject obj)
@@ -196,7 +201,7 @@ public partial class RailConductorPlugin : EditorPlugin
             return false;
         }
 
-        if (!handler.OnGuiInput(_target, @event, _undoRedo))
+        if (!handler.HandleGuiInput(_target, @event, _undoRedo))
         {
             return false;
         }
@@ -212,6 +217,7 @@ public partial class RailConductorPlugin : EditorPlugin
         {
             return;
         }
+
 
         var scale = PluginUtility.GetZoom();
 
@@ -239,8 +245,8 @@ public partial class RailConductorPlugin : EditorPlugin
             {
                 var center = screenPosition1.Lerp(screenPosition2, 0.5f);
                 overlay.DrawString(_font, center + new Vector2(-50f, (1.5f * PluginUtility.GetZoom())),
-                    link.Id[0..3].ToUpper(), 
-                    alignment: HorizontalAlignment.Center, 
+                    link.Id[0..3].ToUpper(),
+                    alignment: HorizontalAlignment.Center,
                     fontSize: (int)(4f * PluginUtility.GetZoom()),
                     modulate: Colors.Black,
                     width: 100);
@@ -250,7 +256,7 @@ public partial class RailConductorPlugin : EditorPlugin
         // Draw the selected node effect
         if (_modeHandlers.TryGetValue(_currentToolMode, out var handler))
         {
-            foreach (var id in handler.SelectedNodeId)
+            foreach (var id in handler.Selected)
             {
                 var selectedNode = _target.Data.GetNode(id);
                 if (selectedNode is null)
@@ -277,12 +283,12 @@ public partial class RailConductorPlugin : EditorPlugin
 
             var fillColor = _hoveredNodeId == node.Id ? PluginSettings.NodeHoverColor : PluginSettings.NodeNormalColor;
             overlay.DrawCircle(screenPosition, (PluginSettings.NodeRadius - 2) * zoom, fillColor);
-            
+
             if (_font is not null)
             {
                 overlay.DrawString(_font, screenPosition + new Vector2(-50f, (1.5f * PluginUtility.GetZoom())),
-                    node.Id[0..3].ToUpper(), 
-                    alignment: HorizontalAlignment.Center, 
+                    node.Id[0..3].ToUpper(),
+                    alignment: HorizontalAlignment.Center,
                     fontSize: (int)(4f * PluginUtility.GetZoom()),
                     modulate: Colors.Black,
                     width: 100);
@@ -303,10 +309,10 @@ public partial class RailConductorPlugin : EditorPlugin
                 {
                     continue;
                 }
-                
+
                 var color = i == 0 ? PluginSettings.SwitchPrimaryColor : PluginSettings.SwitchSecondaryColor;
 
-                var linkANode = _target.Data.GetNode(linkA.GetOtherNode(node.Id)); 
+                var linkANode = _target.Data.GetNode(linkA.GetOtherNode(node.Id));
                 if (linkANode is not null && drawn.Add(linkA.Id))
                 {
                     var direction = (linkANode.Position - node.Position).Normalized();
@@ -314,11 +320,11 @@ public partial class RailConductorPlugin : EditorPlugin
 
                     var linkGlobalPosition = _target.ToGlobal(position);
                     var linkScreenPosition = PluginUtility.WorldToScreen(linkGlobalPosition);
-                    
+
                     overlay.DrawCircle(linkScreenPosition, 2 * zoom, color);
                 }
 
-                var linkBNode = _target.Data.GetNode(linkB.GetOtherNode(node.Id)); 
+                var linkBNode = _target.Data.GetNode(linkB.GetOtherNode(node.Id));
                 if (linkBNode is not null && drawn.Add(linkB.Id))
                 {
                     var direction = (linkBNode.Position - node.Position).Normalized();
@@ -326,7 +332,7 @@ public partial class RailConductorPlugin : EditorPlugin
 
                     var linkGlobalPosition = _target.ToGlobal(position);
                     var linkScreenPosition = PluginUtility.WorldToScreen(linkGlobalPosition);
-                    
+
                     overlay.DrawCircle(linkScreenPosition, 2 * zoom, color);
                 }
             }
@@ -359,9 +365,52 @@ public partial class RailConductorPlugin : EditorPlugin
             // }
         }
 
-        if (_modeHandlers.TryGetValue(_currentToolMode, out var handler2))
+        foreach (var signal in _target.Data.GetSignals())
         {
-            handler2.OnGuiDraw(_target, overlay);
+            var link = _target.Data.GetLink(signal.LinkId);
+            if (link is null)
+            {
+                continue;
+            }
+
+            var nodeA = _target.Data.GetNode(signal.DirectionNodeId);
+            var nodeB = _target.Data.GetNode(link.GetOtherNode(signal.DirectionNodeId));
+
+            if (nodeA is null || nodeB is null)
+            {
+                continue;
+            }
+
+            var direction = (nodeA.Position - nodeB.Position).Normalized();
+            var angle = direction.Angle();
+            var rotated = direction.Rotated(Mathf.DegToRad(90f));
+
+            var position = nodeA.Position + rotated * 12;
+
+            var linkGlobalPosition = _target.ToGlobal(position);
+            var linkScreenPosition = PluginUtility.WorldToScreen(linkGlobalPosition);
+
+            if (handler?.Selected.Contains(signal.Id) ?? false)
+            {
+                overlay.DrawCircle(linkScreenPosition, 4f * scale, PluginSettings.SelectedColor);
+                overlay.DrawArc(linkScreenPosition,
+                    5 * scale,
+                    angle + Mathf.DegToRad(140f),
+                    angle + Mathf.DegToRad(220f),
+                    6,
+                    PluginSettings.SelectedColor,
+                    2 * scale);
+            }
+
+
+            overlay.DrawCircle(linkScreenPosition, 3f * scale, PluginSettings.SignalColor);
+            overlay.DrawArc(linkScreenPosition,
+                4 * scale,
+                angle + Mathf.DegToRad(150f),
+                angle + Mathf.DegToRad(210f),
+                6,
+                PluginSettings.SignalColor,
+                2 * scale);
         }
     }
 }

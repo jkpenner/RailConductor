@@ -4,13 +4,21 @@ namespace RailConductor.Plugin;
 
 public class LinkTrackNodeMode : PluginModeHandler
 {
-    public override string[] SelectedNodeId => [_selectedNodeId1, _selectedNodeId2];
-
     private string _selectedNodeId1 = string.Empty;
     private string _selectedNodeId2 = string.Empty;
 
-    public override bool OnGuiInput(Track target, InputEvent e, EditorUndoRedoManager undoRedo)
+    protected override bool OnGuiInput(Track target, InputEvent e, EditorUndoRedoManager undoRedo)
     {
+        if (!string.IsNullOrEmpty(_selectedNodeId1))
+        {
+            MarkAsSelected(_selectedNodeId1);
+        }
+        
+        if (!string.IsNullOrEmpty(_selectedNodeId2))
+        {
+            MarkAsSelected(_selectedNodeId2);
+        }
+        
         if (target.Data is null)
         {
             return false;
@@ -28,6 +36,7 @@ public class LinkTrackNodeMode : PluginModeHandler
         if (string.IsNullOrEmpty(_selectedNodeId1))
         {
             _selectedNodeId1 = target.Data.FindClosestNodeId(localPosition);
+            MarkAsSelected(_selectedNodeId1);
             return true;
         }
         

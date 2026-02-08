@@ -4,12 +4,10 @@ namespace RailConductor.Plugin;
 
 public class InsertTrackNodeMode : PluginModeHandler
 {
-    public override string[] SelectedNodeId => [];
-
     private string _hoveredLinkId = string.Empty;
     private float _hoveredLinkDistance = float.MaxValue;
 
-    public override bool OnGuiInput(Track target, InputEvent e, EditorUndoRedoManager undoRedo)
+    protected override bool OnGuiInput(Track target, InputEvent e, EditorUndoRedoManager undoRedo)
     {
         if (target.Data is null)
         {
@@ -110,34 +108,34 @@ public class InsertTrackNodeMode : PluginModeHandler
         return false;
     }
 
-    public override void OnGuiDraw(Track target, Control overlay)
-    {
-        if (target.Data is null)
-        {
-            return;
-        }
-        
-        var link = target.Data.GetLink(_hoveredLinkId);
-        if (link is null)
-        {
-            return;
-        }
-        
-        var nodeA = target.Data.GetNode(link.NodeAId);
-        var nodeB = target.Data.GetNode(link.NodeBId);
-
-        if (nodeA is null || nodeB is null)
-        {
-            return;
-        }
-
-        var globalPosition1 = target.ToGlobal(nodeA.Position);
-        var screenPosition1 = PluginUtility.WorldToScreen(globalPosition1);
-
-        var globalPosition2 = target.ToGlobal(nodeB.Position);
-        var screenPosition2 = PluginUtility.WorldToScreen(globalPosition2);
-
-        overlay.DrawLine(screenPosition1, screenPosition2,
-            Colors.Yellow, PluginSettings.LinkWidth * PluginUtility.GetZoom());
-    }
+    // public override void OnGuiDraw(Track target, Control overlay)
+    // {
+    //     if (target.Data is null)
+    //     {
+    //         return;
+    //     }
+    //     
+    //     var link = target.Data.GetLink(_hoveredLinkId);
+    //     if (link is null)
+    //     {
+    //         return;
+    //     }
+    //     
+    //     var nodeA = target.Data.GetNode(link.NodeAId);
+    //     var nodeB = target.Data.GetNode(link.NodeBId);
+    //
+    //     if (nodeA is null || nodeB is null)
+    //     {
+    //         return;
+    //     }
+    //
+    //     var globalPosition1 = target.ToGlobal(nodeA.Position);
+    //     var screenPosition1 = PluginUtility.WorldToScreen(globalPosition1);
+    //
+    //     var globalPosition2 = target.ToGlobal(nodeB.Position);
+    //     var screenPosition2 = PluginUtility.WorldToScreen(globalPosition2);
+    //
+    //     overlay.DrawLine(screenPosition1, screenPosition2,
+    //         Colors.Yellow, PluginSettings.LinkWidth * PluginUtility.GetZoom());
+    // }
 }

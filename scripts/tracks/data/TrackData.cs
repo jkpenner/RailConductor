@@ -9,18 +9,23 @@ public partial class TrackData : Resource
 {
     [Export] private Godot.Collections.Dictionary<string, TrackNodeData> _nodes = new();
     [Export] private Godot.Collections.Dictionary<string, TrackLinkData> _links = new();
+    [Export] private Godot.Collections.Dictionary<string, TrackSignalData> _signals = new();
 
     public IEnumerable<TrackNodeData> GetNodes() => _nodes.Values;
     public IEnumerable<TrackLinkData> GetLinks() => _links.Values;
+    public IEnumerable<TrackSignalData> GetSignals() => _signals.Values;
 
     public TrackNodeData? GetNode(string id) => _nodes.GetValueOrDefault(id);
     public TrackLinkData? GetLink(string id) => _links.GetValueOrDefault(id);
+    public TrackSignalData? GetSignal(string id) => _signals.GetValueOrDefault(id);
 
     public void AddNode(string id, TrackNodeData newNode) => _nodes.Add(id, newNode);
     public void AddLink(string id, TrackLinkData newLink) => _links.Add(id, newLink);
+    public void AddSignal(string id, TrackSignalData newSignal) => _signals.Add(id, newSignal);
 
     public void RemoveNode(string id) => _nodes.Remove(id);
     public void RemoveLink(string id) => _links.Remove(id);
+    public void RemoveSignal(string id) => _signals.Remove(id);
 
     public bool IsLinked(string nodeAId, string nodeBId)
     {

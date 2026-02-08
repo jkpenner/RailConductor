@@ -4,11 +4,15 @@ namespace RailConductor.Plugin;
 
 public class SelectTrackNodeMode : PluginModeHandler
 {
-    public override string[] SelectedNodeId => [_selectedNodeId];
     private string _selectedNodeId = string.Empty;
 
-    public override bool OnGuiInput(Track target, InputEvent e, EditorUndoRedoManager undoRedo)
+    protected override bool OnGuiInput(Track target, InputEvent e, EditorUndoRedoManager undoRedo)
     {
+        if (!string.IsNullOrEmpty(_selectedNodeId))
+        {
+            MarkAsSelected(_selectedNodeId);
+        }
+        
         if (target.Data is null)
         {
             return false;

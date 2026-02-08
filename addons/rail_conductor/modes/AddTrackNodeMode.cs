@@ -5,12 +5,10 @@ namespace RailConductor.Plugin;
 
 public class AddTrackNodeMode : PluginModeHandler
 {
-    public override string[] SelectedNodeId => [_selectedNodeId];
-
-    private string _selectedNodeId;
+    private string _selectedNodeId = string.Empty;
     private Vector2 _originalPosition;
 
-    public override bool OnGuiInput(Track target, InputEvent e, EditorUndoRedoManager undoRedo)
+    protected override bool OnGuiInput(Track target, InputEvent e, EditorUndoRedoManager undoRedo)
     {
         if (target.Data is null)
         {
@@ -29,12 +27,12 @@ public class AddTrackNodeMode : PluginModeHandler
                     Position = localPosition
                 };
 
-                _selectedNodeId = newNode.Id;
+                MarkAsSelected(newNode.Id);
                 _originalPosition = localPosition;
 
                 undoRedo.CreateAction("Add Track Node");
-                undoRedo.AddDoMethod(target.Data, nameof(TrackData.AddNode), _selectedNodeId, newNode);
-                undoRedo.AddUndoMethod(target.Data, nameof(TrackData.RemoveNode), _selectedNodeId);
+                undoRedo.AddDoMethod(target.Data, nameof(TrackData.AddNode), newNode.Id, newNode);
+                undoRedo.AddUndoMethod(target.Data, nameof(TrackData.RemoveNode), newNode.Id);
                 undoRedo.AddDoMethod(newNode, nameof(TrackNodeData.UpdateConfiguration), target.Data);
                 undoRedo.CommitAction();
                 return true;

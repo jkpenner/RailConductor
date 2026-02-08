@@ -4,13 +4,16 @@ namespace RailConductor.Plugin;
 
 public class MoveTrackNodeMode : PluginModeHandler
 {
-    public override string[] SelectedNodeId => [_selectedNodeId];
-    
     private string _selectedNodeId = string.Empty;
     private Vector2 _originalPosition = Vector2.Zero;
 
-    public override bool OnGuiInput(Track target, InputEvent e, EditorUndoRedoManager undoRedo)
+    protected override bool OnGuiInput(Track target, InputEvent e, EditorUndoRedoManager undoRedo)
     {
+        if (!string.IsNullOrEmpty(_selectedNodeId))
+        {
+            MarkAsSelected(_selectedNodeId);
+        }
+        
         if (target.Data is null)
         {
             return false;

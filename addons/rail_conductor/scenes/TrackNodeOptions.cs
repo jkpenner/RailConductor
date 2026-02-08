@@ -23,6 +23,7 @@ public partial class TrackNodeOptions : Control
         _buttons.Add(ToolMode.Delete, GetNode<Button>("%DeleteNodeButton"));
         _buttons.Add(ToolMode.Link, GetNode<Button>("%LinkNodesButton"));
         _buttons.Add(ToolMode.Unlink, GetNode<Button>("%UnlinkNodesButton"));
+        _buttons.Add(ToolMode.PlaceSignal, GetNode<Button>("%PlaceSignalButton"));
         
         // Generate all required callbacks.
         foreach (var mode in Enum.GetValues<ToolMode>())
