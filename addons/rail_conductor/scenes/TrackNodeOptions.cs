@@ -16,13 +16,16 @@ public partial class TrackNodeOptions : Control
     {
         // Register all buttons
         _buttons.Clear();
-        _buttons.Add(ToolMode.Select, GetNode<Button>("%SelectNodeButton"));
+        //General Modes
+        _buttons.Add(ToolMode.Select, GetNode<Button>("%SelectModeButton"));
+        // Track Nodes
         _buttons.Add(ToolMode.Create, GetNode<Button>("%CreateNodeButton"));
         _buttons.Add(ToolMode.Insert, GetNode<Button>("%InsertNodeButton"));
         _buttons.Add(ToolMode.Move, GetNode<Button>("%MoveNodeButton"));
         _buttons.Add(ToolMode.Delete, GetNode<Button>("%DeleteNodeButton"));
         _buttons.Add(ToolMode.Link, GetNode<Button>("%LinkNodesButton"));
         _buttons.Add(ToolMode.Unlink, GetNode<Button>("%UnlinkNodesButton"));
+        // Track Signals
         _buttons.Add(ToolMode.PlaceSignal, GetNode<Button>("%PlaceSignalButton"));
         
         // Generate all required callbacks.

@@ -32,24 +32,24 @@ theme_override_constants/margin_bottom = 2
 [node name="Control" type="VBoxContainer" parent="MarginContainer" unique_id=957086227]
 layout_mode = 2
 
-[node name="Nodes" type="Label" parent="MarginContainer/Control" unique_id=1125291024]
+[node name="General" type="Label" parent="MarginContainer/Control" unique_id=773963383]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "Nodes"
+text = "General"
 horizontal_alignment = 1
 vertical_alignment = 1
 uppercase = true
 
-[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/Control" unique_id=878723272]
+[node name="GeneralOptions" type="PanelContainer" parent="MarginContainer/Control" unique_id=489592651]
 layout_mode = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/Control/PanelContainer" unique_id=1179788625]
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/Control/GeneralOptions" unique_id=448663837]
 layout_mode = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/Control/PanelContainer/MarginContainer" unique_id=1685317933]
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/Control/GeneralOptions/MarginContainer" unique_id=163846026]
 layout_mode = 2
 
-[node name="SelectNodeButton" type="Button" parent="MarginContainer/Control/PanelContainer/MarginContainer/VBoxContainer" unique_id=61415441]
+[node name="SelectModeButton" type="Button" parent="MarginContainer/Control/GeneralOptions/MarginContainer/VBoxContainer" unique_id=946436006]
 unique_name_in_owner = true
 layout_mode = 2
 toggle_mode = true
@@ -58,7 +58,24 @@ icon = ExtResource("2_vwfrl")
 flat = true
 expand_icon = true
 
-[node name="CreateNodeButton" type="Button" parent="MarginContainer/Control/PanelContainer/MarginContainer/VBoxContainer" unique_id=417900684]
+[node name="Nodes" type="Label" parent="MarginContainer/Control" unique_id=1125291024]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Nodes"
+horizontal_alignment = 1
+vertical_alignment = 1
+uppercase = true
+
+[node name="NodeOptions" type="PanelContainer" parent="MarginContainer/Control" unique_id=878723272]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/Control/NodeOptions" unique_id=1179788625]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/Control/NodeOptions/MarginContainer" unique_id=1685317933]
+layout_mode = 2
+
+[node name="CreateNodeButton" type="Button" parent="MarginContainer/Control/NodeOptions/MarginContainer/VBoxContainer" unique_id=417900684]
 unique_name_in_owner = true
 layout_mode = 2
 toggle_mode = true
@@ -67,7 +84,7 @@ icon = ExtResource("3_lfl1h")
 flat = true
 expand_icon = true
 
-[node name="InsertNodeButton" type="Button" parent="MarginContainer/Control/PanelContainer/MarginContainer/VBoxContainer" unique_id=1902198]
+[node name="InsertNodeButton" type="Button" parent="MarginContainer/Control/NodeOptions/MarginContainer/VBoxContainer" unique_id=1902198]
 unique_name_in_owner = true
 layout_mode = 2
 toggle_mode = true
@@ -76,7 +93,7 @@ icon = ExtResource("4_lfl1h")
 flat = true
 expand_icon = true
 
-[node name="MoveNodeButton" type="Button" parent="MarginContainer/Control/PanelContainer/MarginContainer/VBoxContainer" unique_id=940061346]
+[node name="MoveNodeButton" type="Button" parent="MarginContainer/Control/NodeOptions/MarginContainer/VBoxContainer" unique_id=940061346]
 unique_name_in_owner = true
 layout_mode = 2
 toggle_mode = true
@@ -85,7 +102,7 @@ icon = ExtResource("4_6br1v")
 flat = true
 expand_icon = true
 
-[node name="DeleteNodeButton" type="Button" parent="MarginContainer/Control/PanelContainer/MarginContainer/VBoxContainer" unique_id=1423219370]
+[node name="DeleteNodeButton" type="Button" parent="MarginContainer/Control/NodeOptions/MarginContainer/VBoxContainer" unique_id=1423219370]
 unique_name_in_owner = true
 layout_mode = 2
 toggle_mode = true
@@ -94,7 +111,7 @@ icon = ExtResource("5_s8w00")
 flat = true
 expand_icon = true
 
-[node name="LinkNodesButton" type="Button" parent="MarginContainer/Control/PanelContainer/MarginContainer/VBoxContainer" unique_id=1893459649]
+[node name="LinkNodesButton" type="Button" parent="MarginContainer/Control/NodeOptions/MarginContainer/VBoxContainer" unique_id=1893459649]
 unique_name_in_owner = true
 layout_mode = 2
 toggle_mode = true
@@ -103,7 +120,7 @@ icon = ExtResource("6_ln0e4")
 flat = true
 expand_icon = true
 
-[node name="UnlinkNodesButton" type="Button" parent="MarginContainer/Control/PanelContainer/MarginContainer/VBoxContainer" unique_id=611396722]
+[node name="UnlinkNodesButton" type="Button" parent="MarginContainer/Control/NodeOptions/MarginContainer/VBoxContainer" unique_id=611396722]
 unique_name_in_owner = true
 layout_mode = 2
 toggle_mode = true
@@ -120,16 +137,16 @@ horizontal_alignment = 1
 vertical_alignment = 1
 uppercase = true
 
-[node name="PanelContainer2" type="PanelContainer" parent="MarginContainer/Control" unique_id=245600510]
+[node name="ObjectOptions" type="PanelContainer" parent="MarginContainer/Control" unique_id=245600510]
 layout_mode = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/Control/PanelContainer2" unique_id=746662194]
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/Control/ObjectOptions" unique_id=746662194]
 layout_mode = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/Control/PanelContainer2/MarginContainer" unique_id=432591987]
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/Control/ObjectOptions/MarginContainer" unique_id=432591987]
 layout_mode = 2
 
-[node name="PlaceSignalButton" type="Button" parent="MarginContainer/Control/PanelContainer2/MarginContainer/VBoxContainer" unique_id=2070031139]
+[node name="PlaceSignalButton" type="Button" parent="MarginContainer/Control/ObjectOptions/MarginContainer/VBoxContainer" unique_id=2070031139]
 unique_name_in_owner = true
 layout_mode = 2
 toggle_mode = true

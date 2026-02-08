@@ -2,7 +2,7 @@
 
 namespace RailConductor.Plugin;
 
-public class SelectTrackNodeMode : PluginModeHandler
+public class SelectMode : PluginModeHandler
 {
     private string _selectedNodeId = string.Empty;
 

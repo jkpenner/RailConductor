@@ -42,7 +42,7 @@ public partial class RailConductorPlugin : EditorPlugin
         _undoRedo.VersionChanged += OnVersionChanged;
 
         _modeHandlers.Clear();
-        _modeHandlers.Add(ToolMode.Select, new SelectTrackNodeMode());
+        _modeHandlers.Add(ToolMode.Select, new SelectMode());
         _modeHandlers.Add(ToolMode.Create, new AddTrackNodeMode());
         _modeHandlers.Add(ToolMode.Insert, new InsertTrackNodeMode());
         _modeHandlers.Add(ToolMode.Move, new MoveTrackNodeMode());
