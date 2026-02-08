@@ -48,7 +48,7 @@ public partial class TrackData : Resource
         return nodeB.Links.Select(GetLink).OfType<TrackLinkData>()
             .Any(link => link.NodeAId == nodeAId || link.NodeBId == nodeAId);
     }
-    
+
     public TrackLinkData? GetConnectingLink(string nodeAId, string nodeBId)
     {
         var nodeA = GetNode(nodeAId);
@@ -87,6 +87,23 @@ public partial class TrackData : Resource
         return true;
     }
 
+    public string FindClosestId(Vector2 position)
+    {
+        var nodeId = FindClosestNodeId(position);
+        if (!string.IsNullOrEmpty(nodeId))
+        {
+            return nodeId;
+        }
+
+        var signalId = FindClosestSignalId(position);
+        if (!string.IsNullOrEmpty(signalId))
+        {
+            return signalId;
+        }
+
+        return string.Empty;
+    }
+
     public string FindClosestNodeId(Vector2 position)
     {
         if (_nodes.Count == 0)
@@ -109,7 +126,38 @@ public partial class TrackData : Resource
             closest = id;
         }
 
-        return minDist < 20f ? closest : string.Empty;
+        return minDist < 10f ? closest : string.Empty;
+    }
+
+    public string FindClosestSignalId(Vector2 position)
+    {
+        if (_signals.Count == 0)
+        {
+            return string.Empty;
+        }
+
+        var minDist = float.MaxValue;
+        var closest = string.Empty;
+
+        foreach (var (id, signal) in _signals)
+        {
+            var orientation = GetSignalPosition(signal);
+            if (!orientation.HasValue)
+            {
+                continue;
+            }
+            
+            var dist = orientation!.Value.Position.DistanceTo(position);
+            if (dist >= minDist)
+            {
+                continue;
+            }
+
+            minDist = dist;
+            closest = id;
+        }
+
+        return minDist < 10f ? closest : string.Empty;
     }
 
     public string FindClosestLink(Vector2 position)
@@ -193,5 +241,39 @@ public partial class TrackData : Resource
         return p.DistanceTo(projection);
     }
 
-    
+    public (Vector2 Position, float Angle)? GetSignalPosition(string signalId)
+    {
+        var signal = GetSignal(signalId);
+        if (signal is null)
+        {
+            return null;
+        }
+
+        return GetSignalPosition(signal);
+    }
+
+    public (Vector2 Position, float Angle)? GetSignalPosition(TrackSignalData signal)
+    {
+        var link = GetLink(signal.LinkId);
+        if (link is null)
+        {
+            GD.Print("Failed to find signal's link");
+            return null;
+        }
+
+        var nodeA = GetNode(signal.DirectionNodeId);
+        var nodeB = GetNode(link.GetOtherNode(signal.DirectionNodeId));
+
+        if (nodeA is null || nodeB is null)
+        {
+            GD.Print("Failed to find signal's nodes");
+            return null;
+        }
+
+        var direction = (nodeA.Position - nodeB.Position).Normalized();
+        var angle = direction.Angle();
+        var rotated = direction.Rotated(Mathf.DegToRad(90f));
+        var position = nodeA.Position + rotated * 12;
+        return (position, angle);
+    }
 }

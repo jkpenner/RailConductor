@@ -29,7 +29,7 @@ public partial class RailConductorPlugin : EditorPlugin
     private ToolMode _currentToolMode = ToolMode.None;
     private bool _dragging = false;
     private Vector2 _originalPosition;
-    private string _hoveredNodeId = string.Empty;
+    private string _hoveredId = string.Empty;
     private Font _font;
 
     private readonly Dictionary<ToolMode, PluginModeHandler> _modeHandlers = new();
@@ -96,7 +96,7 @@ public partial class RailConductorPlugin : EditorPlugin
     {
         _target = obj as Track;
         _dragging = false;
-        _hoveredNodeId = string.Empty;
+        _hoveredId = string.Empty;
     }
 
     public override void _MakeVisible(bool visible)
@@ -111,7 +111,7 @@ public partial class RailConductorPlugin : EditorPlugin
             ClearMenus();
             _currentToolMode = ToolMode.None;
             _dragging = false;
-            _hoveredNodeId = string.Empty;
+            _hoveredId = string.Empty;
         }
     }
 
@@ -169,7 +169,7 @@ public partial class RailConductorPlugin : EditorPlugin
         _options?.SetToolMode(toolMode);
 
 
-        _hoveredNodeId = string.Empty;
+        _hoveredId = string.Empty;
         _dragging = false;
     }
 
@@ -183,10 +183,10 @@ public partial class RailConductorPlugin : EditorPlugin
 
             var globalPosition = PluginUtility.ScreenToWorld(mouse.Position);
             var localPosition = _target.ToLocal(globalPosition);
-            var hoveredIndex = _target.Data.FindClosestNodeId(localPosition);
-            if (hoveredIndex != _hoveredNodeId)
+            var hoveredIndex = _target.Data.FindClosestId(localPosition);
+            if (hoveredIndex != _hoveredId)
             {
-                _hoveredNodeId = hoveredIndex;
+                _hoveredId = hoveredIndex;
                 UpdateOverlays();
             }
         }
@@ -281,7 +281,7 @@ public partial class RailConductorPlugin : EditorPlugin
             var zoom = PluginUtility.GetZoom();
             overlay.DrawCircle(screenPosition, PluginSettings.NodeRadius * zoom, PluginSettings.NodePrimaryColor);
 
-            var fillColor = _hoveredNodeId == node.Id ? PluginSettings.NodeHoverColor : PluginSettings.NodeNormalColor;
+            var fillColor = _hoveredId == node.Id ? PluginSettings.NodeHoverColor : PluginSettings.NodeNormalColor;
             overlay.DrawCircle(screenPosition, (PluginSettings.NodeRadius - 2) * zoom, fillColor);
 
             if (_font is not null)
@@ -367,33 +367,20 @@ public partial class RailConductorPlugin : EditorPlugin
 
         foreach (var signal in _target.Data.GetSignals())
         {
-            var link = _target.Data.GetLink(signal.LinkId);
-            if (link is null)
+            var orientation = _target.Data.GetSignalPosition(signal);
+            if (orientation is null)
             {
                 continue;
             }
 
-            var nodeA = _target.Data.GetNode(signal.DirectionNodeId);
-            var nodeB = _target.Data.GetNode(link.GetOtherNode(signal.DirectionNodeId));
+            var (position, angle) = orientation.Value;
+            var signalGlobalPosition = _target.ToGlobal(position);
+            var signalScreenPosition = PluginUtility.WorldToScreen(signalGlobalPosition);
 
-            if (nodeA is null || nodeB is null)
+            if (_hoveredId == signal.Id)
             {
-                continue;
-            }
-
-            var direction = (nodeA.Position - nodeB.Position).Normalized();
-            var angle = direction.Angle();
-            var rotated = direction.Rotated(Mathf.DegToRad(90f));
-
-            var position = nodeA.Position + rotated * 12;
-
-            var linkGlobalPosition = _target.ToGlobal(position);
-            var linkScreenPosition = PluginUtility.WorldToScreen(linkGlobalPosition);
-
-            if (handler?.Selected.Contains(signal.Id) ?? false)
-            {
-                overlay.DrawCircle(linkScreenPosition, 4f * scale, PluginSettings.SelectedColor);
-                overlay.DrawArc(linkScreenPosition,
+                overlay.DrawCircle(signalScreenPosition, 4f * scale, PluginSettings.SelectedColor);
+                overlay.DrawArc(signalScreenPosition,
                     5 * scale,
                     angle + Mathf.DegToRad(140f),
                     angle + Mathf.DegToRad(220f),
@@ -403,8 +390,8 @@ public partial class RailConductorPlugin : EditorPlugin
             }
 
 
-            overlay.DrawCircle(linkScreenPosition, 3f * scale, PluginSettings.SignalColor);
-            overlay.DrawArc(linkScreenPosition,
+            overlay.DrawCircle(signalScreenPosition, 3f * scale, PluginSettings.SignalColor);
+            overlay.DrawArc(signalScreenPosition,
                 4 * scale,
                 angle + Mathf.DegToRad(150f),
                 angle + Mathf.DegToRad(210f),
