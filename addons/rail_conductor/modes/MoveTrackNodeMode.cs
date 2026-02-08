@@ -4,9 +4,9 @@ namespace RailConductor.Plugin;
 
 public class MoveTrackNodeMode : PluginModeHandler
 {
-    public override int[] SelectedNodeId => [_selectedNodeId];
+    public override string[] SelectedNodeId => [_selectedNodeId];
     
-    private int _selectedNodeId = -1;
+    private string _selectedNodeId = string.Empty;
     private Vector2 _originalPosition = Vector2.Zero;
 
     public override bool OnGuiInput(Track target, InputEvent e, EditorUndoRedoManager undoRedo)
@@ -40,8 +40,12 @@ public class MoveTrackNodeMode : PluginModeHandler
                     undoRedo.CreateAction("Move Track Node");
                     undoRedo.AddDoProperty(selectedNode, nameof(TrackNodeData.Position), finalPos);
                     undoRedo.AddUndoProperty(selectedNode, nameof(TrackNodeData.Position), _originalPosition);
+                    
+                    undoRedo.AddDoMethod(selectedNode, nameof(TrackNodeData.UpdateConfiguration), target.Data);
+                    undoRedo.AddUndoMethod(selectedNode, nameof(TrackNodeData.UpdateConfiguration), target.Data);
+                    
                     undoRedo.CommitAction();
-                    _selectedNodeId = -1;
+                    _selectedNodeId = string.Empty;
                 }
             }
 
@@ -51,7 +55,7 @@ public class MoveTrackNodeMode : PluginModeHandler
             return true;
         }
 
-        if (e is InputEventMouseMotion mouseMotion && _selectedNodeId >= 0 &&
+        if (e is InputEventMouseMotion mouseMotion && !string.IsNullOrEmpty(_selectedNodeId) &&
             Input.IsMouseButtonPressed(MouseButton.Left))
         {
             var globalPosition = PluginUtility.ScreenToWorldSnapped(mouseMotion.Position);

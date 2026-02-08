@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Godot;
 
 namespace RailConductor;
@@ -6,17 +7,59 @@ namespace RailConductor;
 [GlobalClass, Tool]
 public partial class TrackData : Resource
 {
-    [Export] private Godot.Collections.Dictionary<int, TrackNodeData> _nodes = new();
+    [Export] private Godot.Collections.Dictionary<string, TrackNodeData> _nodes = new();
+    [Export] private Godot.Collections.Dictionary<string, TrackLinkData> _links = new();
 
     public IEnumerable<TrackNodeData> GetNodes() => _nodes.Values;
+    public IEnumerable<TrackLinkData> GetLinks() => _links.Values;
 
-    public TrackNodeData? GetNode(int id) => _nodes.GetValueOrDefault(id);
+    public TrackNodeData? GetNode(string id) => _nodes.GetValueOrDefault(id);
+    public TrackLinkData? GetLink(string id) => _links.GetValueOrDefault(id);
 
-    public void AddNode(int id, TrackNodeData newNode) => _nodes.Add(id, newNode);
+    public void AddNode(string id, TrackNodeData newNode) => _nodes.Add(id, newNode);
+    public void AddLink(string id, TrackLinkData newLink) => _links.Add(id, newLink);
 
-    public void RemoveNode(int id) => _nodes.Remove(id);
+    public void RemoveNode(string id) => _nodes.Remove(id);
+    public void RemoveLink(string id) => _links.Remove(id);
 
-    public bool LinkNodes(int nodeId1, int nodeId2)
+    public bool IsLinked(string nodeAId, string nodeBId)
+    {
+        var nodeA = GetNode(nodeAId);
+        var nodeB = GetNode(nodeBId);
+
+        if (nodeA is null || nodeB is null)
+        {
+            return false;
+        }
+
+        // Check for a link from node A.
+        if (nodeA.Links.Select(GetLink).OfType<TrackLinkData>()
+            .Any(link => link.NodeAId == nodeBId || link.NodeBId == nodeBId))
+        {
+            return true;
+        }
+
+        // Check for a link from node B.
+        return nodeB.Links.Select(GetLink).OfType<TrackLinkData>()
+            .Any(link => link.NodeAId == nodeAId || link.NodeBId == nodeAId);
+    }
+    
+    public TrackLinkData? GetConnectingLink(string nodeAId, string nodeBId)
+    {
+        var nodeA = GetNode(nodeAId);
+        var nodeB = GetNode(nodeBId);
+
+        if (nodeA is null || nodeB is null)
+        {
+            return null;
+        }
+
+        var linkId = nodeA.Links.Intersect(nodeB.Links).FirstOrDefault();
+        return string.IsNullOrEmpty(linkId) ? null : GetLink(linkId);
+    }
+
+
+    public bool LinkNodes(string nodeId1, string nodeId2)
     {
         var node1 = GetNode(nodeId1);
         var node2 = GetNode(nodeId2);
@@ -39,30 +82,15 @@ public partial class TrackData : Resource
         return true;
     }
 
-    public int GetAvailableNodeId()
-    {
-        var id = 0;
-
-        foreach (var key in _nodes.Keys)
-        {
-            if (id <= key)
-            {
-                id = key + 1;
-            }
-        }
-
-        return id;
-    }
-
-    public int FindClosestNodeId(Vector2 position)
+    public string FindClosestNodeId(Vector2 position)
     {
         if (_nodes.Count == 0)
         {
-            return -1;
+            return string.Empty;
         }
 
         var minDist = float.MaxValue;
-        var closest = -1;
+        var closest = string.Empty;
 
         foreach (var (id, node) in _nodes)
         {
@@ -76,30 +104,23 @@ public partial class TrackData : Resource
             closest = id;
         }
 
-        return minDist < 20f ? closest : -1;
+        return minDist < 20f ? closest : string.Empty;
     }
 
-    public (int, int) FindClosestLink(Vector2 position)
+    public string FindClosestLink(Vector2 position)
     {
         if (_nodes.Count < 2)
         {
-            return (-1, -1);
-        }
-
-        var links = GetUniqueLinks();
-
-        if (links.Count == 0)
-        {
-            return (-1, -1);
+            return string.Empty;
         }
 
         var minDist = float.MaxValue;
-        var closestLink = (-1, -1);
+        var closestLink = string.Empty;
 
-        foreach (var link in links)
+        foreach (var link in GetLinks())
         {
-            var node1 = GetNode(link.Item1);
-            var node2 = GetNode(link.Item2);
+            var node1 = GetNode(link.NodeAId);
+            var node2 = GetNode(link.NodeBId);
 
             if (node1 == null || node2 == null)
             {
@@ -114,10 +135,10 @@ public partial class TrackData : Resource
             }
 
             minDist = dist;
-            closestLink = link;
+            closestLink = link.Id;
         }
 
-        return minDist < 20f ? closestLink : (-1, -1);
+        return minDist < 20f ? closestLink : string.Empty;
     }
 
     public float GetClosestLinkDistance(Vector2 position)
@@ -127,19 +148,12 @@ public partial class TrackData : Resource
             return float.MaxValue;
         }
 
-        var links = GetUniqueLinks();
-
-        if (links.Count == 0)
-        {
-            return float.MaxValue;
-        }
-
         var minDist = float.MaxValue;
 
-        foreach (var link in links)
+        foreach (var link in GetLinks())
         {
-            var node1 = GetNode(link.Item1);
-            var node2 = GetNode(link.Item2);
+            var node1 = GetNode(link.NodeAId);
+            var node2 = GetNode(link.NodeBId);
 
             if (node1 == null || node2 == null)
             {
@@ -157,28 +171,11 @@ public partial class TrackData : Resource
         return minDist;
     }
 
-    private HashSet<(int, int)> GetUniqueLinks()
-    {
-        var links = new HashSet<(int, int)>();
-
-        foreach (var node in _nodes.Values)
-        {
-            foreach (var linkId in node.Links)
-            {
-                var id1 = Mathf.Min(node.Id, linkId);
-                var id2 = Mathf.Max(node.Id, linkId);
-                links.Add((id1, id2));
-            }
-        }
-
-        return links;
-    }
-
     private static float DistanceToSegment(Vector2 p, Vector2 a, Vector2 b)
     {
         var ab = b - a;
         var ap = p - a;
-        
+
         var len2 = ab.LengthSquared();
         if (len2 == 0)
         {
@@ -190,4 +187,6 @@ public partial class TrackData : Resource
         var projection = a + t * ab;
         return p.DistanceTo(projection);
     }
+
+    
 }

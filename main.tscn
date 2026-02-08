@@ -4,101 +4,484 @@
 [ext_resource type="PackedScene" uid="uid://coim6fdt86gu8" path="res://scenes/camera_controller.tscn" id="2_0xm2m"]
 [ext_resource type="Script" uid="uid://b1h881bnaxfu1" path="res://scripts/tracks/Track.cs" id="3_1bvp3"]
 [ext_resource type="PackedScene" uid="uid://d38phvi2cgoye" path="res://scenes/tracks/track_segment.tscn" id="3_lquwl"]
+[ext_resource type="Script" uid="uid://mcyc06807gh6" path="res://scripts/tracks/data/TrackLinkData.cs" id="5_dg77c"]
 [ext_resource type="Script" uid="uid://dlpa5obf7cd0w" path="res://scripts/tracks/data/TrackNodeData.cs" id="5_efxa6"]
 [ext_resource type="Script" uid="uid://cx4112x50xprk" path="res://scripts/tracks/TrackIsolator.cs" id="5_lquwl"]
 [ext_resource type="Script" uid="uid://b15yvw4uofycm" path="res://scripts/tracks/TrackSwitch.cs" id="6_5vw27"]
 [ext_resource type="Script" uid="uid://d3c2or76iytl1" path="res://scripts/train/Train.cs" id="6_272bh"]
 [ext_resource type="Script" uid="uid://16mgebho3rd5" path="res://scripts/tracks/data/TrackData.cs" id="6_dg77c"]
+[ext_resource type="Script" uid="uid://db6byob6irbf2" path="res://scripts/tracks/data/TrackLinkPairData.cs" id="7_ycdy4"]
 [ext_resource type="Texture2D" uid="uid://djuh3tra4ijeq" path="res://assets/sprites/circle.png" id="8_5vw27"]
 [ext_resource type="Script" uid="uid://yslvcibqqiko" path="res://scripts/interactions/Interactions.cs" id="9_kek77"]
 
-[sub_resource type="Resource" id="Resource_dg77c"]
-script = ExtResource("5_efxa6")
-Id = 2
-Position = Vector2(17, -30)
-Links = Array[int]([11])
-
 [sub_resource type="Resource" id="Resource_w48qg"]
-script = ExtResource("5_efxa6")
-Id = 4
-Position = Vector2(17, -94)
-Links = Array[int]([10])
+script = ExtResource("5_dg77c")
+Id = "1082ebcc-67e3-4f5e-90eb-ea4b7c51181d"
+NodeAId = "c0cd7f8b-e943-4102-8f77-6dd454caf7e5"
+NodeBId = "d138c214-aa21-4354-b8c1-2c7f41c1e481"
 
 [sub_resource type="Resource" id="Resource_vivmo"]
-script = ExtResource("5_efxa6")
-Id = 10
-Position = Vector2(289, -94)
-Links = Array[int]([19, 18, 4])
+script = ExtResource("5_dg77c")
+Id = "3c618661-7cb7-4cf1-a95e-a6f2f59a7464"
+NodeAId = "51b2dab5-958f-44a9-84ed-547d7af846f3"
+NodeBId = "395e0112-43ee-42c8-8b83-17dfc851fd2f"
 
 [sub_resource type="Resource" id="Resource_2cqfq"]
-script = ExtResource("5_efxa6")
-Id = 11
-Position = Vector2(337, -30)
-Links = Array[int]([13, 17, 2])
+script = ExtResource("5_dg77c")
+Id = "9651bd88-3976-4073-a702-537748ef4339"
+NodeAId = "4fbe6e94-0a62-4c15-bc75-3eb70ee17fb6"
+NodeBId = "31f57179-7f35-4be3-b0ba-04407364c747"
 
 [sub_resource type="Resource" id="Resource_yaehf"]
-script = ExtResource("5_efxa6")
-Id = 13
-Position = Vector2(385, -62)
-Links = Array[int]([15, 19, 11])
+script = ExtResource("5_dg77c")
+Id = "620cebe5-52fc-4821-97a6-e5fbb15028ce"
+NodeAId = "31f57179-7f35-4be3-b0ba-04407364c747"
+NodeBId = "e4fbf2d3-5233-451d-93d5-c26308e6771f"
 
 [sub_resource type="Resource" id="Resource_074og"]
-script = ExtResource("5_efxa6")
-Id = 15
-Position = Vector2(529, -62)
-Links = Array[int]([18, 16, 13])
+script = ExtResource("5_dg77c")
+Id = "7becadef-c183-4f11-ac0d-60e22674a75a"
+NodeAId = "e4fbf2d3-5233-451d-93d5-c26308e6771f"
+NodeBId = "a33c9c7d-9a53-484b-b4b3-69cd918907e6"
 
 [sub_resource type="Resource" id="Resource_cegan"]
-script = ExtResource("5_efxa6")
-Id = 16
-Position = Vector2(625, -62)
-Links = Array[int]([15, 17])
+script = ExtResource("5_dg77c")
+Id = "794a5753-1439-4c6c-91e8-d220f9b81b5f"
+NodeAId = "a33c9c7d-9a53-484b-b4b3-69cd918907e6"
+NodeBId = "c0cd7f8b-e943-4102-8f77-6dd454caf7e5"
 
 [sub_resource type="Resource" id="Resource_82xsv"]
-script = ExtResource("5_efxa6")
-Id = 17
-Position = Vector2(673, -30)
-Links = Array[int]([16, 11, 31])
+script = ExtResource("5_dg77c")
+Id = "f6e4a720-c4ce-472b-ad21-0ab5d28efabc"
+NodeAId = "c0cd7f8b-e943-4102-8f77-6dd454caf7e5"
+NodeBId = "36e472a0-df4f-498b-80a1-3a24e787c09a"
 
 [sub_resource type="Resource" id="Resource_getpj"]
-script = ExtResource("5_efxa6")
-Id = 18
-Position = Vector2(593, -94)
-Links = Array[int]([15, 20, 10])
+script = ExtResource("5_dg77c")
+Id = "1580ad27-aaf1-48fa-882c-8ea4ee63c8a9"
+NodeAId = "36e472a0-df4f-498b-80a1-3a24e787c09a"
+NodeBId = "31f57179-7f35-4be3-b0ba-04407364c747"
 
 [sub_resource type="Resource" id="Resource_d13ii"]
-script = ExtResource("5_efxa6")
-Id = 19
-Position = Vector2(337, -62)
-Links = Array[int]([13, 10])
+script = ExtResource("5_dg77c")
+Id = "948146c4-49ff-426c-9198-a6d866b0afcb"
+NodeAId = "31f57179-7f35-4be3-b0ba-04407364c747"
+NodeBId = "32070eb2-5b4c-4542-b63a-2f29ad191f87"
 
 [sub_resource type="Resource" id="Resource_1u8w0"]
-script = ExtResource("5_efxa6")
-Id = 20
-Position = Vector2(785, -94)
-Links = Array[int]([18])
+script = ExtResource("5_dg77c")
+Id = "31676950-b8f6-41c8-9ec4-460c6287b5bf"
+NodeAId = "3dcdc058-dae4-4ae5-8ffa-3b119b44d4cd"
+NodeBId = "e4fbf2d3-5233-451d-93d5-c26308e6771f"
+
+[sub_resource type="Resource" id="Resource_0odxb"]
+script = ExtResource("5_dg77c")
+Id = "02336761-9330-4a15-a242-46b5fe889ed3"
+NodeAId = "e4fbf2d3-5233-451d-93d5-c26308e6771f"
+NodeBId = "f08d3e39-333e-494f-a9fe-995dec4f9edd"
+
+[sub_resource type="Resource" id="Resource_lswn8"]
+script = ExtResource("5_dg77c")
+Id = "0a139232-88b5-4a10-9f21-d482fe84197a"
+NodeAId = "32070eb2-5b4c-4542-b63a-2f29ad191f87"
+NodeBId = "282dbab6-d87d-49f6-8045-c372ac5ef689"
+
+[sub_resource type="Resource" id="Resource_a6jrf"]
+script = ExtResource("5_dg77c")
+Id = "39eeadc5-cff8-45ec-bf23-cf4a72eaa8a3"
+NodeAId = "3dcdc058-dae4-4ae5-8ffa-3b119b44d4cd"
+NodeBId = "3b050948-1769-4633-afa3-5741f3ac6811"
 
 [sub_resource type="Resource" id="Resource_xuqvo"]
+script = ExtResource("5_dg77c")
+Id = "072c59d0-13d3-4a3c-9c76-d4c90dfa55a2"
+NodeAId = "3b050948-1769-4633-afa3-5741f3ac6811"
+NodeBId = "af74b01e-295d-48a9-94c6-9bbe32554aea"
+
+[sub_resource type="Resource" id="Resource_qsp4k"]
+script = ExtResource("5_dg77c")
+Id = "25a651e1-b8b0-42f9-97c7-35d72ea2be45"
+NodeAId = "af74b01e-295d-48a9-94c6-9bbe32554aea"
+NodeBId = "4bca4691-d37f-459d-879a-001fbd55fc8c"
+
+[sub_resource type="Resource" id="Resource_kq58d"]
+script = ExtResource("5_dg77c")
+Id = "4b7a01b5-bf0b-4981-bfc9-94e8350d3566"
+NodeAId = "4bca4691-d37f-459d-879a-001fbd55fc8c"
+NodeBId = "7d8f476c-1981-412b-9c02-10c591bb9251"
+
+[sub_resource type="Resource" id="Resource_seu75"]
+script = ExtResource("5_dg77c")
+Id = "0bf15255-ff42-4a08-b315-c76d28a0e7b8"
+NodeAId = "7d8f476c-1981-412b-9c02-10c591bb9251"
+NodeBId = "282dbab6-d87d-49f6-8045-c372ac5ef689"
+
+[sub_resource type="Resource" id="Resource_htxhm"]
+script = ExtResource("5_dg77c")
+Id = "8ae0e9a1-b9aa-4569-a64d-820775360b45"
+NodeAId = "7d8f476c-1981-412b-9c02-10c591bb9251"
+NodeBId = "f830f83b-1315-4c3f-b3cf-0fcc07149d6f"
+
+[sub_resource type="Resource" id="Resource_jq2sk"]
+script = ExtResource("5_dg77c")
+Id = "7c1a6af2-09af-47e6-854f-c08a0fa47115"
+NodeAId = "f830f83b-1315-4c3f-b3cf-0fcc07149d6f"
+NodeBId = "4eda8c25-77f4-4091-b178-f81aadc14cb3"
+
+[sub_resource type="Resource" id="Resource_4k2k6"]
+script = ExtResource("5_dg77c")
+Id = "5ebcf6ec-a5ef-4e4f-bde8-ba12c122de12"
+NodeAId = "af74b01e-295d-48a9-94c6-9bbe32554aea"
+NodeBId = "b4f5f666-a551-47ff-944f-8cf1e4846206"
+
+[sub_resource type="Resource" id="Resource_0rl1p"]
+script = ExtResource("5_dg77c")
+Id = "70f8f2fc-0c47-487b-8968-542de7267dd8"
+NodeAId = "b4f5f666-a551-47ff-944f-8cf1e4846206"
+NodeBId = "32070eb2-5b4c-4542-b63a-2f29ad191f87"
+
+[sub_resource type="Resource" id="Resource_ok6jj"]
+script = ExtResource("5_dg77c")
+Id = "bc936867-54e8-4560-950f-61c6ee2a027a"
+NodeAId = "3b050948-1769-4633-afa3-5741f3ac6811"
+NodeBId = "4eda8c25-77f4-4091-b178-f81aadc14cb3"
+
+[sub_resource type="Resource" id="Resource_facbu"]
+script = ExtResource("5_dg77c")
+Id = "a2d9f1a8-3af3-4f43-bb2c-dad93f03167f"
+NodeAId = "282dbab6-d87d-49f6-8045-c372ac5ef689"
+NodeBId = "d51a5ab2-41fe-4164-8c3f-e9aba75d84db"
+
+[sub_resource type="Resource" id="Resource_b1qrp"]
+script = ExtResource("5_dg77c")
+Id = "3a454bed-fbee-4a5c-aea9-e7cbfd127495"
+NodeAId = "23932172-d0cc-4dea-ac45-4eac8bfe1e71"
+NodeBId = "4eda8c25-77f4-4091-b178-f81aadc14cb3"
+
+[sub_resource type="Resource" id="Resource_come4"]
 script = ExtResource("5_efxa6")
-Id = 31
-Position = Vector2(897, -30)
-Links = Array[int]([17])
+Id = "d138c214-aa21-4354-b8c1-2c7f41c1e481"
+Position = Vector2(1, 2)
+Links = Array[String](["1082ebcc-67e3-4f5e-90eb-ea4b7c51181d"])
+NodeType = 1
+
+[sub_resource type="Resource" id="Resource_h8e4i"]
+script = ExtResource("7_ycdy4")
+LinkAId = "f6e4a720-c4ce-472b-ad21-0ab5d28efabc"
+LinkBId = "1082ebcc-67e3-4f5e-90eb-ea4b7c51181d"
+
+[sub_resource type="Resource" id="Resource_4lmeg"]
+script = ExtResource("7_ycdy4")
+LinkAId = "f6e4a720-c4ce-472b-ad21-0ab5d28efabc"
+LinkBId = "794a5753-1439-4c6c-91e8-d220f9b81b5f"
+
+[sub_resource type="Resource" id="Resource_0cp0l"]
+script = ExtResource("5_efxa6")
+Id = "c0cd7f8b-e943-4102-8f77-6dd454caf7e5"
+Position = Vector2(97, 2)
+Links = Array[String](["1082ebcc-67e3-4f5e-90eb-ea4b7c51181d", "794a5753-1439-4c6c-91e8-d220f9b81b5f", "f6e4a720-c4ce-472b-ad21-0ab5d28efabc"])
+NodeType = 2
+PairedLinks = Array[ExtResource("7_ycdy4")]([SubResource("Resource_h8e4i"), SubResource("Resource_4lmeg")])
+
+[sub_resource type="Resource" id="Resource_d2t1y"]
+script = ExtResource("7_ycdy4")
+LinkAId = "0a139232-88b5-4a10-9f21-d482fe84197a"
+LinkBId = "948146c4-49ff-426c-9198-a6d866b0afcb"
+
+[sub_resource type="Resource" id="Resource_gngh3"]
+script = ExtResource("7_ycdy4")
+LinkAId = "0a139232-88b5-4a10-9f21-d482fe84197a"
+LinkBId = "70f8f2fc-0c47-487b-8968-542de7267dd8"
+
+[sub_resource type="Resource" id="Resource_0n3wm"]
+script = ExtResource("5_efxa6")
+Id = "32070eb2-5b4c-4542-b63a-2f29ad191f87"
+Position = Vector2(369, 2)
+Links = Array[String](["948146c4-49ff-426c-9198-a6d866b0afcb", "0a139232-88b5-4a10-9f21-d482fe84197a", "70f8f2fc-0c47-487b-8968-542de7267dd8"])
+NodeType = 2
+PairedLinks = Array[ExtResource("7_ycdy4")]([SubResource("Resource_d2t1y"), SubResource("Resource_gngh3")])
+
+[sub_resource type="Resource" id="Resource_qnost"]
+script = ExtResource("7_ycdy4")
+LinkAId = "f6e4a720-c4ce-472b-ad21-0ab5d28efabc"
+LinkBId = "1580ad27-aaf1-48fa-882c-8ea4ee63c8a9"
+
+[sub_resource type="Resource" id="Resource_wnkbs"]
+script = ExtResource("5_efxa6")
+Id = "36e472a0-df4f-498b-80a1-3a24e787c09a"
+Position = Vector2(193, 2)
+Links = Array[String](["f6e4a720-c4ce-472b-ad21-0ab5d28efabc", "1580ad27-aaf1-48fa-882c-8ea4ee63c8a9"])
+NodeType = 1
+PairedLinks = Array[ExtResource("7_ycdy4")]([SubResource("Resource_qnost")])
+
+[sub_resource type="Resource" id="Resource_f6a44"]
+script = ExtResource("7_ycdy4")
+LinkAId = "1580ad27-aaf1-48fa-882c-8ea4ee63c8a9"
+LinkBId = "948146c4-49ff-426c-9198-a6d866b0afcb"
+
+[sub_resource type="Resource" id="Resource_0cbny"]
+script = ExtResource("7_ycdy4")
+LinkAId = "9651bd88-3976-4073-a702-537748ef4339"
+LinkBId = "620cebe5-52fc-4821-97a6-e5fbb15028ce"
+
+[sub_resource type="Resource" id="Resource_hrvbo"]
+script = ExtResource("5_efxa6")
+Id = "31f57179-7f35-4be3-b0ba-04407364c747"
+Position = Vector2(273, 2)
+Links = Array[String](["9651bd88-3976-4073-a702-537748ef4339", "620cebe5-52fc-4821-97a6-e5fbb15028ce", "1580ad27-aaf1-48fa-882c-8ea4ee63c8a9", "948146c4-49ff-426c-9198-a6d866b0afcb"])
+NodeType = 3
+PairedLinks = Array[ExtResource("7_ycdy4")]([SubResource("Resource_f6a44"), SubResource("Resource_0cbny")])
+
+[sub_resource type="Resource" id="Resource_uypp3"]
+script = ExtResource("7_ycdy4")
+LinkAId = "7becadef-c183-4f11-ac0d-60e22674a75a"
+LinkBId = "794a5753-1439-4c6c-91e8-d220f9b81b5f"
+
+[sub_resource type="Resource" id="Resource_blkrb"]
+script = ExtResource("5_efxa6")
+Id = "a33c9c7d-9a53-484b-b4b3-69cd918907e6"
+Position = Vector2(145, 66)
+Links = Array[String](["7becadef-c183-4f11-ac0d-60e22674a75a", "794a5753-1439-4c6c-91e8-d220f9b81b5f"])
+NodeType = 1
+PairedLinks = Array[ExtResource("7_ycdy4")]([SubResource("Resource_uypp3")])
+
+[sub_resource type="Resource" id="Resource_abqjc"]
+script = ExtResource("7_ycdy4")
+LinkAId = "7becadef-c183-4f11-ac0d-60e22674a75a"
+LinkBId = "31676950-b8f6-41c8-9ec4-460c6287b5bf"
+
+[sub_resource type="Resource" id="Resource_6iyjs"]
+script = ExtResource("7_ycdy4")
+LinkAId = "620cebe5-52fc-4821-97a6-e5fbb15028ce"
+LinkBId = "02336761-9330-4a15-a242-46b5fe889ed3"
+
+[sub_resource type="Resource" id="Resource_4w656"]
+script = ExtResource("5_efxa6")
+Id = "e4fbf2d3-5233-451d-93d5-c26308e6771f"
+Position = Vector2(273, 66)
+Links = Array[String](["620cebe5-52fc-4821-97a6-e5fbb15028ce", "7becadef-c183-4f11-ac0d-60e22674a75a", "31676950-b8f6-41c8-9ec4-460c6287b5bf", "02336761-9330-4a15-a242-46b5fe889ed3"])
+NodeType = 3
+PairedLinks = Array[ExtResource("7_ycdy4")]([SubResource("Resource_abqjc"), SubResource("Resource_6iyjs")])
+
+[sub_resource type="Resource" id="Resource_e71vb"]
+script = ExtResource("5_efxa6")
+Id = "4fbe6e94-0a62-4c15-bc75-3eb70ee17fb6"
+Position = Vector2(273, -46)
+Links = Array[String](["9651bd88-3976-4073-a702-537748ef4339"])
+NodeType = 1
+
+[sub_resource type="Resource" id="Resource_rnkwl"]
+script = ExtResource("7_ycdy4")
+LinkAId = "31676950-b8f6-41c8-9ec4-460c6287b5bf"
+LinkBId = "39eeadc5-cff8-45ec-bf23-cf4a72eaa8a3"
+
+[sub_resource type="Resource" id="Resource_vke2r"]
+script = ExtResource("5_efxa6")
+Id = "3dcdc058-dae4-4ae5-8ffa-3b119b44d4cd"
+Position = Vector2(369, 66)
+Links = Array[String](["31676950-b8f6-41c8-9ec4-460c6287b5bf", "39eeadc5-cff8-45ec-bf23-cf4a72eaa8a3"])
+NodeType = 1
+PairedLinks = Array[ExtResource("7_ycdy4")]([SubResource("Resource_rnkwl")])
+
+[sub_resource type="Resource" id="Resource_uit24"]
+script = ExtResource("5_efxa6")
+Id = "f08d3e39-333e-494f-a9fe-995dec4f9edd"
+Position = Vector2(273, 98)
+Links = Array[String](["02336761-9330-4a15-a242-46b5fe889ed3"])
+NodeType = 1
+
+[sub_resource type="Resource" id="Resource_ruth0"]
+script = ExtResource("7_ycdy4")
+LinkAId = "39eeadc5-cff8-45ec-bf23-cf4a72eaa8a3"
+LinkBId = "072c59d0-13d3-4a3c-9c76-d4c90dfa55a2"
+
+[sub_resource type="Resource" id="Resource_rm4vd"]
+script = ExtResource("7_ycdy4")
+LinkAId = "39eeadc5-cff8-45ec-bf23-cf4a72eaa8a3"
+LinkBId = "bc936867-54e8-4560-950f-61c6ee2a027a"
+
+[sub_resource type="Resource" id="Resource_pjyto"]
+script = ExtResource("5_efxa6")
+Id = "3b050948-1769-4633-afa3-5741f3ac6811"
+Position = Vector2(417, 66)
+Links = Array[String](["39eeadc5-cff8-45ec-bf23-cf4a72eaa8a3", "072c59d0-13d3-4a3c-9c76-d4c90dfa55a2", "bc936867-54e8-4560-950f-61c6ee2a027a"])
+NodeType = 2
+PairedLinks = Array[ExtResource("7_ycdy4")]([SubResource("Resource_ruth0"), SubResource("Resource_rm4vd")])
+
+[sub_resource type="Resource" id="Resource_sm6fg"]
+script = ExtResource("7_ycdy4")
+LinkAId = "072c59d0-13d3-4a3c-9c76-d4c90dfa55a2"
+LinkBId = "25a651e1-b8b0-42f9-97c7-35d72ea2be45"
+
+[sub_resource type="Resource" id="Resource_b17eg"]
+script = ExtResource("7_ycdy4")
+LinkAId = "072c59d0-13d3-4a3c-9c76-d4c90dfa55a2"
+LinkBId = "5ebcf6ec-a5ef-4e4f-bde8-ba12c122de12"
+
+[sub_resource type="Resource" id="Resource_ntx8l"]
+script = ExtResource("5_efxa6")
+Id = "af74b01e-295d-48a9-94c6-9bbe32554aea"
+Position = Vector2(449, 34)
+Links = Array[String](["072c59d0-13d3-4a3c-9c76-d4c90dfa55a2", "25a651e1-b8b0-42f9-97c7-35d72ea2be45", "5ebcf6ec-a5ef-4e4f-bde8-ba12c122de12"])
+NodeType = 2
+PairedLinks = Array[ExtResource("7_ycdy4")]([SubResource("Resource_sm6fg"), SubResource("Resource_b17eg")])
+
+[sub_resource type="Resource" id="Resource_uatky"]
+script = ExtResource("7_ycdy4")
+LinkAId = "5ebcf6ec-a5ef-4e4f-bde8-ba12c122de12"
+LinkBId = "70f8f2fc-0c47-487b-8968-542de7267dd8"
+
+[sub_resource type="Resource" id="Resource_rqtf5"]
+script = ExtResource("5_efxa6")
+Id = "b4f5f666-a551-47ff-944f-8cf1e4846206"
+Position = Vector2(417, 34)
+Links = Array[String](["5ebcf6ec-a5ef-4e4f-bde8-ba12c122de12", "70f8f2fc-0c47-487b-8968-542de7267dd8"])
+NodeType = 1
+PairedLinks = Array[ExtResource("7_ycdy4")]([SubResource("Resource_uatky")])
+
+[sub_resource type="Resource" id="Resource_1vm84"]
+script = ExtResource("7_ycdy4")
+LinkAId = "25a651e1-b8b0-42f9-97c7-35d72ea2be45"
+LinkBId = "4b7a01b5-bf0b-4981-bfc9-94e8350d3566"
+
+[sub_resource type="Resource" id="Resource_wu3dr"]
+script = ExtResource("5_efxa6")
+Id = "4bca4691-d37f-459d-879a-001fbd55fc8c"
+Position = Vector2(545, 34)
+Links = Array[String](["25a651e1-b8b0-42f9-97c7-35d72ea2be45", "4b7a01b5-bf0b-4981-bfc9-94e8350d3566"])
+NodeType = 1
+PairedLinks = Array[ExtResource("7_ycdy4")]([SubResource("Resource_1vm84")])
+
+[sub_resource type="Resource" id="Resource_cyx1q"]
+script = ExtResource("7_ycdy4")
+LinkAId = "4b7a01b5-bf0b-4981-bfc9-94e8350d3566"
+LinkBId = "0bf15255-ff42-4a08-b315-c76d28a0e7b8"
+
+[sub_resource type="Resource" id="Resource_0dhbp"]
+script = ExtResource("7_ycdy4")
+LinkAId = "4b7a01b5-bf0b-4981-bfc9-94e8350d3566"
+LinkBId = "8ae0e9a1-b9aa-4569-a64d-820775360b45"
+
+[sub_resource type="Resource" id="Resource_jx0wj"]
+script = ExtResource("5_efxa6")
+Id = "7d8f476c-1981-412b-9c02-10c591bb9251"
+Position = Vector2(577, 34)
+Links = Array[String](["4b7a01b5-bf0b-4981-bfc9-94e8350d3566", "0bf15255-ff42-4a08-b315-c76d28a0e7b8", "8ae0e9a1-b9aa-4569-a64d-820775360b45"])
+NodeType = 2
+PairedLinks = Array[ExtResource("7_ycdy4")]([SubResource("Resource_cyx1q"), SubResource("Resource_0dhbp")])
+
+[sub_resource type="Resource" id="Resource_ycdy4"]
+script = ExtResource("7_ycdy4")
+LinkAId = "8ae0e9a1-b9aa-4569-a64d-820775360b45"
+LinkBId = "7c1a6af2-09af-47e6-854f-c08a0fa47115"
+
+[sub_resource type="Resource" id="Resource_34ol3"]
+script = ExtResource("5_efxa6")
+Id = "f830f83b-1315-4c3f-b3cf-0fcc07149d6f"
+Position = Vector2(625, 34)
+Links = Array[String](["8ae0e9a1-b9aa-4569-a64d-820775360b45", "7c1a6af2-09af-47e6-854f-c08a0fa47115"])
+NodeType = 1
+PairedLinks = Array[ExtResource("7_ycdy4")]([SubResource("Resource_ycdy4")])
+
+[sub_resource type="Resource" id="Resource_kkkcx"]
+script = ExtResource("7_ycdy4")
+LinkAId = "3a454bed-fbee-4a5c-aea9-e7cbfd127495"
+LinkBId = "7c1a6af2-09af-47e6-854f-c08a0fa47115"
+
+[sub_resource type="Resource" id="Resource_c2n8d"]
+script = ExtResource("7_ycdy4")
+LinkAId = "3a454bed-fbee-4a5c-aea9-e7cbfd127495"
+LinkBId = "bc936867-54e8-4560-950f-61c6ee2a027a"
+
+[sub_resource type="Resource" id="Resource_gx4rg"]
+script = ExtResource("5_efxa6")
+Id = "4eda8c25-77f4-4091-b178-f81aadc14cb3"
+Position = Vector2(673, 66)
+Links = Array[String](["7c1a6af2-09af-47e6-854f-c08a0fa47115", "bc936867-54e8-4560-950f-61c6ee2a027a", "3a454bed-fbee-4a5c-aea9-e7cbfd127495"])
+NodeType = 2
+PairedLinks = Array[ExtResource("7_ycdy4")]([SubResource("Resource_kkkcx"), SubResource("Resource_c2n8d")])
+
+[sub_resource type="Resource" id="Resource_wy5fy"]
+script = ExtResource("7_ycdy4")
+LinkAId = "0a139232-88b5-4a10-9f21-d482fe84197a"
+LinkBId = "0bf15255-ff42-4a08-b315-c76d28a0e7b8"
+
+[sub_resource type="Resource" id="Resource_5dllo"]
+script = ExtResource("7_ycdy4")
+LinkAId = "0a139232-88b5-4a10-9f21-d482fe84197a"
+LinkBId = "a2d9f1a8-3af3-4f43-bb2c-dad93f03167f"
+
+[sub_resource type="Resource" id="Resource_birbe"]
+script = ExtResource("5_efxa6")
+Id = "282dbab6-d87d-49f6-8045-c372ac5ef689"
+Position = Vector2(609, 2)
+Links = Array[String](["0a139232-88b5-4a10-9f21-d482fe84197a", "0bf15255-ff42-4a08-b315-c76d28a0e7b8", "a2d9f1a8-3af3-4f43-bb2c-dad93f03167f"])
+NodeType = 2
+PairedLinks = Array[ExtResource("7_ycdy4")]([SubResource("Resource_wy5fy"), SubResource("Resource_5dllo")])
+
+[sub_resource type="Resource" id="Resource_f1p13"]
+script = ExtResource("5_efxa6")
+Id = "d51a5ab2-41fe-4164-8c3f-e9aba75d84db"
+Position = Vector2(721, 2)
+Links = Array[String](["a2d9f1a8-3af3-4f43-bb2c-dad93f03167f"])
+NodeType = 1
+
+[sub_resource type="Resource" id="Resource_4obbf"]
+script = ExtResource("5_efxa6")
+Id = "23932172-d0cc-4dea-ac45-4eac8bfe1e71"
+Position = Vector2(721, 66)
+Links = Array[String](["3a454bed-fbee-4a5c-aea9-e7cbfd127495"])
+NodeType = 1
 
 [sub_resource type="Resource" id="Resource_ryguw"]
 script = ExtResource("6_dg77c")
-_nodes = Dictionary[int, ExtResource("5_efxa6")]({
-2: SubResource("Resource_dg77c"),
-4: SubResource("Resource_w48qg"),
-10: SubResource("Resource_vivmo"),
-11: SubResource("Resource_2cqfq"),
-13: SubResource("Resource_yaehf"),
-15: SubResource("Resource_074og"),
-16: SubResource("Resource_cegan"),
-17: SubResource("Resource_82xsv"),
-18: SubResource("Resource_getpj"),
-19: SubResource("Resource_d13ii"),
-20: SubResource("Resource_1u8w0"),
-31: SubResource("Resource_xuqvo")
+_nodes = Dictionary[String, ExtResource("5_efxa6")]({
+"23932172-d0cc-4dea-ac45-4eac8bfe1e71": SubResource("Resource_4obbf"),
+"282dbab6-d87d-49f6-8045-c372ac5ef689": SubResource("Resource_birbe"),
+"31f57179-7f35-4be3-b0ba-04407364c747": SubResource("Resource_hrvbo"),
+"32070eb2-5b4c-4542-b63a-2f29ad191f87": SubResource("Resource_0n3wm"),
+"36e472a0-df4f-498b-80a1-3a24e787c09a": SubResource("Resource_wnkbs"),
+"3b050948-1769-4633-afa3-5741f3ac6811": SubResource("Resource_pjyto"),
+"3dcdc058-dae4-4ae5-8ffa-3b119b44d4cd": SubResource("Resource_vke2r"),
+"4bca4691-d37f-459d-879a-001fbd55fc8c": SubResource("Resource_wu3dr"),
+"4eda8c25-77f4-4091-b178-f81aadc14cb3": SubResource("Resource_gx4rg"),
+"4fbe6e94-0a62-4c15-bc75-3eb70ee17fb6": SubResource("Resource_e71vb"),
+"7d8f476c-1981-412b-9c02-10c591bb9251": SubResource("Resource_jx0wj"),
+"a33c9c7d-9a53-484b-b4b3-69cd918907e6": SubResource("Resource_blkrb"),
+"af74b01e-295d-48a9-94c6-9bbe32554aea": SubResource("Resource_ntx8l"),
+"b4f5f666-a551-47ff-944f-8cf1e4846206": SubResource("Resource_rqtf5"),
+"c0cd7f8b-e943-4102-8f77-6dd454caf7e5": SubResource("Resource_0cp0l"),
+"d138c214-aa21-4354-b8c1-2c7f41c1e481": SubResource("Resource_come4"),
+"d51a5ab2-41fe-4164-8c3f-e9aba75d84db": SubResource("Resource_f1p13"),
+"e4fbf2d3-5233-451d-93d5-c26308e6771f": SubResource("Resource_4w656"),
+"f08d3e39-333e-494f-a9fe-995dec4f9edd": SubResource("Resource_uit24"),
+"f830f83b-1315-4c3f-b3cf-0fcc07149d6f": SubResource("Resource_34ol3")
+})
+_links = Dictionary[String, ExtResource("5_dg77c")]({
+"02336761-9330-4a15-a242-46b5fe889ed3": SubResource("Resource_0odxb"),
+"072c59d0-13d3-4a3c-9c76-d4c90dfa55a2": SubResource("Resource_xuqvo"),
+"0a139232-88b5-4a10-9f21-d482fe84197a": SubResource("Resource_lswn8"),
+"0bf15255-ff42-4a08-b315-c76d28a0e7b8": SubResource("Resource_seu75"),
+"1082ebcc-67e3-4f5e-90eb-ea4b7c51181d": SubResource("Resource_w48qg"),
+"1580ad27-aaf1-48fa-882c-8ea4ee63c8a9": SubResource("Resource_getpj"),
+"25a651e1-b8b0-42f9-97c7-35d72ea2be45": SubResource("Resource_qsp4k"),
+"31676950-b8f6-41c8-9ec4-460c6287b5bf": SubResource("Resource_1u8w0"),
+"39eeadc5-cff8-45ec-bf23-cf4a72eaa8a3": SubResource("Resource_a6jrf"),
+"3a454bed-fbee-4a5c-aea9-e7cbfd127495": SubResource("Resource_b1qrp"),
+"3c618661-7cb7-4cf1-a95e-a6f2f59a7464": SubResource("Resource_vivmo"),
+"4b7a01b5-bf0b-4981-bfc9-94e8350d3566": SubResource("Resource_kq58d"),
+"5ebcf6ec-a5ef-4e4f-bde8-ba12c122de12": SubResource("Resource_4k2k6"),
+"620cebe5-52fc-4821-97a6-e5fbb15028ce": SubResource("Resource_yaehf"),
+"70f8f2fc-0c47-487b-8968-542de7267dd8": SubResource("Resource_0rl1p"),
+"794a5753-1439-4c6c-91e8-d220f9b81b5f": SubResource("Resource_cegan"),
+"7becadef-c183-4f11-ac0d-60e22674a75a": SubResource("Resource_074og"),
+"7c1a6af2-09af-47e6-854f-c08a0fa47115": SubResource("Resource_jq2sk"),
+"8ae0e9a1-b9aa-4569-a64d-820775360b45": SubResource("Resource_htxhm"),
+"948146c4-49ff-426c-9198-a6d866b0afcb": SubResource("Resource_d13ii"),
+"9651bd88-3976-4073-a702-537748ef4339": SubResource("Resource_2cqfq"),
+"a2d9f1a8-3af3-4f43-bb2c-dad93f03167f": SubResource("Resource_facbu"),
+"bc936867-54e8-4560-950f-61c6ee2a027a": SubResource("Resource_ok6jj"),
+"f6e4a720-c4ce-472b-ad21-0ab5d28efabc": SubResource("Resource_82xsv")
 })
 metadata/_custom_type_script = "uid://16mgebho3rd5"
 

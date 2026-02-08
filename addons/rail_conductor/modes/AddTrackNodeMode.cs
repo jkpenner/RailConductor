@@ -5,9 +5,9 @@ namespace RailConductor.Plugin;
 
 public class AddTrackNodeMode : PluginModeHandler
 {
-    public override int[] SelectedNodeId => [_selectedNodeId];
+    public override string[] SelectedNodeId => [_selectedNodeId];
 
-    private int _selectedNodeId;
+    private string _selectedNodeId;
     private Vector2 _originalPosition;
 
     public override bool OnGuiInput(Track target, InputEvent e, EditorUndoRedoManager undoRedo)
@@ -26,7 +26,6 @@ public class AddTrackNodeMode : PluginModeHandler
             {
                 var newNode = new TrackNodeData
                 {
-                    Id = target.Data.GetAvailableNodeId(),
                     Position = localPosition
                 };
 
@@ -36,6 +35,7 @@ public class AddTrackNodeMode : PluginModeHandler
                 undoRedo.CreateAction("Add Track Node");
                 undoRedo.AddDoMethod(target.Data, nameof(TrackData.AddNode), _selectedNodeId, newNode);
                 undoRedo.AddUndoMethod(target.Data, nameof(TrackData.RemoveNode), _selectedNodeId);
+                undoRedo.AddDoMethod(newNode, nameof(TrackNodeData.UpdateConfiguration), target.Data);
                 undoRedo.CommitAction();
                 return true;
             }
@@ -47,13 +47,14 @@ public class AddTrackNodeMode : PluginModeHandler
                 undoRedo.CreateAction("Move Track Node");
                 undoRedo.AddDoProperty(nodeRef, nameof(TrackNodeData.Position), finalPos);
                 undoRedo.AddUndoProperty(nodeRef, nameof(TrackNodeData.Position), _originalPosition);
+                undoRedo.AddDoMethod(nodeRef, nameof(TrackNodeData.UpdateConfiguration), target.Data);
                 undoRedo.CommitAction();
-                _selectedNodeId = -1;
+                _selectedNodeId = string.Empty;
                 return true;
             }
         }
 
-        if (e is InputEventMouseMotion mouseMotion && _selectedNodeId >= 0 &&
+        if (e is InputEventMouseMotion mouseMotion && !string.IsNullOrEmpty(_selectedNodeId) &&
             Input.IsMouseButtonPressed(MouseButton.Left))
         {
             var globalPosition = PluginUtility.ScreenToWorldSnapped(mouseMotion.Position);

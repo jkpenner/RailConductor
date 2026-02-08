@@ -4,7 +4,7 @@ namespace RailConductor.Plugin;
 
 public class DeleteTrackNodeMode : PluginModeHandler
 {
-    public override int[] SelectedNodeId => [];
+    public override string[] SelectedNodeId => [];
 
     public override bool OnGuiInput(Track target, InputEvent e, EditorUndoRedoManager undoRedo)
     {
@@ -22,7 +22,7 @@ public class DeleteTrackNodeMode : PluginModeHandler
         var localPosition = target.ToLocal(globalPosition);
 
         var deletedId = target.Data.FindClosestNodeId(localPosition);
-        if (deletedId < 0)
+        if (string.IsNullOrEmpty(deletedId))
         {
             return false;
         }
@@ -36,20 +36,35 @@ public class DeleteTrackNodeMode : PluginModeHandler
         undoRedo.CreateAction("Delete Track Node");
 
         // Remove the links from any linked node.
-        foreach (var linkedNodeId in nodeToDelete.Links)
+        foreach (var linkId in nodeToDelete.Links)
         {
-            var linkedNode = target.Data.GetNode(linkedNodeId);
+            var link = target.Data.GetLink(linkId);
+            if (link is null)
+            {
+                continue;
+            }
+            
+            // Remove the connected link
+            undoRedo.AddDoMethod(target.Data, nameof(TrackData.RemoveLink), linkId);
+            undoRedo.AddUndoMethod(target.Data, nameof(TrackData.AddLink), linkId, link);
+            
+            var linkedNode = target.Data.GetNode(link.GetOtherNode(deletedId));
             if (linkedNode is null)
             {
                 continue;
             }
             
-            undoRedo.AddDoMethod(linkedNode, nameof(TrackNodeData.RemoveLink), deletedId);
-            undoRedo.AddUndoMethod(linkedNode, nameof(TrackNodeData.AddLink), deletedId);
+            // Remove the link from the connected node
+            undoRedo.AddDoMethod(linkedNode, nameof(TrackNodeData.RemoveLink), linkId);
+            undoRedo.AddDoMethod(linkedNode, nameof(TrackNodeData.UpdateConfiguration), target.Data);
+            
+            undoRedo.AddUndoMethod(linkedNode, nameof(TrackNodeData.AddLink), linkId);
+            undoRedo.AddUndoMethod(linkedNode, nameof(TrackNodeData.UpdateConfiguration), target.Data);
         }
 
         undoRedo.AddDoMethod(target.Data, nameof(TrackData.RemoveNode), deletedId);
         undoRedo.AddUndoMethod(target.Data, nameof(TrackData.AddNode), deletedId, nodeToDelete);
+        undoRedo.AddUndoMethod(nodeToDelete, nameof(TrackNodeData.UpdateConfiguration), target.Data);
         undoRedo.CommitAction();
         return true;
     }

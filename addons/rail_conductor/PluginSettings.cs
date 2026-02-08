@@ -13,4 +13,8 @@ public static class PluginSettings
     public static readonly Color NodeHoverColor = new(0.9f, 0.9f, 0.95f);
 
     public static readonly Color SelectedColor = new(0.9f, 0.9f, 0.2f);
+    
+    
+    public static readonly Color SwitchPrimaryColor = new(0.4f, 0.9f, 0.2f);
+    public static readonly Color SwitchSecondaryColor = new(0.9f, 0.4f, 0.2f);
 }

@@ -28,7 +28,8 @@ public partial class RailConductorPlugin : EditorPlugin
     private ToolMode _currentToolMode = ToolMode.None;
     private bool _dragging = false;
     private Vector2 _originalPosition;
-    private int _hoveredNodeId = -1;
+    private string _hoveredNodeId = string.Empty;
+    private Font _font;
 
     private readonly Dictionary<ToolMode, PluginModeHandler> _modeHandlers = new();
 
@@ -47,11 +48,15 @@ public partial class RailConductorPlugin : EditorPlugin
         _modeHandlers.Add(ToolMode.Delete, new DeleteTrackNodeMode());
         _modeHandlers.Add(ToolMode.Link, new LinkTrackNodeMode());
         _modeHandlers.Add(ToolMode.Unlink, new UnlinkTrackNodeMode());
+        
+        
 
         foreach (var handler in _modeHandlers.Values)
         {
             handler.OnSetup();
         }
+        
+        _font = ResourceLoader.Load<Font>("res://addons/rail_conductor/fonts/default.tres");
     }
 
     private void OnVersionChanged()
@@ -86,7 +91,7 @@ public partial class RailConductorPlugin : EditorPlugin
     {
         _target = obj as Track;
         _dragging = false;
-        _hoveredNodeId = -1;
+        _hoveredNodeId = string.Empty;
     }
 
     public override void _MakeVisible(bool visible)
@@ -101,7 +106,7 @@ public partial class RailConductorPlugin : EditorPlugin
             ClearMenus();
             _currentToolMode = ToolMode.None;
             _dragging = false;
-            _hoveredNodeId = -1;
+            _hoveredNodeId = string.Empty;
         }
     }
 
@@ -159,7 +164,7 @@ public partial class RailConductorPlugin : EditorPlugin
         _options?.SetToolMode(toolMode);
 
 
-        _hoveredNodeId = -1;
+        _hoveredNodeId = string.Empty;
         _dragging = false;
     }
 
@@ -170,7 +175,7 @@ public partial class RailConductorPlugin : EditorPlugin
         if (_target?.Data is not null && @event is InputEventMouseMotion mouse)
         {
             UpdateOverlays();
-            
+
             var globalPosition = PluginUtility.ScreenToWorld(mouse.Position);
             var localPosition = _target.ToLocal(globalPosition);
             var hoveredIndex = _target.Data.FindClosestNodeId(localPosition);
@@ -209,29 +214,37 @@ public partial class RailConductorPlugin : EditorPlugin
         }
 
         var scale = PluginUtility.GetZoom();
-        var links = _target.Data.GetNodes()
-            .SelectMany(n => n.Links.Select(l => PluginUtility.GetLinkId(n.Id, l)))
-            .ToHashSet();
 
         // Draw the links between all nodes
-        foreach (var (node1Id, node2Id) in links)
+        foreach (var link in _target.Data.GetLinks())
         {
-            var node1 = _target.Data.GetNode(node1Id);
-            var node2 = _target.Data.GetNode(node2Id);
+            var nodeA = _target.Data.GetNode(link.NodeAId);
+            var nodeB = _target.Data.GetNode(link.NodeBId);
 
-            if (node1 is null || node2 is null)
+            if (nodeA is null || nodeB is null)
             {
                 continue;
             }
 
-            var globalPosition1 = _target.ToGlobal(node1.Position);
+            var globalPosition1 = _target.ToGlobal(nodeA.Position);
             var screenPosition1 = PluginUtility.WorldToScreen(globalPosition1);
 
-            var globalPosition2 = _target.ToGlobal(node2.Position);
+            var globalPosition2 = _target.ToGlobal(nodeB.Position);
             var screenPosition2 = PluginUtility.WorldToScreen(globalPosition2);
 
             overlay.DrawLine(screenPosition1, screenPosition2,
                 PluginSettings.LinkColor, PluginSettings.LinkWidth * scale);
+
+            if (_font is not null)
+            {
+                var center = screenPosition1.Lerp(screenPosition2, 0.5f);
+                overlay.DrawString(_font, center + new Vector2(-50f, (1.5f * PluginUtility.GetZoom())),
+                    link.Id[0..3].ToUpper(), 
+                    alignment: HorizontalAlignment.Center, 
+                    fontSize: (int)(4f * PluginUtility.GetZoom()),
+                    modulate: Colors.Black,
+                    width: 100);
+            }
         }
 
         // Draw the selected node effect
@@ -264,11 +277,86 @@ public partial class RailConductorPlugin : EditorPlugin
 
             var fillColor = _hoveredNodeId == node.Id ? PluginSettings.NodeHoverColor : PluginSettings.NodeNormalColor;
             overlay.DrawCircle(screenPosition, (PluginSettings.NodeRadius - 2) * zoom, fillColor);
-
-            foreach (var link in node.Links)
+            
+            if (_font is not null)
             {
-                links.Add(PluginUtility.GetLinkId(node.Id, link));
+                overlay.DrawString(_font, screenPosition + new Vector2(-50f, (1.5f * PluginUtility.GetZoom())),
+                    node.Id[0..3].ToUpper(), 
+                    alignment: HorizontalAlignment.Center, 
+                    fontSize: (int)(4f * PluginUtility.GetZoom()),
+                    modulate: Colors.Black,
+                    width: 100);
             }
+
+            if (node.NodeType != TrackNodeType.Switch && node.NodeType != TrackNodeType.Crossover)
+            {
+                continue;
+            }
+
+            HashSet<string> drawn = [];
+            for (var i = 0; i < node.PairedLinks.Count; i++)
+            {
+                var pair = node.PairedLinks[i];
+                var linkA = _target.Data.GetLink(pair.LinkAId);
+                var linkB = _target.Data.GetLink(pair.LinkBId);
+                if (linkA is null || linkB is null)
+                {
+                    continue;
+                }
+                
+                var color = i == 0 ? PluginSettings.SwitchPrimaryColor : PluginSettings.SwitchSecondaryColor;
+
+                var linkANode = _target.Data.GetNode(linkA.GetOtherNode(node.Id)); 
+                if (linkANode is not null && drawn.Add(linkA.Id))
+                {
+                    var direction = (linkANode.Position - node.Position).Normalized();
+                    var position = node.Position + direction * (PluginSettings.NodeRadius + 3);
+
+                    var linkGlobalPosition = _target.ToGlobal(position);
+                    var linkScreenPosition = PluginUtility.WorldToScreen(linkGlobalPosition);
+                    
+                    overlay.DrawCircle(linkScreenPosition, 2 * zoom, color);
+                }
+
+                var linkBNode = _target.Data.GetNode(linkB.GetOtherNode(node.Id)); 
+                if (linkBNode is not null && drawn.Add(linkB.Id))
+                {
+                    var direction = (linkBNode.Position - node.Position).Normalized();
+                    var position = node.Position + direction * (PluginSettings.NodeRadius + 3);
+
+                    var linkGlobalPosition = _target.ToGlobal(position);
+                    var linkScreenPosition = PluginUtility.WorldToScreen(linkGlobalPosition);
+                    
+                    overlay.DrawCircle(linkScreenPosition, 2 * zoom, color);
+                }
+            }
+
+            // foreach (var linkId in node.Links)
+            // {
+            //     var link = _target.Data.GetLink(linkId);
+            //     if (link is null)
+            //     {
+            //         continue;
+            //     }
+            //
+            //     var linkedNode = _target.Data.GetNode(link.GetOtherNode(node.Id));
+            //     if (linkedNode is null)
+            //     {
+            //         continue;
+            //     }
+            //
+            //     var direction = (linkedNode.Position - node.Position).Normalized();
+            //     var position = node.Position + direction * (PluginSettings.NodeRadius + 3);
+            //
+            //     var linkGlobalPosition = _target.ToGlobal(position);
+            //     var linkScreenPosition = PluginUtility.WorldToScreen(linkGlobalPosition);
+            //
+            //     if (node.NodeType == TrackNodeType.Crossover)
+            //     {
+            //         node.PairedLinks.FindIndex()
+            //     }
+            //     overlay.DrawCircle(linkScreenPosition, 2 * zoom, Colors.Red);
+            // }
         }
 
         if (_modeHandlers.TryGetValue(_currentToolMode, out var handler2))
