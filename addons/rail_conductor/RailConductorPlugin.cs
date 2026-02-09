@@ -9,7 +9,6 @@ public enum ToolMode
     None,
     Select,
     Create,
-    Move,
     Link,
     Insert,
     PlaceSignal
@@ -43,7 +42,6 @@ public partial class RailConductorPlugin : EditorPlugin
         _modeHandlers.Add(ToolMode.Select, new SelectMode());
         _modeHandlers.Add(ToolMode.Create, new AddTrackNodeMode());
         _modeHandlers.Add(ToolMode.Insert, new InsertTrackNodeMode());
-        _modeHandlers.Add(ToolMode.Move, new MoveTrackNodeMode());
         _modeHandlers.Add(ToolMode.Link, new LinkTrackNodeMode());
         _modeHandlers.Add(ToolMode.PlaceSignal, new PlaceSignalMode());
 
