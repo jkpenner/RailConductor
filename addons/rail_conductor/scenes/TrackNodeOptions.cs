@@ -23,7 +23,6 @@ public partial class TrackNodeOptions : Control
         _buttons.Add(ToolMode.Insert, GetNode<Button>("%InsertNodeButton"));
         _buttons.Add(ToolMode.Move, GetNode<Button>("%MoveNodeButton"));
         _buttons.Add(ToolMode.Link, GetNode<Button>("%LinkNodesButton"));
-        _buttons.Add(ToolMode.Unlink, GetNode<Button>("%UnlinkNodesButton"));
         // Track Signals
         _buttons.Add(ToolMode.PlaceSignal, GetNode<Button>("%PlaceSignalButton"));
         

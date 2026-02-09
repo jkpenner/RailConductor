@@ -8,28 +8,23 @@ public class PlaceSignalMode : PluginModeHandler
     private float _hoveredLinkDistance = float.MaxValue;
     private string _selectedLinkId = string.Empty;
 
-    protected override bool OnGuiInput(Track target, InputEvent e, EditorUndoRedoManager undoRedo)
+    protected override bool OnGuiInput(PluginContext ctx, InputEvent e)
     {
-        if (target.Data is null)
-        {
-            return false;
-        }
-
         if (e is InputEventMouseMotion motion)
         {
             if (string.IsNullOrEmpty(_selectedLinkId))
             {
                 var globalPosition = PluginUtility.ScreenToWorldSnapped(motion.Position);
-                var localPosition = target.ToLocal(globalPosition);
-                _hoveredLinkId = target.Data.FindClosestLink(localPosition);
-                _hoveredLinkDistance = target.Data.GetClosestLinkDistance(localPosition);
+                var localPosition = ctx.Track.ToLocal(globalPosition);
+                _hoveredLinkId = ctx.TrackData.FindClosestLink(localPosition);
+                _hoveredLinkDistance = ctx.TrackData.GetClosestLinkDistance(localPosition);
             }
         }
 
         if (e is InputEventMouseButton { ButtonIndex: MouseButton.Left, Pressed: true } btn)
         {
             var globalPosition = PluginUtility.ScreenToWorldSnapped(btn.Position);
-            var localPosition = target.ToLocal(globalPosition);
+            var localPosition = ctx.Track.ToLocal(globalPosition);
 
             if (string.IsNullOrEmpty(_selectedLinkId))
             {
@@ -41,14 +36,14 @@ public class PlaceSignalMode : PluginModeHandler
             }
             else
             {
-                var closestNodeId = target.Data.FindClosestNodeId(localPosition);
+                var closestNodeId = ctx.TrackData.FindClosestNodeId(localPosition);
                 if (string.IsNullOrEmpty(closestNodeId))
                 {
                     _selectedLinkId = string.Empty;
                     return false;
                 }
 
-                var link = target.Data.GetLink(_selectedLinkId);
+                var link = ctx.TrackData.GetLink(_selectedLinkId);
                 if (link is null)
                 {
                     _selectedLinkId = string.Empty;
@@ -67,12 +62,12 @@ public class PlaceSignalMode : PluginModeHandler
                     DirectionNodeId = closestNodeId
                 };
 
-                undoRedo.CreateAction("Place Signal");
+                ctx.UndoRedo.CreateAction("Place Signal");
 
-                undoRedo.AddDoMethod(target.Data, nameof(TrackData.AddSignal), newSignal.Id, newSignal);
-                undoRedo.AddUndoMethod(target.Data, nameof(TrackData.RemoveSignal), newSignal.Id);
+                ctx.UndoRedo.AddDoMethod(ctx.Track.Data, nameof(TrackData.AddSignal), newSignal.Id, newSignal);
+                ctx.UndoRedo.AddUndoMethod(ctx.Track.Data, nameof(TrackData.RemoveSignal), newSignal.Id);
 
-                undoRedo.CommitAction();
+                ctx.UndoRedo.CommitAction();
 
                 _selectedLinkId = string.Empty;
                 return true;
@@ -84,7 +79,7 @@ public class PlaceSignalMode : PluginModeHandler
     //
     // protected override void OnGuiDraw(Track target, Control overlay)
     // {
-    //     if (target.Data is null)
+    //     if (ctx.Track.Data is null)
     //     {
     //         return;
     //     }
@@ -97,24 +92,24 @@ public class PlaceSignalMode : PluginModeHandler
     //         return;
     //     }
     //
-    //     var link = target.Data.GetLink(drawLinkId);
+    //     var link = ctx.TrackData.GetLink(drawLinkId);
     //     if (link is null)
     //     {
     //         return;
     //     }
     //
-    //     var nodeA = target.Data.GetNode(link.NodeAId);
-    //     var nodeB = target.Data.GetNode(link.NodeBId);
+    //     var nodeA = ctx.TrackData.GetNode(link.NodeAId);
+    //     var nodeB = ctx.TrackData.GetNode(link.NodeBId);
     //
     //     if (nodeA is null || nodeB is null)
     //     {
     //         return;
     //     }
     //
-    //     var globalPosition1 = target.ToGlobal(nodeA.Position);
+    //     var globalPosition1 = ctx.Track.ToGlobal(nodeA.Position);
     //     var screenPosition1 = PluginUtility.WorldToScreen(globalPosition1);
     //
-    //     var globalPosition2 = target.ToGlobal(nodeB.Position);
+    //     var globalPosition2 = ctx.Track.ToGlobal(nodeB.Position);
     //     var screenPosition2 = PluginUtility.WorldToScreen(globalPosition2);
     //
     //     overlay.DrawLine(screenPosition1, screenPosition2,

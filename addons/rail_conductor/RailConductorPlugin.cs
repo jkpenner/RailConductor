@@ -11,7 +11,6 @@ public enum ToolMode
     Create,
     Move,
     Link,
-    Unlink,
     Insert,
     PlaceSignal
 }
@@ -30,6 +29,7 @@ public partial class RailConductorPlugin : EditorPlugin
     private string _hoveredId = string.Empty;
     private Font _font;
 
+    private PluginContext _context = new();
     private readonly Dictionary<ToolMode, PluginModeHandler> _modeHandlers = new();
 
     private EditorUndoRedoManager? _undoRedo;
@@ -45,7 +45,6 @@ public partial class RailConductorPlugin : EditorPlugin
         _modeHandlers.Add(ToolMode.Insert, new InsertTrackNodeMode());
         _modeHandlers.Add(ToolMode.Move, new MoveTrackNodeMode());
         _modeHandlers.Add(ToolMode.Link, new LinkTrackNodeMode());
-        _modeHandlers.Add(ToolMode.Unlink, new UnlinkTrackNodeMode());
         _modeHandlers.Add(ToolMode.PlaceSignal, new PlaceSignalMode());
 
         _font = ResourceLoader.Load<Font>("res://addons/rail_conductor/fonts/default.tres");
@@ -170,11 +169,19 @@ public partial class RailConductorPlugin : EditorPlugin
         _dragging = false;
     }
 
-    public override bool _ForwardCanvasGuiInput(InputEvent @event)
+    public override bool _ForwardCanvasGuiInput(InputEvent input)
     {
-        _undoRedo = GetUndoRedo();
+        if (_target?.Data is null)
+        {
+            return false;
+        }
+        
+        _context.Track = _target;
+        _context.TrackData = _target.Data;
+        _context.UndoRedo = GetUndoRedo();
+        
 
-        if (_target?.Data is not null && @event is InputEventMouseMotion mouse)
+        if (_target?.Data is not null && input is InputEventMouseMotion mouse)
         {
             UpdateOverlays();
 
@@ -198,7 +205,7 @@ public partial class RailConductorPlugin : EditorPlugin
             return false;
         }
 
-        if (!handler.HandleGuiInput(_target, @event, _undoRedo))
+        if (!handler.HandleGuiInput(_context, input))
         {
             return false;
         }
@@ -207,25 +214,9 @@ public partial class RailConductorPlugin : EditorPlugin
         return true;
     }
 
-    private bool IsHovered(string id)
-    {
-        if (_modeHandlers.TryGetValue(_currentToolMode, out var handler))
-        {
-            return handler.Hovered.Contains(id);
-        }
+    private bool IsHovered(string id) => _context.IsHovered(id);
 
-        return false;
-    }
-
-    private bool IsSelected(string id)
-    {
-        if (_modeHandlers.TryGetValue(_currentToolMode, out var handler))
-        {
-            return handler.Selected.Contains(id);
-        }
-
-        return false;
-    }
+    private bool IsSelected(string id) => _context.IsSelected(id);
     
 
     public override void _ForwardCanvasDrawOverViewport(Control overlay)

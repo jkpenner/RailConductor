@@ -1,97 +1,93 @@
-﻿using Godot;
+﻿using System.Linq;
+using Godot;
 
 namespace RailConductor.Plugin;
 
 public class SelectMode : PluginModeHandler
 {
-    protected override bool OnGuiInput(Track target, InputEvent e, EditorUndoRedoManager undoRedo)
+    protected override bool OnGuiInput(PluginContext ctx, InputEvent e)
     {
-        if (target.Data is null)
-        {
-            return false;
-        }
-
         switch (e)
         {
             case InputEventMouseButton mouseButton:
-                UpdateHoveredItem(target, mouseButton.Position);
+                UpdateHoveredItem(ctx, mouseButton.Position);
                 if (mouseButton is { ButtonIndex: MouseButton.Left, Pressed: true })
                 {
-                    var newSelectedId = GetClosestId(target, mouseButton.Position);
+                    var newSelectedId = GetClosestId(ctx.Track, mouseButton.Position);
                     if (!string.IsNullOrEmpty(newSelectedId))
                     {
                         if (!mouseButton.ShiftPressed)
                         {
-                            ClearSelection();
+                            ctx.ClearSelection();
                         }
                         
-                        Select(newSelectedId);
+                        ctx.Select(newSelectedId);
                         return true;
                     }
                 }
 
                 break;
             case InputEventMouseMotion mouseMotion:
-                UpdateHoveredItem(target, mouseMotion.Position);
+                UpdateHoveredItem(ctx, mouseMotion.Position);
                 break;
             case InputEventKey { Keycode: Key.Delete, Pressed: true } key:
-                if (Selected.Count == 0)
+                if (ctx.Selected.Any())
                 {
                     return false;
                 }
 
-                HandleDeleteEvent(target.Data, undoRedo);
+                DeleteSelected(ctx);
                 return true;
         }
 
         return false;
     }
 
-    private void HandleDeleteEvent(TrackData track, EditorUndoRedoManager undoRedo)
+    private void DeleteSelected(PluginContext ctx)
     {
-        foreach (var id in Selected)
+        foreach (var id in ctx.Selected)
         {
-            if (track.IsNodeId(id))
+            if (ctx.TrackData.IsNodeId(id))
             {
-                var node = track.GetNode(id);
+                var node = ctx.TrackData.GetNode(id);
                 if (node is not null)
                 {
-                    TrackEditorActions.DeleteTrackNode(track, node, undoRedo);
+                    TrackEditorActions.DeleteTrackNode(ctx.TrackData, node, ctx.UndoRedo);
                     continue;
                 }
             }
 
-            if (track.IsLinkId(id))
+            if (ctx.TrackData.IsLinkId(id))
             {
-                var link = track.GetLink(id);
+                var link = ctx.TrackData.GetLink(id);
                 if (link is not null)
                 {
-                    TrackEditorActions.DeleteTrackLink(track, link, undoRedo);
+                    TrackEditorActions.DeleteTrackLink(ctx.TrackData, link, ctx.UndoRedo);
                     continue;
                 }
             }
 
-            if (track.IsSignalId(id))
+            if (ctx.TrackData.IsSignalId(id))
             {
-                var signal = track.GetSignal(id);
+                var signal = ctx.TrackData.GetSignal(id);
                 if (signal is not null)
                 {
-                    TrackEditorActions.DeleteTrackSignal(track, signal, undoRedo);
+                    TrackEditorActions.DeleteTrackSignal(ctx.TrackData, signal, ctx.UndoRedo);
                     continue;
                 }
             }
         }
 
-        ClearSelection();
+        ctx.ClearSelection();
         RequestOverlayUpdate();
     }
 
-    private void UpdateHoveredItem(Track target, Vector2 screenPosition)
+    private void UpdateHoveredItem(PluginContext ctx, Vector2 screenPosition)
     {
-        var newHoveredId = GetClosestId(target, screenPosition);
+        var newHoveredId = GetClosestId(ctx.Track, screenPosition);
         if (!string.IsNullOrEmpty(newHoveredId))
         {
-            Hover(newHoveredId);
+            ctx.Hover(newHoveredId);
         }
     }
 }

@@ -7,36 +7,31 @@ public class InsertTrackNodeMode : PluginModeHandler
     private string _hoveredLinkId = string.Empty;
     private float _hoveredLinkDistance = float.MaxValue;
 
-    protected override bool OnGuiInput(Track target, InputEvent e, EditorUndoRedoManager undoRedo)
+    protected override bool OnGuiInput(PluginContext ctx, InputEvent input)
     {
-        if (target.Data is null)
-        {
-            return false;
-        }
-
-        if (e is InputEventMouseMotion motion)
+        if (input is InputEventMouseMotion motion)
         {
             var globalPosition = PluginUtility.ScreenToWorldSnapped(motion.Position);
-            var localPosition = target.ToLocal(globalPosition);
-            _hoveredLinkId = target.Data.FindClosestLink(localPosition);
-            _hoveredLinkDistance = target.Data.GetClosestLinkDistance(localPosition);
+            var localPosition = ctx.Track.ToLocal(globalPosition);
+            _hoveredLinkId = ctx.TrackData.FindClosestLink(localPosition);
+            _hoveredLinkDistance = ctx.TrackData.GetClosestLinkDistance(localPosition);
         }
 
-        if (e is InputEventMouseButton { ButtonIndex: MouseButton.Left, Pressed: true } btn)
+        if (input is InputEventMouseButton { ButtonIndex: MouseButton.Left, Pressed: true } btn)
         {
             var globalPosition = PluginUtility.ScreenToWorldSnapped(btn.Position);
-            var localPosition = target.ToLocal(globalPosition);
+            var localPosition = ctx.Track.ToLocal(globalPosition);
 
             if (_hoveredLinkDistance < 2f)
             {
-                var link = target.Data.GetLink(_hoveredLinkId);
+                var link = ctx.TrackData.GetLink(_hoveredLinkId);
                 if (link is null)
                 {
                     return false;
                 }
                 
-                var nodeA = target.Data.GetNode(link.NodeAId);
-                var nodeB = target.Data.GetNode(link.NodeBId);
+                var nodeA = ctx.TrackData.GetNode(link.NodeAId);
+                var nodeB = ctx.TrackData.GetNode(link.NodeBId);
 
                 if (nodeA is null || nodeB is null)
                 {
@@ -60,47 +55,47 @@ public class InsertTrackNodeMode : PluginModeHandler
                     NodeBId = newNode.Id,
                 };
                 
-                undoRedo.CreateAction("Insert Track Node");
+                ctx.UndoRedo.CreateAction("Insert Track Node");
                 
                 // Remove the old link from TrackData
-                undoRedo.AddDoMethod(target.Data, nameof(TrackData.RemoveLink), link.Id);
-                undoRedo.AddUndoMethod(target.Data, nameof(TrackData.AddLink), link.Id, link);
+                ctx.UndoRedo.AddDoMethod(ctx.TrackData, nameof(TrackData.RemoveLink), link.Id);
+                ctx.UndoRedo.AddUndoMethod(ctx.TrackData, nameof(TrackData.AddLink), link.Id, link);
                 
                 // Remove the old link ID from the previous nodes
-                undoRedo.AddDoMethod(nodeA, nameof(TrackNodeData.RemoveLink), link.Id);
-                undoRedo.AddUndoMethod(nodeA, nameof(TrackNodeData.AddLink), link.Id);
-                undoRedo.AddDoMethod(nodeB, nameof(TrackNodeData.RemoveLink), link.Id);
-                undoRedo.AddUndoMethod(nodeB, nameof(TrackNodeData.AddLink), link.Id);
+                ctx.UndoRedo.AddDoMethod(nodeA, nameof(TrackNodeData.RemoveLink), link.Id);
+                ctx.UndoRedo.AddUndoMethod(nodeA, nameof(TrackNodeData.AddLink), link.Id);
+                ctx.UndoRedo.AddDoMethod(nodeB, nameof(TrackNodeData.RemoveLink), link.Id);
+                ctx.UndoRedo.AddUndoMethod(nodeB, nameof(TrackNodeData.AddLink), link.Id);
                 
                 // Add the new node and new links to TrackData
-                undoRedo.AddDoMethod(target.Data, nameof(TrackData.AddNode), newNode.Id, newNode);
-                undoRedo.AddUndoMethod(target.Data, nameof(TrackData.RemoveNode), newNode.Id);
-                undoRedo.AddDoMethod(target.Data, nameof(TrackData.AddLink), newLink1.Id, newLink1);
-                undoRedo.AddUndoMethod(target.Data, nameof(TrackData.RemoveLink), newLink1.Id);
-                undoRedo.AddDoMethod(target.Data, nameof(TrackData.AddLink), newLink2.Id, newLink2);
-                undoRedo.AddUndoMethod(target.Data, nameof(TrackData.RemoveLink), newLink2.Id);
+                ctx.UndoRedo.AddDoMethod(ctx.TrackData, nameof(TrackData.AddNode), newNode.Id, newNode);
+                ctx.UndoRedo.AddUndoMethod(ctx.TrackData, nameof(TrackData.RemoveNode), newNode.Id);
+                ctx.UndoRedo.AddDoMethod(ctx.TrackData, nameof(TrackData.AddLink), newLink1.Id, newLink1);
+                ctx.UndoRedo.AddUndoMethod(ctx.TrackData, nameof(TrackData.RemoveLink), newLink1.Id);
+                ctx.UndoRedo.AddDoMethod(ctx.TrackData, nameof(TrackData.AddLink), newLink2.Id, newLink2);
+                ctx.UndoRedo.AddUndoMethod(ctx.TrackData, nameof(TrackData.RemoveLink), newLink2.Id);
                 
                 // Add the new link IDs to the old nodes
-                undoRedo.AddDoMethod(nodeA, nameof(TrackNodeData.AddLink), newLink1.Id);
-                undoRedo.AddUndoMethod(nodeA, nameof(TrackNodeData.RemoveLink), newLink1.Id);
-                undoRedo.AddDoMethod(nodeB, nameof(TrackNodeData.AddLink), newLink2.Id);
-                undoRedo.AddUndoMethod(nodeB, nameof(TrackNodeData.RemoveLink), newLink2.Id);
+                ctx.UndoRedo.AddDoMethod(nodeA, nameof(TrackNodeData.AddLink), newLink1.Id);
+                ctx.UndoRedo.AddUndoMethod(nodeA, nameof(TrackNodeData.RemoveLink), newLink1.Id);
+                ctx.UndoRedo.AddDoMethod(nodeB, nameof(TrackNodeData.AddLink), newLink2.Id);
+                ctx.UndoRedo.AddUndoMethod(nodeB, nameof(TrackNodeData.RemoveLink), newLink2.Id);
                 
                 // Add the new link IDs to the new node
-                undoRedo.AddDoMethod(newNode, nameof(TrackNodeData.AddLink), newLink1.Id);
-                undoRedo.AddUndoMethod(newNode, nameof(TrackNodeData.RemoveLink), newLink1.Id);
-                undoRedo.AddDoMethod(newNode, nameof(TrackNodeData.AddLink), newLink2.Id);
-                undoRedo.AddUndoMethod(newNode, nameof(TrackNodeData.RemoveLink), newLink2.Id);
+                ctx.UndoRedo.AddDoMethod(newNode, nameof(TrackNodeData.AddLink), newLink1.Id);
+                ctx.UndoRedo.AddUndoMethod(newNode, nameof(TrackNodeData.RemoveLink), newLink1.Id);
+                ctx.UndoRedo.AddDoMethod(newNode, nameof(TrackNodeData.AddLink), newLink2.Id);
+                ctx.UndoRedo.AddUndoMethod(newNode, nameof(TrackNodeData.RemoveLink), newLink2.Id);
                 
                 // Update configurations (do and undo for all affected nodes)
-                undoRedo.AddDoMethod(newNode, nameof(TrackNodeData.UpdateConfiguration), target.Data);
-                undoRedo.AddUndoMethod(newNode, nameof(TrackNodeData.UpdateConfiguration), target.Data);
-                undoRedo.AddDoMethod(nodeA, nameof(TrackNodeData.UpdateConfiguration), target.Data);
-                undoRedo.AddUndoMethod(nodeA, nameof(TrackNodeData.UpdateConfiguration), target.Data);
-                undoRedo.AddDoMethod(nodeB, nameof(TrackNodeData.UpdateConfiguration), target.Data);
-                undoRedo.AddUndoMethod(nodeB, nameof(TrackNodeData.UpdateConfiguration), target.Data);
+                ctx.UndoRedo.AddDoMethod(newNode, nameof(TrackNodeData.UpdateConfiguration), ctx.TrackData);
+                ctx.UndoRedo.AddUndoMethod(newNode, nameof(TrackNodeData.UpdateConfiguration), ctx.TrackData);
+                ctx.UndoRedo.AddDoMethod(nodeA, nameof(TrackNodeData.UpdateConfiguration), ctx.TrackData);
+                ctx.UndoRedo.AddUndoMethod(nodeA, nameof(TrackNodeData.UpdateConfiguration), ctx.TrackData);
+                ctx.UndoRedo.AddDoMethod(nodeB, nameof(TrackNodeData.UpdateConfiguration), ctx.TrackData);
+                ctx.UndoRedo.AddUndoMethod(nodeB, nameof(TrackNodeData.UpdateConfiguration), ctx.TrackData);
                 
-                undoRedo.CommitAction();
+                ctx.UndoRedo.CommitAction();
             }
             return true;
         }
@@ -110,29 +105,29 @@ public class InsertTrackNodeMode : PluginModeHandler
 
     // public override void OnGuiDraw(Track target, Control overlay)
     // {
-    //     if (target.Data is null)
+    //     if (ctx.TrackData is null)
     //     {
     //         return;
     //     }
     //     
-    //     var link = target.Data.GetLink(_hoveredLinkId);
+    //     var link = ctx.TrackData.GetLink(_hoveredLinkId);
     //     if (link is null)
     //     {
     //         return;
     //     }
     //     
-    //     var nodeA = target.Data.GetNode(link.NodeAId);
-    //     var nodeB = target.Data.GetNode(link.NodeBId);
+    //     var nodeA = ctx.TrackData.GetNode(link.NodeAId);
+    //     var nodeB = ctx.TrackData.GetNode(link.NodeBId);
     //
     //     if (nodeA is null || nodeB is null)
     //     {
     //         return;
     //     }
     //
-    //     var globalPosition1 = target.ToGlobal(nodeA.Position);
+    //     var globalPosition1 = ctx.Track.ToGlobal(nodeA.Position);
     //     var screenPosition1 = PluginUtility.WorldToScreen(globalPosition1);
     //
-    //     var globalPosition2 = target.ToGlobal(nodeB.Position);
+    //     var globalPosition2 = ctx.Track.ToGlobal(nodeB.Position);
     //     var screenPosition2 = PluginUtility.WorldToScreen(globalPosition2);
     //
     //     overlay.DrawLine(screenPosition1, screenPosition2,

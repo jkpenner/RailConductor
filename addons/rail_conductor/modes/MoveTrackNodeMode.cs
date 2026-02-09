@@ -7,27 +7,22 @@ public class MoveTrackNodeMode : PluginModeHandler
     private string _selectedNodeId = string.Empty;
     private Vector2 _originalPosition = Vector2.Zero;
 
-    protected override bool OnGuiInput(Track target, InputEvent e, EditorUndoRedoManager undoRedo)
+    protected override bool OnGuiInput(PluginContext ctx, InputEvent e)
     {
         if (!string.IsNullOrEmpty(_selectedNodeId))
         {
-            Select(_selectedNodeId);
-        }
-        
-        if (target.Data is null)
-        {
-            return false;
+            ctx.Select(_selectedNodeId);
         }
 
         if (e is InputEventMouseButton { ButtonIndex: MouseButton.Left } btn)
         {
             var globalPosition = PluginUtility.ScreenToWorldSnapped(btn.Position);
-            var localPosition = target.ToLocal(globalPosition);
+            var localPosition = ctx.Track.ToLocal(globalPosition);
 
             if (btn.Pressed)
             {
-                _selectedNodeId = target.Data.FindClosestNodeId(localPosition);
-                var selectedNode = target.Data.GetNode(_selectedNodeId);
+                _selectedNodeId = ctx.TrackData.FindClosestNodeId(localPosition);
+                var selectedNode = ctx.TrackData.GetNode(_selectedNodeId);
                 if (selectedNode is not null)
                 {
                     _originalPosition = selectedNode.Position;
@@ -35,26 +30,26 @@ public class MoveTrackNodeMode : PluginModeHandler
             }
             else // Released
             {
-                var selectedNode = target.Data.GetNode(_selectedNodeId);
+                var selectedNode = ctx.TrackData.GetNode(_selectedNodeId);
                 if (selectedNode is not null)
                 {
                     var finalPos = selectedNode.Position;
 
-                    undoRedo.CreateAction("Move Track Node");
-                    undoRedo.AddDoProperty(selectedNode, nameof(TrackNodeData.Position), finalPos);
-                    undoRedo.AddUndoProperty(selectedNode, nameof(TrackNodeData.Position), _originalPosition);
+                    ctx.UndoRedo.CreateAction("Move Track Node");
+                    ctx.UndoRedo.AddDoProperty(selectedNode, nameof(TrackNodeData.Position), finalPos);
+                    ctx.UndoRedo.AddUndoProperty(selectedNode, nameof(TrackNodeData.Position), _originalPosition);
                     
-                    undoRedo.AddDoMethod(selectedNode, nameof(TrackNodeData.UpdateConfiguration), target.Data);
-                    undoRedo.AddUndoMethod(selectedNode, nameof(TrackNodeData.UpdateConfiguration), target.Data);
+                    ctx.UndoRedo.AddDoMethod(selectedNode, nameof(TrackNodeData.UpdateConfiguration), ctx.TrackData);
+                    ctx.UndoRedo.AddUndoMethod(selectedNode, nameof(TrackNodeData.UpdateConfiguration), ctx.TrackData);
                     
-                    undoRedo.CommitAction();
+                    ctx.UndoRedo.CommitAction();
                     _selectedNodeId = string.Empty;
                 }
             }
 
-            // target.Update();
-            target.RecalculateGraph();
-            target.NotifyPropertyListChanged();
+            // ctx.Track.Update();
+            ctx.Track.RecalculateGraph();
+            ctx.Track.NotifyPropertyListChanged();
             return true;
         }
 
@@ -62,16 +57,16 @@ public class MoveTrackNodeMode : PluginModeHandler
             Input.IsMouseButtonPressed(MouseButton.Left))
         {
             var globalPosition = PluginUtility.ScreenToWorldSnapped(mouseMotion.Position);
-            var localPosition = target.ToLocal(globalPosition);
+            var localPosition = ctx.Track.ToLocal(globalPosition);
 
-            var selectedNode = target.Data.GetNode(_selectedNodeId);
+            var selectedNode = ctx.TrackData.GetNode(_selectedNodeId);
             if (selectedNode is not null)
             {
                 selectedNode.Position = localPosition;
 
-                // target.Update();
-                target.RecalculateGraph();
-                target.NotifyPropertyListChanged();
+                // ctx.Track.Update();
+                ctx.Track.RecalculateGraph();
+                ctx.Track.NotifyPropertyListChanged();
                 return true;
             }
         }
