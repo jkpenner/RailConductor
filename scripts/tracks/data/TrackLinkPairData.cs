@@ -2,7 +2,7 @@
 
 namespace RailConductor;
 
-[GlobalClass]
+[GlobalClass, Tool]
 public partial class TrackLinkPairData : Resource
 {
     [Export]

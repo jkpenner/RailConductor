@@ -5,6 +5,9 @@ namespace RailConductor;
 [GlobalClass]
 public partial class TrackSettings : Resource
 {
+    
+    
+    
     [Export]
     public Color SegmentNormalColor { get; set; } = Colors.White;
 

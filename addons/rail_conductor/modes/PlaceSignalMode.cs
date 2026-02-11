@@ -1,4 +1,5 @@
-﻿using Godot;
+﻿using System;
+using Godot;
 
 namespace RailConductor.Plugin;
 
@@ -7,6 +8,26 @@ public class PlaceSignalMode : PluginModeHandler
     private string _hoveredLinkId = string.Empty;
     private float _hoveredLinkDistance = float.MaxValue;
     private string _selectedLinkId = string.Empty;
+    private Phase _currentPhase = Phase.LinkSelect;
+
+    private enum Phase
+    {
+        LinkSelect,
+        NodeSelect,
+    }
+
+    protected override void OnEnable(PluginContext ctx)
+    {
+        ctx.ClearSelection();
+        ctx.RestrictSelectionType(SelectionType.Link);
+        RequestOverlayUpdate();
+    }
+
+    protected override void OnDisable(PluginContext ctx)
+    {
+        ctx.ResetSelectRestrictions();
+        ctx.ClearSelection();
+    }
 
     protected override bool OnGuiInput(PluginContext ctx, InputEvent e)
     {
@@ -21,98 +42,100 @@ public class PlaceSignalMode : PluginModeHandler
             }
         }
 
+        if (e is InputEventMouseButton { ButtonIndex: MouseButton.Right, Pressed: true })
+        {
+            // Return back to the previous phase on right click
+            if (_currentPhase == Phase.NodeSelect)
+            {
+                _currentPhase = Phase.LinkSelect;
+                _selectedLinkId = string.Empty;
+                ctx.ClearSelection();
+                ctx.ResetSelectRestrictions();
+                ctx.RestrictSelectionType(SelectionType.Link);
+                return true;
+            }
+        }
+
         if (e is InputEventMouseButton { ButtonIndex: MouseButton.Left, Pressed: true } btn)
         {
             var globalPosition = PluginUtility.ScreenToWorldSnapped(btn.Position);
             var localPosition = ctx.Track.ToLocal(globalPosition);
 
-            if (string.IsNullOrEmpty(_selectedLinkId))
+            switch (_currentPhase)
             {
-                if (_hoveredLinkDistance < 20f && !string.IsNullOrEmpty(_hoveredLinkId))
-                {
-                    _selectedLinkId = _hoveredLinkId;
-                    return true;
-                }
+                case Phase.LinkSelect:
+                    HandleLinkSelectPhase(ctx);
+                    break;
+                case Phase.NodeSelect:
+                    HandleNodeSelectPhase(ctx, localPosition);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
-            else
-            {
-                var closestNodeId = ctx.TrackData.FindClosestNodeId(localPosition);
-                if (string.IsNullOrEmpty(closestNodeId))
-                {
-                    _selectedLinkId = string.Empty;
-                    return false;
-                }
 
-                var link = ctx.TrackData.GetLink(_selectedLinkId);
-                if (link is null)
-                {
-                    _selectedLinkId = string.Empty;
-                    return false;
-                }
-
-                if (closestNodeId != link.NodeAId && closestNodeId != link.NodeBId)
-                {
-                    _selectedLinkId = string.Empty;
-                    return false;
-                }
-
-                var newSignal = new TrackSignalData
-                {
-                    LinkId = _selectedLinkId,
-                    DirectionNodeId = closestNodeId
-                };
-
-                ctx.UndoRedo.CreateAction("Place Signal");
-
-                ctx.UndoRedo.AddDoMethod(ctx.Track.Data, nameof(TrackData.AddSignal), newSignal.Id, newSignal);
-                ctx.UndoRedo.AddUndoMethod(ctx.Track.Data, nameof(TrackData.RemoveSignal), newSignal.Id);
-
-                ctx.UndoRedo.CommitAction();
-
-                _selectedLinkId = string.Empty;
-                return true;
-            }
+            return true;
         }
 
         return false;
     }
-    //
-    // protected override void OnGuiDraw(Track target, Control overlay)
-    // {
-    //     if (ctx.Track.Data is null)
-    //     {
-    //         return;
-    //     }
-    //
-    //     var drawLinkId = string.IsNullOrEmpty(_selectedLinkId) ? _hoveredLinkId : _selectedLinkId;
-    //     var drawColor = string.IsNullOrEmpty(_selectedLinkId) ? Colors.Yellow : Colors.Cyan;
-    //
-    //     if (string.IsNullOrEmpty(drawLinkId))
-    //     {
-    //         return;
-    //     }
-    //
-    //     var link = ctx.TrackData.GetLink(drawLinkId);
-    //     if (link is null)
-    //     {
-    //         return;
-    //     }
-    //
-    //     var nodeA = ctx.TrackData.GetNode(link.NodeAId);
-    //     var nodeB = ctx.TrackData.GetNode(link.NodeBId);
-    //
-    //     if (nodeA is null || nodeB is null)
-    //     {
-    //         return;
-    //     }
-    //
-    //     var globalPosition1 = ctx.Track.ToGlobal(nodeA.Position);
-    //     var screenPosition1 = PluginUtility.WorldToScreen(globalPosition1);
-    //
-    //     var globalPosition2 = ctx.Track.ToGlobal(nodeB.Position);
-    //     var screenPosition2 = PluginUtility.WorldToScreen(globalPosition2);
-    //
-    //     overlay.DrawLine(screenPosition1, screenPosition2,
-    //         drawColor, PluginSettings.LinkWidth * PluginUtility.GetZoom());
-    // }
+
+    private void HandleLinkSelectPhase(PluginContext ctx)
+    {
+        if (_hoveredLinkDistance >= 20f || string.IsNullOrEmpty(_hoveredLinkId))
+        {
+            return;
+        }
+
+        var link = ctx.TrackData.GetLink(_hoveredLinkId);
+        if (link is null)
+        {
+            return;
+        }
+
+        _currentPhase = Phase.NodeSelect;
+        _selectedLinkId = _hoveredLinkId;
+        ctx.SelectOnly(_selectedLinkId);
+        ctx.RestrictSelectionType(SelectionType.Node);
+        ctx.AddSelectableObject(link.NodeAId);
+        ctx.AddSelectableObject(link.NodeBId);
+        RequestOverlayUpdate();
+    }
+
+    private void HandleNodeSelectPhase(PluginContext ctx, Vector2 localPosition)
+    {
+        var closestNodeId = ctx.TrackData.FindClosestNodeId(localPosition);
+        if (string.IsNullOrEmpty(closestNodeId))
+        {
+            _selectedLinkId = string.Empty;
+            return;
+        }
+
+        var link = ctx.TrackData.GetLink(_selectedLinkId);
+        if (link is null)
+        {
+            _selectedLinkId = string.Empty;
+            return;
+        }
+
+        if (closestNodeId != link.NodeAId && closestNodeId != link.NodeBId)
+        {
+            _selectedLinkId = string.Empty;
+            return;
+        }
+
+        var newSignal = new TrackSignalData
+        {
+            LinkId = _selectedLinkId,
+            DirectionNodeId = closestNodeId
+        };
+
+        TrackEditorActions.AddTrackSignal(ctx.TrackData, newSignal, ctx.UndoRedo);
+
+        _currentPhase = Phase.LinkSelect;
+        _selectedLinkId = string.Empty;
+        ctx.SelectOnly(newSignal.Id);
+        ctx.ResetSelectRestrictions();
+        ctx.RestrictSelectionType(SelectionType.Link);
+        RequestOverlayUpdate();
+    }
 }

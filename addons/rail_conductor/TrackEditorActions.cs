@@ -16,6 +16,19 @@ public static class TrackEditorActions
         undoRedo.CommitAction();
     }
 
+    public static void AddTrackSignal(
+        TrackData track,
+        TrackSignalData signal,
+        EditorUndoRedoManager undoRedo)
+    {
+        undoRedo.CreateAction("Place Signal");
+
+        undoRedo.AddDoMethod(track, nameof(TrackData.AddSignal), signal.Id, signal);
+        undoRedo.AddUndoMethod(track, nameof(TrackData.RemoveSignal), signal.Id);
+
+        undoRedo.CommitAction();
+    }
+
     public static void MoveTrackNode(
         TrackData track,
         TrackNodeData node,
