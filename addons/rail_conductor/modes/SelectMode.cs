@@ -37,6 +37,7 @@ public class SelectMode : PluginModeHandler
                         .ToArray();
                 }
 
+                RequestOverlayUpdate();
                 return true;
 
             case InputEventMouseButton { ButtonIndex: MouseButton.Left, Pressed: false } btn:
@@ -61,7 +62,7 @@ public class SelectMode : PluginModeHandler
                             newOrigin + delta, _initialPressPosition + delta, ctx.UndoRedo);
                     }
 
-
+                    RequestOverlayUpdate();
                     return true;
                 }
 
@@ -81,7 +82,7 @@ public class SelectMode : PluginModeHandler
             case InputEventMouseMotion mouseMotion:
                 _hasMoveSincePress = true;
                 UpdateHoveredItem(ctx, mouseMotion.Position);
-
+                
                 if (_isDraggable)
                 {
                     // Update all nodes based on their original positions.
@@ -100,6 +101,7 @@ public class SelectMode : PluginModeHandler
                     }
                 }
 
+                RequestOverlayUpdate();
                 break;
             case InputEventKey { Keycode: Key.Delete, Pressed: true }:
                 if (!ctx.Selected.Any())
@@ -108,6 +110,7 @@ public class SelectMode : PluginModeHandler
                 }
 
                 DeleteSelected(ctx);
+                RequestOverlayUpdate();
                 return true;
         }
 
