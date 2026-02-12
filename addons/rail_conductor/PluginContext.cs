@@ -24,7 +24,7 @@ public class PluginContext
     
     public Track Track { get; set; }
     public TrackData TrackData { get; set; }
-    public EditorUndoRedoManager UndoRedo { get; set; }
+    public EditorUndoRedoManager? UndoRedo { get; set; }
     
     public IEnumerable<string> Selected => _selected;
     public IEnumerable<string> Hovered => _hovered;

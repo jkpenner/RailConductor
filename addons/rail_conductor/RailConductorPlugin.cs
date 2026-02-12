@@ -1,5 +1,6 @@
 #if TOOLS
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
 
 namespace RailConductor.Plugin;
@@ -15,39 +16,76 @@ public enum ToolMode
 }
 
 [Tool]
-public partial class RailConductorPlugin : EditorPlugin
+public partial class RailConductorPlugin : EditorPlugin, ISerializationListener
 {
-    private Track? _target;
-    private TrackNodeOptions? _options;
-    // private TrackToolbar? _toolbar;
-
-
     private ToolMode _currentToolMode = ToolMode.None;
-    private Font _font;
-
-    private PluginContext _context = new();
+    private readonly PluginContext _context = new();
     private readonly Dictionary<ToolMode, PluginModeHandler> _modeHandlers = new();
 
+    private bool _isInitialized;
+    private Track? _target;
+    private TrackNodeOptions? _options;
     private EditorUndoRedoManager? _undoRedo;
 
-    public override void _EnterTree()
+    public override void _EnterTree() => Initialize();
+    public override void _ExitTree() => Cleanup();
+
+    public void OnAfterDeserialize() => Initialize();
+    public void OnBeforeSerialize() => Cleanup();
+
+    private void Initialize()
     {
+        if (_isInitialized)
+        {
+            return;
+        }
+
+        _isInitialized = true;
+
+        // Setup undo/redo callback handling.
         _undoRedo = GetUndoRedo();
         _undoRedo.VersionChanged += OnVersionChanged;
 
-        _modeHandlers.Clear();
+        // Initialize Mode Handlers
         _modeHandlers.Add(ToolMode.Select, new SelectMode());
         _modeHandlers.Add(ToolMode.Create, new AddTrackNodeMode());
         _modeHandlers.Add(ToolMode.Insert, new InsertTrackNodeMode());
         _modeHandlers.Add(ToolMode.Link, new LinkTrackNodeMode());
         _modeHandlers.Add(ToolMode.PlaceSignal, new PlaceSignalMode());
 
-        _font = ResourceLoader.Load<Font>("res://addons/rail_conductor/fonts/default.tres");
-
         foreach (var handler in _modeHandlers.Values)
         {
             handler.OverlayUpdateRequested += OnUpdateOverlayRequested;
         }
+    }
+
+    private void Cleanup()
+    {
+        if (!_isInitialized)
+        {
+            return;
+        }
+
+        _isInitialized = false;
+        ClearMenus();
+
+        // Clean up undo/redo callbacks.
+        if (_undoRedo is not null)
+        {
+            _undoRedo.VersionChanged -= OnVersionChanged;
+        }
+
+        _undoRedo = null;
+
+        // Clean up mode handlers.
+        foreach (var handler in _modeHandlers.Values)
+        {
+            handler.OverlayUpdateRequested -= OnUpdateOverlayRequested;
+        }
+
+        _modeHandlers.Clear();
+
+        _target = null;
     }
 
     private void OnUpdateOverlayRequested()
@@ -58,24 +96,6 @@ public partial class RailConductorPlugin : EditorPlugin
     private void OnVersionChanged()
     {
         UpdateOverlays();
-    }
-
-    public override void _ExitTree()
-    {
-        ClearMenus();
-        _target = null;
-
-        if (_undoRedo is not null)
-        {
-            _undoRedo.VersionChanged -= OnVersionChanged;
-        }
-
-        foreach (var handler in _modeHandlers.Values)
-        {
-            handler.OverlayUpdateRequested -= OnUpdateOverlayRequested;
-        }
-
-        _undoRedo = null;
     }
 
     public override bool _Handles(GodotObject obj)
@@ -104,49 +124,36 @@ public partial class RailConductorPlugin : EditorPlugin
 
     private void SetupMenus()
     {
-        // if (_toolbar is null)
-        // {
-        //     var toolbarScene = ResourceLoader.Load<PackedScene>(
-        //         "res://addons/rail_conductor/scenes/track_toolbar.tscn");
-        //     _toolbar = toolbarScene.Instantiate<TrackToolbar>();
-        //     if (_toolbar is not null)
-        //     {
-        //         GD.Print("Adding tool bar to CanvasEditorMenu");
-        //         _toolbar.ToolModeSelected += SetMode;
-        //         AddControlToContainer(CustomControlContainer.CanvasEditorMenu, _toolbar);
-        //     }
-        // }
+        if (_options is not null)
+        {
+            return;
+        }
+
+        var optionsScene = ResourceLoader.Load<PackedScene>(
+            "res://addons/rail_conductor/scenes/track_node_options.tscn");
+        _options = optionsScene.InstantiateOrNull<TrackNodeOptions>();
 
         if (_options is null)
         {
-            var optionsScene = ResourceLoader.Load<PackedScene>(
-                "res://addons/rail_conductor/scenes/track_node_options.tscn");
-            _options = optionsScene.InstantiateOrNull<TrackNodeOptions>();
-            if (_options is not null)
-            {
-                _options.ToolModeSelected += SetMode;
-                AddControlToContainer(CustomControlContainer.CanvasEditorSideRight, _options);
-            }
+            GD.PushError($"Failed to instantiate {nameof(TrackNodeOptions)} scene.");
+            return;
         }
+
+        _options.ToolModeSelected += SetMode;
+        AddControlToContainer(CustomControlContainer.CanvasEditorSideRight, _options);
     }
 
     private void ClearMenus()
     {
-        // if (_toolbar is not null)
-        // {
-        //     RemoveControlFromContainer(CustomControlContainer.CanvasEditorMenu, _toolbar);
-        //     _toolbar.ToolModeSelected -= SetMode;
-        //     _toolbar.QueueFree();
-        //     _toolbar = null;
-        // }
-
-        if (_options is not null)
+        if (_options is null)
         {
-            RemoveControlFromContainer(CustomControlContainer.CanvasEditorMenu, _options);
-            _options.ToolModeSelected -= SetMode;
-            _options.QueueFree();
-            _options = null;
+            return;
         }
+
+        RemoveControlFromContainer(CustomControlContainer.CanvasEditorMenu, _options);
+        _options.ToolModeSelected -= SetMode;
+        _options.QueueFree();
+        _options = null;
     }
 
     private void SetMode(ToolMode toolMode)
@@ -155,15 +162,14 @@ public partial class RailConductorPlugin : EditorPlugin
         {
             prevHandler.Disable(_context);
         }
-        
+
         _currentToolMode = toolMode;
-        
+
         if (_modeHandlers.TryGetValue(_currentToolMode, out var nextHandler))
         {
             nextHandler.Enable(_context);
         }
-        
-        // _toolbar?.SetToolMode(toolMode);
+
         _options?.SetToolMode(toolMode);
     }
 
@@ -178,60 +184,52 @@ public partial class RailConductorPlugin : EditorPlugin
         {
             return false;
         }
-        
+
+        // Update plugin context with current values
         _context.Track = _target;
         _context.TrackData = _target.Data;
-        _context.UndoRedo = GetUndoRedo();
+        _context.UndoRedo = _undoRedo;
 
         if (!handler.HandleGuiInput(_context, input))
         {
             return false;
         }
-
+        
         UpdateOverlays();
         return true;
     }
 
-    private bool IsHovered(string id) => _context.IsHovered(id);
-
-    private bool IsSelected(string id) => _context.IsSelected(id);
-
-
     public override void _ForwardCanvasDrawOverViewport(Control overlay)
     {
-        if (_target?.Data is null)
+        var drawTarget = _target;
+        if (drawTarget is null)
         {
             return;
         }
+        
+        if (drawTarget.Data is null)
+        {
+            return;
+        }
+        
+        _context.Track = drawTarget;
+        _context.TrackData = drawTarget.Data;
+        _context.UndoRedo = _undoRedo;
 
-        _context.Track = _target;
-        _context.TrackData = _target.Data;
-        _context.UndoRedo = GetUndoRedo();
-
-        // Draw the links between all nodes
-        foreach (var link in _target.Data.GetLinks())
+        foreach (var link in drawTarget.Data.GetLinks())
         {
             TrackEditorDrawer.DrawTrackLink(overlay, _context, link);
         }
 
-        // Draw all nodes
-        foreach (var node in _target.Data.GetNodes())
+        foreach (var node in drawTarget.Data.GetNodes())
         {
             TrackEditorDrawer.DrawTrackNode(overlay, _context, node);
         }
 
-        foreach (var signal in _target.Data.GetSignals())
+        foreach (var signal in drawTarget.Data.GetSignals())
         {
             TrackEditorDrawer.DrawTrackSignal(overlay, _context, signal);
         }
-    }
-}
-
-public static class ColorExtensions
-{
-    public static Color WithAlpha(this Color color, float alpha)
-    {
-        return new Color(color.R, color.G, color.B, alpha);
     }
 }
 #endif
