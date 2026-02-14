@@ -5,6 +5,69 @@ namespace RailConductor.Plugin;
 
 public static class TrackEditorDrawer
 {
+    public static void DrawTrack(Control overlay, PluginContext ctx)
+    {
+        foreach (var platform in ctx.TrackData.GetPlatforms())
+        {
+            DrawTrackPlatform(overlay, ctx, platform);
+        }
+        
+        foreach (var link in ctx.TrackData.GetLinks())
+        {
+            DrawTrackLink(overlay, ctx, link);
+        }
+
+        foreach (var node in ctx.TrackData.GetNodes())
+        {
+            DrawTrackNode(overlay, ctx, node);
+        }
+
+        foreach (var signal in ctx.TrackData.GetSignals())
+        {
+            DrawTrackSignal(overlay, ctx, signal);
+        }
+    }
+
+    public static Font GetFont() => ResourceLoader.Load<Font>(PluginSettings.FontPath);
+
+    public static void DrawTrackPlatform(Control overlay, PluginContext ctx, TrackPlatformData platform)
+    {
+        var scale = PluginUtility.GetZoom();
+
+        var globalPosition = ctx.Track.ToGlobal(platform.Position);
+        var center = PluginUtility.WorldToScreen(globalPosition);
+        
+        var size = platform.IsVertical 
+            ? PluginSettings.PlatformVerticalSize 
+            : PluginSettings.PlatformHorizontalSize;
+
+        if (ctx.IsSelected(platform.Id))
+        {
+            var selectedSize = (size + new Vector2(2f, 2f)) * scale;
+            overlay.DrawRect(new Rect2(center, selectedSize), PluginSettings.SelectedColor);
+        }
+
+        var color = GetColor(ctx, platform.Id,
+            PluginSettings.LinkNormalColor,
+            PluginSettings.LinkHoverColor,
+            PluginSettings.LinkDisabledColor);
+
+        overlay.DrawRect(new Rect2(center, size), color);
+
+        // Draw the display name label
+        var labelOffset = center - size * 0.5f;
+        var labelSize = new Vector2(20f, 4f) * scale;
+        
+        overlay.DrawRect(new Rect2(center - labelOffset, labelSize), Colors.White);
+        overlay.DrawString(GetFont(), 
+            center - labelOffset,
+            platform.DisplayName,
+            alignment: HorizontalAlignment.Center,
+            fontSize: (int)(4f * scale),
+            modulate: Colors.Black,
+            width: 60f);
+    }
+
     public static void DrawTrackLink(Control overlay, PluginContext ctx, TrackLinkData link)
     {
         var nodeA = ctx.TrackData.GetNode(link.NodeAId);
@@ -40,6 +103,8 @@ public static class TrackEditorDrawer
         if (font is not null)
         {
             var center = screenPosition1.Lerp(screenPosition2, 0.5f);
+            overlay.DrawRect(new Rect2(center - new Vector2(8f, 2f) * scale, new Vector2(16f, 4f) * scale),
+                Colors.White);
             overlay.DrawString(font, center + new Vector2(-50f, (1.5f * scale)),
                 link.Id[0..3].ToUpper(),
                 alignment: HorizontalAlignment.Center,
@@ -60,7 +125,7 @@ public static class TrackEditorDrawer
             overlay.DrawCircle(screenPosition, (PluginSettings.NodeRadius + 2) * scale,
                 PluginSettings.SelectedColor);
         }
-        
+
         var color = GetColor(ctx, node.Id,
             PluginSettings.NodeNormalColor,
             PluginSettings.NodeHoverColor,
@@ -72,7 +137,7 @@ public static class TrackEditorDrawer
             PluginSettings.NodeFillNormalColor,
             PluginSettings.NodeFillHoverColor,
             PluginSettings.NodeFillDisabledColor);
-        
+
         overlay.DrawCircle(screenPosition, (PluginSettings.NodeRadius - 2) * scale, fillColor);
 
         var font = ResourceLoader.Load<Font>("res://addons/rail_conductor/fonts/default.tres");

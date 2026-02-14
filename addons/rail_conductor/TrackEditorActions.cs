@@ -42,6 +42,21 @@ public static class TrackEditorActions
         undoRedo.AddDoMethod(node, nameof(TrackNodeData.UpdateConfiguration), track);
         undoRedo.CommitAction();
     }
+    
+    public static void AddTrackPlatform(
+        PluginContext ctx,
+        TrackPlatformData platform)
+    {
+        if (ctx.UndoRedo is null)
+        {
+            return;
+        }
+        
+        ctx.UndoRedo.CreateAction("Place Platform");
+        ctx.UndoRedo.AddDoMethod(ctx.TrackData, nameof(TrackData.AddPlatform), platform.Id, platform);
+        ctx.UndoRedo.AddUndoMethod(ctx.TrackData, nameof(TrackData.RemovePlatform), platform.Id);
+        ctx.UndoRedo.CommitAction();
+    }
 
     public static void DeleteTrackNode(
         TrackData track,

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Godot;
+using RailConductor.Plugin;
 
 namespace RailConductor;
 
@@ -10,27 +11,33 @@ public partial class TrackData : Resource
     [Export] private Godot.Collections.Dictionary<string, TrackNodeData> _nodes = new();
     [Export] private Godot.Collections.Dictionary<string, TrackLinkData> _links = new();
     [Export] private Godot.Collections.Dictionary<string, TrackSignalData> _signals = new();
+    [Export] private Godot.Collections.Dictionary<string, TrackPlatformData> _platforms = new();
 
     public bool IsValidId(string id) => IsNodeId(id) || IsLinkId(id) || IsSignalId(id);
     public bool IsNodeId(string id) => _nodes.ContainsKey(id);
     public bool IsLinkId(string id) => _links.ContainsKey(id);
     public bool IsSignalId(string id) => _signals.ContainsKey(id);
-    
+    public bool IsPlatformId(string id) => _platforms.ContainsKey(id);
+
     public IEnumerable<TrackNodeData> GetNodes() => _nodes.Values;
     public IEnumerable<TrackLinkData> GetLinks() => _links.Values;
     public IEnumerable<TrackSignalData> GetSignals() => _signals.Values;
+    public IEnumerable<TrackPlatformData> GetPlatforms() => _platforms.Values;
 
     public TrackNodeData? GetNode(string id) => _nodes.GetValueOrDefault(id);
     public TrackLinkData? GetLink(string id) => _links.GetValueOrDefault(id);
     public TrackSignalData? GetSignal(string id) => _signals.GetValueOrDefault(id);
+    public TrackPlatformData? GetPlatform(string id) => _platforms.GetValueOrDefault(id);
 
     public void AddNode(string id, TrackNodeData newNode) => _nodes.Add(id, newNode);
     public void AddLink(string id, TrackLinkData newLink) => _links.Add(id, newLink);
     public void AddSignal(string id, TrackSignalData newSignal) => _signals.Add(id, newSignal);
+    public void AddPlatform(string id, TrackPlatformData newPlatform) => _platforms.Add(id, newPlatform);
 
     public void RemoveNode(string id) => _nodes.Remove(id);
     public void RemoveLink(string id) => _links.Remove(id);
     public void RemoveSignal(string id) => _signals.Remove(id);
+    public void RemovePlatform(string id) => _platforms.Remove(id);
 
     public bool IsLinked(string nodeAId, string nodeBId)
     {
@@ -112,6 +119,12 @@ public partial class TrackData : Resource
             return linkId;
         }
 
+        var platformId = FindClosestPlatform(position);
+        if (!string.IsNullOrEmpty(platformId))
+        {
+            return platformId;
+        }
+
         return string.Empty;
     }
 
@@ -137,7 +150,7 @@ public partial class TrackData : Resource
             closest = id;
         }
 
-        return minDist < 10f ? closest : string.Empty;
+        return minDist < PluginSettings.MaxSelectDistance ? closest : string.Empty;
     }
 
     public string FindClosestSignalId(Vector2 position)
@@ -157,7 +170,7 @@ public partial class TrackData : Resource
             {
                 continue;
             }
-            
+
             var dist = orientation!.Value.Position.DistanceTo(position);
             if (dist >= minDist)
             {
@@ -168,7 +181,43 @@ public partial class TrackData : Resource
             closest = id;
         }
 
-        return minDist < 10f ? closest : string.Empty;
+        return minDist < PluginSettings.MaxSelectDistance ? closest : string.Empty;
+    }
+
+    public string FindClosestPlatform(Vector2 position)
+    {
+        if (_platforms.Count == 0)
+        {
+            return string.Empty;
+        }
+        
+        var minDist = float.MaxValue;
+        var closest = string.Empty;
+
+        foreach (var platform in GetPlatforms())
+        {
+            var size = platform.IsVertical
+                ? PluginSettings.PlatformVerticalSize
+                : PluginSettings.PlatformHorizontalSize;
+            var rect = new Rect2(platform.Position, size);
+            var dist = PluginUtility.DistanceToRect(position, rect);
+
+            // If the position is in the rect just return it.
+            if (rect.HasPoint(position))
+            {
+                return platform.Id;
+            }
+            
+            if (dist >= minDist)
+            {
+                continue;
+            }
+
+            minDist = dist;
+            closest = platform.Id;
+        }
+        
+        return minDist < PluginSettings.MaxSelectDistance ? closest : string.Empty;
     }
 
     public string FindClosestLink(Vector2 position)
@@ -179,7 +228,7 @@ public partial class TrackData : Resource
         }
 
         var minDist = float.MaxValue;
-        var closestLink = string.Empty;
+        var closest = string.Empty;
 
         foreach (var link in GetLinks())
         {
@@ -199,10 +248,10 @@ public partial class TrackData : Resource
             }
 
             minDist = dist;
-            closestLink = link.Id;
+            closest = link.Id;
         }
 
-        return minDist < 20f ? closestLink : string.Empty;
+        return minDist < PluginSettings.MaxSelectDistance ? closest : string.Empty;
     }
 
     public float GetClosestLinkDistance(Vector2 position)
@@ -251,7 +300,7 @@ public partial class TrackData : Resource
         var projection = a + t * ab;
         return p.DistanceTo(projection);
     }
-
+    
     public (Vector2 Position, float Angle)? GetSignalPosition(string signalId)
     {
         var signal = GetSignal(signalId);

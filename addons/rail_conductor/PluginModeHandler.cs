@@ -48,6 +48,11 @@ public abstract class PluginModeHandler
         return false;
     }
 
+    public virtual void Draw(Control overlay, PluginContext ctx)
+    {
+        
+    }
+
     protected void RequestOverlayUpdate() => OverlayUpdateRequested?.Invoke();
 
 

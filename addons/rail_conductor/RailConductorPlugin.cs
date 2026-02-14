@@ -12,92 +12,27 @@ public enum ToolMode
     Create,
     Link,
     Insert,
-    PlaceSignal
+    PlaceSignal,
+    PlacePlatform
 }
 
 [Tool]
 public partial class RailConductorPlugin : EditorPlugin, ISerializationListener
 {
     private ToolMode _currentToolMode = ToolMode.None;
-    private readonly PluginContext _context = new();
+    private PluginContext? _context;
     private readonly Dictionary<ToolMode, PluginModeHandler> _modeHandlers = new();
-
+    
     private bool _isInitialized;
-    private Track? _target;
     private TrackNodeOptions? _options;
-    private EditorUndoRedoManager? _undoRedo;
+    private readonly NodeLocator<Track> _trackLocator = new();
 
     public override void _EnterTree() => Initialize();
     public override void _ExitTree() => Cleanup();
 
     public void OnAfterDeserialize() => Initialize();
     public void OnBeforeSerialize() => Cleanup();
-
-    private void Initialize()
-    {
-        if (_isInitialized)
-        {
-            return;
-        }
-
-        _isInitialized = true;
-
-        // Setup undo/redo callback handling.
-        _undoRedo = GetUndoRedo();
-        _undoRedo.VersionChanged += OnVersionChanged;
-
-        // Initialize Mode Handlers
-        _modeHandlers.Add(ToolMode.Select, new SelectMode());
-        _modeHandlers.Add(ToolMode.Create, new AddTrackNodeMode());
-        _modeHandlers.Add(ToolMode.Insert, new InsertTrackNodeMode());
-        _modeHandlers.Add(ToolMode.Link, new LinkTrackNodeMode());
-        _modeHandlers.Add(ToolMode.PlaceSignal, new PlaceSignalMode());
-
-        foreach (var handler in _modeHandlers.Values)
-        {
-            handler.OverlayUpdateRequested += OnUpdateOverlayRequested;
-        }
-    }
-
-    private void Cleanup()
-    {
-        if (!_isInitialized)
-        {
-            return;
-        }
-
-        _isInitialized = false;
-        ClearMenus();
-
-        // Clean up undo/redo callbacks.
-        if (_undoRedo is not null)
-        {
-            _undoRedo.VersionChanged -= OnVersionChanged;
-        }
-
-        _undoRedo = null;
-
-        // Clean up mode handlers.
-        foreach (var handler in _modeHandlers.Values)
-        {
-            handler.OverlayUpdateRequested -= OnUpdateOverlayRequested;
-        }
-
-        _modeHandlers.Clear();
-
-        _target = null;
-    }
-
-    private void OnUpdateOverlayRequested()
-    {
-        UpdateOverlays();
-    }
-
-    private void OnVersionChanged()
-    {
-        UpdateOverlays();
-    }
-
+    
     public override bool _Handles(GodotObject obj)
     {
         return obj is Track;
@@ -105,7 +40,7 @@ public partial class RailConductorPlugin : EditorPlugin, ISerializationListener
 
     public override void _Edit(GodotObject obj)
     {
-        _target = obj as Track;
+        UpdateCurrentContext(obj as Track);
     }
 
     public override void _MakeVisible(bool visible)
@@ -121,6 +56,77 @@ public partial class RailConductorPlugin : EditorPlugin, ISerializationListener
             _currentToolMode = ToolMode.None;
         }
     }
+    
+    private void Initialize()
+    {
+        if (_isInitialized)
+        {
+            return;
+        }
+
+        _isInitialized = true;
+        
+        // Set up the current scene being edited
+        _trackLocator.SetRoot(EditorInterface.Singleton.GetEditedSceneRoot());
+        SceneChanged += _trackLocator.SetRoot;
+
+        // Setup undo/redo callback handling.
+        GetUndoRedo().VersionChanged += OnVersionChanged;
+
+        // Initialize Mode Handlers
+        _modeHandlers.Add(ToolMode.Select, new SelectMode());
+        _modeHandlers.Add(ToolMode.Create, new AddTrackNodeMode());
+        _modeHandlers.Add(ToolMode.Insert, new InsertTrackNodeMode());
+        _modeHandlers.Add(ToolMode.Link, new LinkTrackNodeMode());
+        _modeHandlers.Add(ToolMode.PlaceSignal, new PlaceSignalMode());
+        _modeHandlers.Add(ToolMode.PlacePlatform, new PlacePlatformMode());
+
+        foreach (var handler in _modeHandlers.Values)
+        {
+            handler.OverlayUpdateRequested += OnUpdateOverlayRequested;
+        }
+        
+        SetForceDrawOverForwardingEnabled();
+    }
+    
+    private void Cleanup()
+    {
+        if (!_isInitialized)
+        {
+            return;
+        }
+
+        _isInitialized = false;
+        ClearMenus();
+
+        // Clean up undo/redo callbacks.
+        // Setup undo/redo callback handling.
+        GetUndoRedo().VersionChanged -= OnVersionChanged;
+
+        // Clean up mode handlers.
+        foreach (var handler in _modeHandlers.Values)
+        {
+            handler.OverlayUpdateRequested -= OnUpdateOverlayRequested;
+        }
+
+        _modeHandlers.Clear();
+        
+        SceneChanged -= _trackLocator.SetRoot;
+
+        _trackLocator.Reset();
+    }
+
+    private void OnUpdateOverlayRequested()
+    {
+        UpdateOverlays();
+    }
+
+    private void OnVersionChanged()
+    {
+        UpdateOverlays();
+    }
+
+    
 
     private void SetupMenus()
     {
@@ -150,7 +156,7 @@ public partial class RailConductorPlugin : EditorPlugin, ISerializationListener
             return;
         }
 
-        RemoveControlFromContainer(CustomControlContainer.CanvasEditorMenu, _options);
+        RemoveControlFromContainer(CustomControlContainer.CanvasEditorSideRight, _options);
         _options.ToolModeSelected -= SetMode;
         _options.QueueFree();
         _options = null;
@@ -158,16 +164,22 @@ public partial class RailConductorPlugin : EditorPlugin, ISerializationListener
 
     private void SetMode(ToolMode toolMode)
     {
+        var ctx = GetCurrentContext();
+        if (ctx is null)
+        {
+            return;
+        }
+        
         if (_modeHandlers.TryGetValue(_currentToolMode, out var prevHandler))
         {
-            prevHandler.Disable(_context);
+            prevHandler.Disable(ctx);
         }
 
         _currentToolMode = toolMode;
 
         if (_modeHandlers.TryGetValue(_currentToolMode, out var nextHandler))
         {
-            nextHandler.Enable(_context);
+            nextHandler.Enable(ctx);
         }
 
         _options?.SetToolMode(toolMode);
@@ -175,60 +187,94 @@ public partial class RailConductorPlugin : EditorPlugin, ISerializationListener
 
     public override bool _ForwardCanvasGuiInput(InputEvent input)
     {
-        if (_target?.Data is null || _currentToolMode == ToolMode.None || _undoRedo is null)
+        // Ignore input events if invalid state.
+        var ctx = GetCurrentContext();
+        if (ctx is null || _currentToolMode == ToolMode.None)
         {
             return false;
         }
 
-        if (!_modeHandlers.TryGetValue(_currentToolMode, out var handler))
-        {
-            return false;
-        }
-
-        // Update plugin context with current values
-        _context.Track = _target;
-        _context.TrackData = _target.Data;
-        _context.UndoRedo = _undoRedo;
-
-        if (!handler.HandleGuiInput(_context, input))
-        {
-            return false;
-        }
-        
-        UpdateOverlays();
-        return true;
+        // Ignore if no current mode handler.
+        return _modeHandlers.TryGetValue(_currentToolMode, out var handler) 
+               && handler.HandleGuiInput(ctx, input);
+    }
+    
+    private PluginContext? GetCurrentContext()
+    {
+        return _context;
     }
 
+    private PluginContext? CreateContext(Track? track)
+    {
+        if (track?.Data is null)
+        {
+            return null;
+        }
+
+        return new PluginContext
+        {
+            Track = track,
+            TrackData = track.Data,
+            UndoRedo = GetUndoRedo(),
+        };
+    }
+    
+    private void UpdateCurrentContext(Track? track)
+    {
+        // Clear context on null or invalid data.
+        if (track?.Data is null)
+        {
+            _context = null;
+            return;
+        }
+
+        // Ignore updating to the same track.
+        if (_context != null && _context.Track == track)
+        {
+            return;
+        }
+        
+        _context = CreateContext(track);
+    }
+    
     public override void _ForwardCanvasDrawOverViewport(Control overlay)
     {
-        var drawTarget = _target;
-        if (drawTarget is null)
+        var ctx = GetCurrentContext();
+        if (ctx is not null)
         {
-            return;
+            TrackEditorDrawer.DrawTrackPlatform(overlay, ctx, new TrackPlatformData
+            {
+                Position = new Vector2(300, 200),
+                IsVertical = false,
+                DisplayName = "Test"
+            });
+            
+            TrackEditorDrawer.DrawTrack(overlay, ctx);
+
+            if (_modeHandlers.TryGetValue(_currentToolMode, out var handler))
+            {
+                handler.Draw(overlay, ctx);
+            }
         }
+    }
+    
+    public override void _ForwardCanvasForceDrawOverViewport(Control overlay)
+    {
+        var currentContext = GetCurrentContext();
         
-        if (drawTarget.Data is null)
+        foreach(var track in _trackLocator.Nodes)
         {
-            return;
-        }
-        
-        _context.Track = drawTarget;
-        _context.TrackData = drawTarget.Data;
-        _context.UndoRedo = _undoRedo;
-
-        foreach (var link in drawTarget.Data.GetLinks())
-        {
-            TrackEditorDrawer.DrawTrackLink(overlay, _context, link);
-        }
-
-        foreach (var node in drawTarget.Data.GetNodes())
-        {
-            TrackEditorDrawer.DrawTrackNode(overlay, _context, node);
-        }
-
-        foreach (var signal in drawTarget.Data.GetSignals())
-        {
-            TrackEditorDrawer.DrawTrackSignal(overlay, _context, signal);
+            // Ignore the selected track
+            if (currentContext?.Track == track)
+            {
+                continue;
+            }
+            
+            var ctx = CreateContext(track);
+            if (ctx is not null)
+            {
+                TrackEditorDrawer.DrawTrack(overlay, ctx);    
+            }
         }
     }
 }

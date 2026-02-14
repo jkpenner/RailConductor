@@ -24,6 +24,7 @@ public partial class TrackNodeOptions : Control
         _buttons.Add(ToolMode.Link, GetNode<Button>("%LinkNodesButton"));
         // Track Signals
         _buttons.Add(ToolMode.PlaceSignal, GetNode<Button>("%PlaceSignalButton"));
+        _buttons.Add(ToolMode.PlacePlatform, GetNode<Button>("%PlacePlatformButton"));
         
         // Generate all required callbacks.
         foreach (var mode in Enum.GetValues<ToolMode>())
