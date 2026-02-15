@@ -14,4 +14,10 @@ public partial class SignalData : Resource
 
     [Export]
     public string DirectionNodeId { get; set; } = string.Empty;
+
+    [Export(PropertyHint.ArrayType, "RouteDefinition")]
+    public Godot.Collections.Array<RouteDefinition> RouteDefinitions { get; set; } = new();
+    
+    [Export]
+    public string InterlockingGroupId { get; set; } = "";
 }

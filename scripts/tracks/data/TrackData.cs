@@ -12,22 +12,26 @@ public partial class TrackData : Resource
     [Export] private Godot.Collections.Dictionary<string, TrackLinkData> _links = new();
     [Export] private Godot.Collections.Dictionary<string, SignalData> _signals = new();
     [Export] private Godot.Collections.Dictionary<string, PlatformData> _platforms = new();
+    [Export] private Godot.Collections.Dictionary<string, InterlockingGroupData> _interlockingGroups = new();
 
-    public bool IsValidId(string id) => IsNodeId(id) || IsLinkId(id) || IsSignalId(id);
+    public bool IsValidId(string id) => IsNodeId(id) || IsLinkId(id) || IsSignalId(id) || IsPlatformId(id) || IsInterlockingGroupId(id);
     public bool IsNodeId(string id) => _nodes.ContainsKey(id);
     public bool IsLinkId(string id) => _links.ContainsKey(id);
     public bool IsSignalId(string id) => _signals.ContainsKey(id);
     public bool IsPlatformId(string id) => _platforms.ContainsKey(id);
+    public bool IsInterlockingGroupId(string id) => _interlockingGroups.ContainsKey(id);
 
     public IEnumerable<TrackNodeData> GetNodes() => _nodes.Values;
     public IEnumerable<TrackLinkData> GetLinks() => _links.Values;
     public IEnumerable<SignalData> GetSignals() => _signals.Values;
     public IEnumerable<PlatformData> GetPlatforms() => _platforms.Values;
+    public IEnumerable<InterlockingGroupData> GetInterlockingGroups() => _interlockingGroups.Values;
 
     public TrackNodeData? GetNode(string id) => _nodes.GetValueOrDefault(id);
     public TrackLinkData? GetLink(string id) => _links.GetValueOrDefault(id);
     public SignalData? GetSignal(string id) => _signals.GetValueOrDefault(id);
     public PlatformData? GetPlatform(string id) => _platforms.GetValueOrDefault(id);
+    public InterlockingGroupData? GetInterlockingGroup(string id) => _interlockingGroups.GetValueOrDefault(id);
 
     public void AddNode(string id, TrackNodeData newNode) => _nodes.Add(id, newNode);
     public void AddLink(string id, TrackLinkData newLink) => _links.Add(id, newLink);
