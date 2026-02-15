@@ -4,7 +4,7 @@ using Godot;
 namespace RailConductor;
 
 [GlobalClass, Tool]
-public partial class TrackSignalData : Resource
+public partial class SignalData : Resource
 {
     [Export]
     public string Id { get; set; } = Guid.NewGuid().ToString();

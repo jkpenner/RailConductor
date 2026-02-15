@@ -36,7 +36,7 @@ public class PlacePlatformMode : PluginModeHandler
             var globalPosition = PluginUtility.ScreenToWorldSnapped(btn.Position);
             var localPosition = ctx.Track.ToLocal(globalPosition);
 
-            var platform = new TrackPlatformData
+            var platform = new PlatformData
             {
                 Position = localPosition,
                 IsVertical = _placeVertical
@@ -53,7 +53,7 @@ public class PlacePlatformMode : PluginModeHandler
 
     public override void Draw(Control overlay, PluginContext ctx)
     {
-        TrackEditorDrawer.DrawTrackPlatform(overlay, ctx, new TrackPlatformData
+        TrackEditorDrawer.DrawTrackPlatform(overlay, ctx, new PlatformData
         {
             Position = _placePosition,
             IsVertical = _placeVertical

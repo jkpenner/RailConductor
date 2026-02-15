@@ -30,7 +30,7 @@ public static class TrackEditorDrawer
 
     public static Font GetFont() => ResourceLoader.Load<Font>(PluginSettings.FontPath);
 
-    public static void DrawTrackPlatform(Control overlay, PluginContext ctx, TrackPlatformData platform)
+    public static void DrawTrackPlatform(Control overlay, PluginContext ctx, PlatformData platform)
     {
         var scale = PluginUtility.GetZoom();
 
@@ -195,7 +195,7 @@ public static class TrackEditorDrawer
         }
     }
 
-    public static void DrawTrackSignal(Control overlay, PluginContext ctx, TrackSignalData signal)
+    public static void DrawTrackSignal(Control overlay, PluginContext ctx, SignalData signal)
     {
         var orientation = ctx.TrackData.GetSignalPosition(signal);
         if (orientation is null)

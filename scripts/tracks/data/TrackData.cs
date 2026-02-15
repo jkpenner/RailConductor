@@ -10,8 +10,8 @@ public partial class TrackData : Resource
 {
     [Export] private Godot.Collections.Dictionary<string, TrackNodeData> _nodes = new();
     [Export] private Godot.Collections.Dictionary<string, TrackLinkData> _links = new();
-    [Export] private Godot.Collections.Dictionary<string, TrackSignalData> _signals = new();
-    [Export] private Godot.Collections.Dictionary<string, TrackPlatformData> _platforms = new();
+    [Export] private Godot.Collections.Dictionary<string, SignalData> _signals = new();
+    [Export] private Godot.Collections.Dictionary<string, PlatformData> _platforms = new();
 
     public bool IsValidId(string id) => IsNodeId(id) || IsLinkId(id) || IsSignalId(id);
     public bool IsNodeId(string id) => _nodes.ContainsKey(id);
@@ -21,18 +21,18 @@ public partial class TrackData : Resource
 
     public IEnumerable<TrackNodeData> GetNodes() => _nodes.Values;
     public IEnumerable<TrackLinkData> GetLinks() => _links.Values;
-    public IEnumerable<TrackSignalData> GetSignals() => _signals.Values;
-    public IEnumerable<TrackPlatformData> GetPlatforms() => _platforms.Values;
+    public IEnumerable<SignalData> GetSignals() => _signals.Values;
+    public IEnumerable<PlatformData> GetPlatforms() => _platforms.Values;
 
     public TrackNodeData? GetNode(string id) => _nodes.GetValueOrDefault(id);
     public TrackLinkData? GetLink(string id) => _links.GetValueOrDefault(id);
-    public TrackSignalData? GetSignal(string id) => _signals.GetValueOrDefault(id);
-    public TrackPlatformData? GetPlatform(string id) => _platforms.GetValueOrDefault(id);
+    public SignalData? GetSignal(string id) => _signals.GetValueOrDefault(id);
+    public PlatformData? GetPlatform(string id) => _platforms.GetValueOrDefault(id);
 
     public void AddNode(string id, TrackNodeData newNode) => _nodes.Add(id, newNode);
     public void AddLink(string id, TrackLinkData newLink) => _links.Add(id, newLink);
-    public void AddSignal(string id, TrackSignalData newSignal) => _signals.Add(id, newSignal);
-    public void AddPlatform(string id, TrackPlatformData newPlatform) => _platforms.Add(id, newPlatform);
+    public void AddSignal(string id, SignalData newSignal) => _signals.Add(id, newSignal);
+    public void AddPlatform(string id, PlatformData newPlatform) => _platforms.Add(id, newPlatform);
 
     public void RemoveNode(string id) => _nodes.Remove(id);
     public void RemoveLink(string id) => _links.Remove(id);
@@ -312,7 +312,7 @@ public partial class TrackData : Resource
         return GetSignalPosition(signal);
     }
 
-    public (Vector2 Position, float Angle)? GetSignalPosition(TrackSignalData signal)
+    public (Vector2 Position, float Angle)? GetSignalPosition(SignalData signal)
     {
         var link = GetLink(signal.LinkId);
         if (link is null)

@@ -123,7 +123,7 @@ public class PlaceSignalMode : PluginModeHandler
             return;
         }
 
-        var newSignal = new TrackSignalData
+        var newSignal = new SignalData
         {
             LinkId = _selectedLinkId,
             DirectionNodeId = closestNodeId

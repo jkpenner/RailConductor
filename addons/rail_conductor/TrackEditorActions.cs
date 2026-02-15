@@ -18,7 +18,7 @@ public static class TrackEditorActions
 
     public static void AddTrackSignal(
         TrackData track,
-        TrackSignalData signal,
+        SignalData signal,
         EditorUndoRedoManager undoRedo)
     {
         undoRedo.CreateAction("Place Signal");
@@ -45,7 +45,7 @@ public static class TrackEditorActions
     
     public static void AddTrackPlatform(
         PluginContext ctx,
-        TrackPlatformData platform)
+        PlatformData platform)
     {
         if (ctx.UndoRedo is null)
         {
@@ -145,7 +145,7 @@ public static class TrackEditorActions
 
     public static void DeleteTrackSignal(
         TrackData track,
-        TrackSignalData signal,
+        SignalData signal,
         EditorUndoRedoManager undoRedo)
     {
         undoRedo.CreateAction("Delete Track Signal");
@@ -155,7 +155,7 @@ public static class TrackEditorActions
 
     private static void DeleteTrackSignalActions(
         TrackData track,
-        TrackSignalData signal,
+        SignalData signal,
         EditorUndoRedoManager undoRedo)
     {
         undoRedo.AddDoMethod(track, nameof(TrackData.RemoveSignal), signal.Id);

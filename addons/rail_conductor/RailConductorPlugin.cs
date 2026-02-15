@@ -242,7 +242,7 @@ public partial class RailConductorPlugin : EditorPlugin, ISerializationListener
         var ctx = GetCurrentContext();
         if (ctx is not null)
         {
-            TrackEditorDrawer.DrawTrackPlatform(overlay, ctx, new TrackPlatformData
+            TrackEditorDrawer.DrawTrackPlatform(overlay, ctx, new PlatformData
             {
                 Position = new Vector2(300, 200),
                 IsVertical = false,
