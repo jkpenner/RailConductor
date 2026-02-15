@@ -1,0 +1,7 @@
+[gd_resource type="AtlasTexture" format=3 uid="uid://deym2sn23uv5k"]
+
+[ext_resource type="Texture2D" uid="uid://bqm7oy0olsrij" path="res://addons/rail_conductor/icons/icons.png" id="1_fpkrb"]
+
+[resource]
+atlas = ExtResource("1_fpkrb")
+region = Rect2(110, 150, 200, 200)

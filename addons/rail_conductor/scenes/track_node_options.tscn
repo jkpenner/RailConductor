@@ -1,10 +1,12 @@
 [gd_scene format=3 uid="uid://bbmul24vk5o88"]
 
 [ext_resource type="Script" uid="uid://dj3of0rq2l8in" path="res://addons/rail_conductor/scenes/TrackNodeOptions.cs" id="1_63yrt"]
-[ext_resource type="Texture2D" uid="uid://4mprydcwk43l" path="res://addons/rail_conductor/icons/select_light.svg" id="2_vwfrl"]
-[ext_resource type="Texture2D" uid="uid://bw5yr6fqnic84" path="res://addons/rail_conductor/icons/create_light.svg" id="3_lfl1h"]
-[ext_resource type="Texture2D" uid="uid://ca54qj67o5bvv" path="res://addons/rail_conductor/icons/insert_light.svg" id="4_lfl1h"]
-[ext_resource type="Texture2D" uid="uid://1ir1ejdvvbjo" path="res://addons/rail_conductor/icons/link_light.svg" id="6_ln0e4"]
+[ext_resource type="Texture2D" uid="uid://deym2sn23uv5k" path="res://addons/rail_conductor/icons/icons_select.tres" id="2_a6842"]
+[ext_resource type="Texture2D" uid="uid://cnge5lodif67h" path="res://addons/rail_conductor/icons/icons_create.tres" id="3_vwfrl"]
+[ext_resource type="Texture2D" uid="uid://b0rj0a7628bhy" path="res://addons/rail_conductor/icons/icons_insert.tres" id="4_lfl1h"]
+[ext_resource type="Texture2D" uid="uid://ml5j5hbr86k8" path="res://addons/rail_conductor/icons/icons_link.tres" id="5_6br1v"]
+[ext_resource type="Texture2D" uid="uid://b7lnpxmfnkb27" path="res://addons/rail_conductor/icons/icons_signal.tres" id="6_c0dpc"]
+[ext_resource type="Texture2D" uid="uid://chqbthlck4bxc" path="res://addons/rail_conductor/icons/icons_platform.tres" id="7_vwfrl"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vwfrl"]
 bg_color = Color(0.078431375, 0.078431375, 0.078431375, 1)
@@ -48,11 +50,14 @@ layout_mode = 2
 
 [node name="SelectModeButton" type="Button" parent="MarginContainer/Control/GeneralOptions/MarginContainer/VBoxContainer" unique_id=946436006]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 38)
 layout_mode = 2
 toggle_mode = true
 text = "Select"
-icon = ExtResource("2_vwfrl")
+icon = ExtResource("2_a6842")
 flat = true
+alignment = 0
+text_overrun_behavior = 5
 expand_icon = true
 
 [node name="Nodes" type="Label" parent="MarginContainer/Control" unique_id=1125291024]
@@ -74,29 +79,38 @@ layout_mode = 2
 
 [node name="CreateNodeButton" type="Button" parent="MarginContainer/Control/NodeOptions/MarginContainer/VBoxContainer" unique_id=417900684]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 38)
 layout_mode = 2
 toggle_mode = true
 text = "Create"
-icon = ExtResource("3_lfl1h")
+icon = ExtResource("3_vwfrl")
 flat = true
+alignment = 0
+text_overrun_behavior = 5
 expand_icon = true
 
 [node name="InsertNodeButton" type="Button" parent="MarginContainer/Control/NodeOptions/MarginContainer/VBoxContainer" unique_id=1902198]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 38)
 layout_mode = 2
 toggle_mode = true
 text = "Insert"
 icon = ExtResource("4_lfl1h")
 flat = true
+alignment = 0
+text_overrun_behavior = 5
 expand_icon = true
 
 [node name="LinkNodesButton" type="Button" parent="MarginContainer/Control/NodeOptions/MarginContainer/VBoxContainer" unique_id=1893459649]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 38)
 layout_mode = 2
 toggle_mode = true
 text = "Link"
-icon = ExtResource("6_ln0e4")
+icon = ExtResource("5_6br1v")
 flat = true
+alignment = 0
+text_overrun_behavior = 5
 expand_icon = true
 
 [node name="Objects" type="Label" parent="MarginContainer/Control" unique_id=1815070056]
@@ -118,18 +132,24 @@ layout_mode = 2
 
 [node name="PlaceSignalButton" type="Button" parent="MarginContainer/Control/ObjectOptions/MarginContainer/VBoxContainer" unique_id=2070031139]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 38)
 layout_mode = 2
 toggle_mode = true
 text = "Place Signal"
-icon = ExtResource("4_lfl1h")
+icon = ExtResource("6_c0dpc")
 flat = true
+alignment = 0
+text_overrun_behavior = 5
 expand_icon = true
 
 [node name="PlacePlatformButton" type="Button" parent="MarginContainer/Control/ObjectOptions/MarginContainer/VBoxContainer" unique_id=1981471413]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 38)
 layout_mode = 2
 toggle_mode = true
 text = "Place Platform"
-icon = ExtResource("4_lfl1h")
+icon = ExtResource("7_vwfrl")
 flat = true
+alignment = 0
+text_overrun_behavior = 5
 expand_icon = true

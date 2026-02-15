@@ -322,7 +322,7 @@ Links = Array[String](["a9b4bc3a-3c00-4df0-ada6-4aa652389e9d", "8248b953-ce57-47
 NodeType = 1
 PairedLinks = Array[ExtResource("7_ycdy4")]([SubResource("Resource_23xmf")])
 
-[sub_resource type="Resource" id="Resource_ppx11"]
+[sub_resource type="Resource" id="Resource_gngh3"]
 script = ExtResource("7_ycdy4")
 LinkAId = "a15a2bdc-fe13-497e-8a2a-d1429c9c1e68"
 LinkBId = "fe98b6a2-83a8-4d47-aff7-6cab41f8dadb"
@@ -333,7 +333,7 @@ Id = "680e622d-2ddd-4e76-9ce4-051dcf64d683"
 Position = Vector2(272, 159)
 Links = Array[String](["a15a2bdc-fe13-497e-8a2a-d1429c9c1e68", "fe98b6a2-83a8-4d47-aff7-6cab41f8dadb"])
 NodeType = 1
-PairedLinks = Array[ExtResource("7_ycdy4")]([SubResource("Resource_ppx11")])
+PairedLinks = Array[ExtResource("7_ycdy4")]([SubResource("Resource_gngh3")])
 
 [sub_resource type="Resource" id="Resource_h6isl"]
 script = ExtResource("7_ycdy4")
@@ -506,23 +506,29 @@ Links = Array[String](["e429331b-5cb4-417e-93fd-9972098cd9b6", "c7826722-8ebe-47
 NodeType = 1
 PairedLinks = Array[ExtResource("7_ycdy4")]([SubResource("Resource_5dllo")])
 
-[sub_resource type="Resource" id="Resource_gngh3"]
-script = ExtResource("7_ycdy4")
-LinkAId = "1bde11e3-6791-4ae3-8b50-0427029e4f1d"
-LinkBId = "2dadac61-3e2b-485f-831c-8e9c1eda97ab"
-
 [sub_resource type="Resource" id="Resource_wnkbs"]
 script = ExtResource("7_ycdy4")
-LinkAId = "1bde11e3-6791-4ae3-8b50-0427029e4f1d"
-LinkBId = "89dfc899-21a9-4e64-907e-db6ef154895e"
+LinkAId = "89dfc899-21a9-4e64-907e-db6ef154895e"
+LinkBId = "1bde11e3-6791-4ae3-8b50-0427029e4f1d"
+
+[sub_resource type="Resource" id="Resource_ppx11"]
+script = ExtResource("7_ycdy4")
+LinkAId = "2dadac61-3e2b-485f-831c-8e9c1eda97ab"
+LinkBId = "4568b115-7100-4095-9256-9f769c1fcbec"
 
 [sub_resource type="Resource" id="Resource_vke2r"]
 script = ExtResource("5_efxa6")
 Id = "e9008ed1-ac9b-4779-8d8a-53d66d7ba854"
 Position = Vector2(337, 66)
-Links = Array[String](["2dadac61-3e2b-485f-831c-8e9c1eda97ab", "89dfc899-21a9-4e64-907e-db6ef154895e", "1bde11e3-6791-4ae3-8b50-0427029e4f1d"])
-NodeType = 2
-PairedLinks = Array[ExtResource("7_ycdy4")]([SubResource("Resource_gngh3"), SubResource("Resource_wnkbs")])
+Links = Array[String](["2dadac61-3e2b-485f-831c-8e9c1eda97ab", "89dfc899-21a9-4e64-907e-db6ef154895e", "1bde11e3-6791-4ae3-8b50-0427029e4f1d", "4568b115-7100-4095-9256-9f769c1fcbec"])
+NodeType = 3
+PairedLinks = Array[ExtResource("7_ycdy4")]([SubResource("Resource_wnkbs"), SubResource("Resource_ppx11")])
+
+[sub_resource type="Resource" id="Resource_l0gw7"]
+script = ExtResource("8_dg77c")
+Id = "84608fd4-c897-4b75-8fbe-09fb978c49ac"
+Position = Vector2(64, 111)
+IsVertical = true
 
 [sub_resource type="Resource" id="Resource_uit24"]
 script = ExtResource("8_w48qg")
@@ -571,6 +577,12 @@ script = ExtResource("8_w48qg")
 Id = "a960bc9e-0617-4fd8-a865-c95068da19fb"
 LinkId = "842c2ddc-6b27-430d-a81a-275ca2c49d5d"
 DirectionNodeId = "cb85fb39-3d02-47af-9ad8-5e0d34c0d51e"
+
+[sub_resource type="Resource" id="Resource_inymm"]
+script = ExtResource("8_w48qg")
+Id = "b8c92952-9327-48d5-ba40-f933b08599d7"
+LinkId = "1bde11e3-6791-4ae3-8b50-0427029e4f1d"
+DirectionNodeId = "14acbfbb-43a1-4a41-bdc1-6c2b27137a49"
 
 [sub_resource type="Resource" id="Resource_ryguw"]
 script = ExtResource("6_dg77c")
@@ -639,7 +651,11 @@ _signals = Dictionary[String, ExtResource("8_w48qg")]({
 "6afb69d9-1993-481b-8c52-26362f90024f": SubResource("Resource_yvsr8"),
 "849c2acd-223d-4cba-87b5-6c2e5214f4f2": SubResource("Resource_41lik"),
 "8c4702ba-43dd-48fd-9a3f-7732d00c6f7c": SubResource("Resource_jbvwl"),
-"a960bc9e-0617-4fd8-a865-c95068da19fb": SubResource("Resource_sn1fb")
+"a960bc9e-0617-4fd8-a865-c95068da19fb": SubResource("Resource_sn1fb"),
+"b8c92952-9327-48d5-ba40-f933b08599d7": SubResource("Resource_inymm")
+})
+_platforms = Dictionary[String, ExtResource("8_dg77c")]({
+"84608fd4-c897-4b75-8fbe-09fb978c49ac": SubResource("Resource_l0gw7")
 })
 metadata/_custom_type_script = "uid://16mgebho3rd5"
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://h0sknqqsqhvn"
-path="res://.godot/imported/unlink_light.svg-564bb7349a5680c551ba69074d612804.ctex"
+uid="uid://bqm7oy0olsrij"
+path="res://.godot/imported/icons.png-74c78b71d1fdc4e9b91ab5762991c354.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/rail_conductor/icons/unlink_light.svg"
-dest_files=["res://.godot/imported/unlink_light.svg-564bb7349a5680c551ba69074d612804.ctex"]
+source_file="res://addons/rail_conductor/icons/icons.png"
+dest_files=["res://.godot/imported/icons.png-74c78b71d1fdc4e9b91ab5762991c354.ctex"]
 
 [params]
 
@@ -38,6 +38,3 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
-svg/scale=1.0
-editor/scale_with_editor_scale=false
-editor/convert_colors_with_editor_theme=false
