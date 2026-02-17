@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://c4agf0e1ulw3d"]
+
+[ext_resource type="Script" uid="uid://b7gv11vf3r72w" path="res://managers/SimulationManager/SimulationManager.cs" id="1_a4qqy"]
+
+[node name="SimulationManager" type="Node" unique_id=33242899]
+script = ExtResource("1_a4qqy")

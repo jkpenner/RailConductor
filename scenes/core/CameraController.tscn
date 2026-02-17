@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://coim6fdt86gu8"]
 
-[ext_resource type="Script" uid="uid://d1dswvv4y0vx0" path="res://scripts/CameraController.cs" id="1_nsieu"]
+[ext_resource type="Script" uid="uid://d1dswvv4y0vx0" path="res://scenes/core/CameraController.cs" id="1_nsieu"]
 
 [node name="CameraController" type="Node2D" unique_id=1151989516]
 script = ExtResource("1_nsieu")

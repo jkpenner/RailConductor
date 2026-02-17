@@ -5,7 +5,7 @@ using Godot;
 namespace RailConductor.Plugin;
 
 [Tool]
-public partial class TrackNodeOptions : Control
+public partial class TrackOptions : Control
 {
     public event Action<ToolMode>? ToolModeSelected;
     

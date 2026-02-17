@@ -24,7 +24,7 @@ public partial class RailConductorPlugin : EditorPlugin, ISerializationListener
     private readonly Dictionary<ToolMode, PluginModeHandler> _modeHandlers = new();
     
     private bool _isInitialized;
-    private TrackNodeOptions? _options;
+    private TrackOptions? _options;
     private readonly NodeLocator<Track> _trackLocator = new();
 
     public override void _EnterTree() => Initialize();
@@ -136,12 +136,12 @@ public partial class RailConductorPlugin : EditorPlugin, ISerializationListener
         }
 
         var optionsScene = ResourceLoader.Load<PackedScene>(
-            "res://addons/rail_conductor/scenes/track_node_options.tscn");
-        _options = optionsScene.InstantiateOrNull<TrackNodeOptions>();
+            "res://addons/rail_conductor/scenes/TrackOptions.tscn");
+        _options = optionsScene.InstantiateOrNull<TrackOptions>();
 
         if (_options is null)
         {
-            GD.PushError($"Failed to instantiate {nameof(TrackNodeOptions)} scene.");
+            GD.PushError($"Failed to instantiate {nameof(TrackOptions)} scene.");
             return;
         }
 

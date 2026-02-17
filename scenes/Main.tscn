@@ -1,17 +1,18 @@
 [gd_scene format=3 uid="uid://bsj2m1jhx8b4l"]
 
-[ext_resource type="Script" uid="uid://cywxbsbvsaka6" path="res://Main.cs" id="1_0xm2m"]
-[ext_resource type="PackedScene" uid="uid://coim6fdt86gu8" path="res://scenes/camera_controller.tscn" id="2_0xm2m"]
-[ext_resource type="Script" uid="uid://b1h881bnaxfu1" path="res://scripts/tracks/Track.cs" id="3_1bvp3"]
-[ext_resource type="Script" uid="uid://mcyc06807gh6" path="res://scripts/tracks/data/TrackLinkData.cs" id="5_dg77c"]
-[ext_resource type="Script" uid="uid://dlpa5obf7cd0w" path="res://scripts/tracks/data/TrackNodeData.cs" id="5_efxa6"]
-[ext_resource type="Script" uid="uid://d3c2or76iytl1" path="res://scripts/train/Train.cs" id="6_272bh"]
-[ext_resource type="Script" uid="uid://16mgebho3rd5" path="res://scripts/tracks/data/TrackData.cs" id="6_dg77c"]
-[ext_resource type="Script" uid="uid://db6byob6irbf2" path="res://scripts/tracks/data/TrackLinkPairData.cs" id="7_ycdy4"]
-[ext_resource type="Texture2D" uid="uid://djuh3tra4ijeq" path="res://assets/sprites/circle.png" id="8_5vw27"]
-[ext_resource type="Script" uid="uid://cfbhkw6uaghtk" path="res://scripts/tracks/data/PlatformData.cs" id="8_dg77c"]
-[ext_resource type="Script" uid="uid://2oyo7nuh2mht" path="res://scripts/tracks/data/SignalData.cs" id="8_w48qg"]
-[ext_resource type="Script" uid="uid://yslvcibqqiko" path="res://scripts/interactions/Interactions.cs" id="9_kek77"]
+[ext_resource type="Script" uid="uid://cywxbsbvsaka6" path="res://managers/SimulationManager/Main.cs" id="1_0xm2m"]
+[ext_resource type="PackedScene" uid="uid://coim6fdt86gu8" path="res://scenes/core/CameraController.tscn" id="2_0xm2m"]
+[ext_resource type="Script" uid="uid://b1h881bnaxfu1" path="res://scripts/core/tracks/Track.cs" id="3_1bvp3"]
+[ext_resource type="Script" uid="uid://mcyc06807gh6" path="res://scripts/core/tracks/data/TrackLinkData.cs" id="5_dg77c"]
+[ext_resource type="Script" uid="uid://dlpa5obf7cd0w" path="res://scripts/core/tracks/data/TrackNodeData.cs" id="5_efxa6"]
+[ext_resource type="Script" uid="uid://2hvv7wrhnful" path="res://scripts/core/tracks/data/InterlockingGroupData.cs" id="5_w48qg"]
+[ext_resource type="Script" uid="uid://16mgebho3rd5" path="res://scripts/core/tracks/data/TrackData.cs" id="6_dg77c"]
+[ext_resource type="Script" uid="uid://db6byob6irbf2" path="res://scripts/core/tracks/data/TrackLinkPairData.cs" id="7_ycdy4"]
+[ext_resource type="Script" uid="uid://cfbhkw6uaghtk" path="res://scripts/core/tracks/data/PlatformData.cs" id="8_dg77c"]
+[ext_resource type="Script" uid="uid://2oyo7nuh2mht" path="res://scripts/core/tracks/data/SignalData.cs" id="8_w48qg"]
+[ext_resource type="Script" uid="uid://yslvcibqqiko" path="res://scripts/core/interactions/Interactions.cs" id="9_kek77"]
+[ext_resource type="Script" uid="uid://c70ocdqxg436o" path="res://scripts/core/tracks/data/RouteDefinition.cs" id="11_vivmo"]
+[ext_resource type="PackedScene" uid="uid://cx7rnb56o6a7r" path="res://entities/train/Train.tscn" id="13_qmy6f"]
 
 [sub_resource type="Resource" id="Resource_074og"]
 script = ExtResource("5_dg77c")
@@ -674,23 +675,8 @@ position = Vector2(0, 1)
 script = ExtResource("3_1bvp3")
 Data = SubResource("Resource_ryguw")
 
-[node name="Train" type="Node2D" parent="." unique_id=1558786846 node_paths=PackedStringArray("LeadVisual", "RearVisual")]
+[node name="Train" parent="." unique_id=995265002 instance=ExtResource("13_qmy6f")]
 position = Vector2(102, -52)
-script = ExtResource("6_272bh")
-TrainLength = 200.0
-LeadVisual = NodePath("Lead")
-RearVisual = NodePath("Rear")
-
-[node name="Lead" type="Sprite2D" parent="Train" unique_id=406436698]
-modulate = Color(0, 0.20392157, 0.84313726, 1)
-scale = Vector2(0.05, 0.05)
-texture = ExtResource("8_5vw27")
-
-[node name="Rear" type="Sprite2D" parent="Train" unique_id=251388624]
-modulate = Color(0.9211696, 0.34046587, 0.25685716, 1)
-position = Vector2(31.999998, -0.99999994)
-scale = Vector2(0.05, 0.05)
-texture = ExtResource("8_5vw27")
 
 [node name="Node2D" type="Node2D" parent="." unique_id=1993713351]
 position = Vector2(0, -200)

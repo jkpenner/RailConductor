@@ -1,0 +1,21 @@
+[gd_scene format=3 uid="uid://cx7rnb56o6a7r"]
+
+[ext_resource type="Script" uid="uid://d3c2or76iytl1" path="res://entities/train/Train.cs" id="1_k05ly"]
+[ext_resource type="Texture2D" uid="uid://djuh3tra4ijeq" path="res://assets/textures/circle.png" id="2_v6bau"]
+
+[node name="Train" type="Node2D" unique_id=995265002 node_paths=PackedStringArray("LeadVisual", "RearVisual")]
+script = ExtResource("1_k05ly")
+TrainLength = 200.0
+LeadVisual = NodePath("Lead")
+RearVisual = NodePath("Rear")
+
+[node name="Lead" type="Sprite2D" parent="." unique_id=959906166]
+modulate = Color(0, 0.20392157, 0.84313726, 1)
+scale = Vector2(0.05, 0.05)
+texture = ExtResource("2_v6bau")
+
+[node name="Rear" type="Sprite2D" parent="." unique_id=1630618812]
+modulate = Color(0.9211696, 0.34046587, 0.25685716, 1)
+position = Vector2(31.999998, -0.99999994)
+scale = Vector2(0.05, 0.05)
+texture = ExtResource("2_v6bau")

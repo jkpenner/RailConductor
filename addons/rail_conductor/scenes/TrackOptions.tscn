@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://bbmul24vk5o88"]
 
-[ext_resource type="Script" uid="uid://dj3of0rq2l8in" path="res://addons/rail_conductor/scenes/TrackNodeOptions.cs" id="1_63yrt"]
+[ext_resource type="Script" uid="uid://dj3of0rq2l8in" path="res://addons/rail_conductor/scenes/TrackOptions.cs" id="1_63yrt"]
 [ext_resource type="Texture2D" uid="uid://deym2sn23uv5k" path="res://addons/rail_conductor/icons/icons_select.tres" id="2_a6842"]
 [ext_resource type="Texture2D" uid="uid://cnge5lodif67h" path="res://addons/rail_conductor/icons/icons_create.tres" id="3_vwfrl"]
 [ext_resource type="Texture2D" uid="uid://b0rj0a7628bhy" path="res://addons/rail_conductor/icons/icons_insert.tres" id="4_lfl1h"]

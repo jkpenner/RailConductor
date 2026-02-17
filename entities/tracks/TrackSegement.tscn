@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://d38phvi2cgoye"]
 
-[ext_resource type="Script" uid="uid://byb8les288xtu" path="res://scripts/tracks/TrackSegment.cs" id="1_jt72q"]
-[ext_resource type="Script" uid="uid://cdi23cwipvf7k" path="res://scripts/tracks/TrackNode.cs" id="3_owskb"]
+[ext_resource type="Script" uid="uid://byb8les288xtu" path="res://scripts/core/tracks/TrackSegment.cs" id="1_jt72q"]
+[ext_resource type="Script" uid="uid://cdi23cwipvf7k" path="res://scripts/core/tracks/TrackNode.cs" id="3_owskb"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1bvp3"]
 resource_local_to_scene = true
