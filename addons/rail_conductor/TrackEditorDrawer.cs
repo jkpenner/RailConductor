@@ -43,8 +43,9 @@ public static class TrackEditorDrawer
 
         if (ctx.IsSelected(platform.Id))
         {
-            var selectedSize = (size + new Vector2(2f, 2f)) * scale;
-            overlay.DrawRect(new Rect2(center, selectedSize), PluginSettings.SelectedColor);
+            var offset = new Vector2(2f, 2f);
+            var selectedSize = (size + offset) * scale;
+            overlay.DrawRect(new Rect2(center - (offset * 0.5f * scale), selectedSize), PluginSettings.SelectedColor);
         }
 
         var color = GetColor(ctx, platform.Id,
@@ -52,7 +53,7 @@ public static class TrackEditorDrawer
             PluginSettings.LinkHoverColor,
             PluginSettings.LinkDisabledColor);
 
-        overlay.DrawRect(new Rect2(center, size), color);
+        overlay.DrawRect(new Rect2(center, size * scale), color);
 
         // Draw the display name label
         var labelOffset = center - size * 0.5f;

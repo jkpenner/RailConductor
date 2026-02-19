@@ -159,6 +159,6 @@ public static class TrackEditorActions
         EditorUndoRedoManager undoRedo)
     {
         undoRedo.AddDoMethod(track, nameof(TrackData.RemoveSignal), signal.Id);
-        undoRedo.AddDoMethod(track, nameof(TrackData.AddSignal), signal);
+        undoRedo.AddUndoMethod(track, nameof(TrackData.AddSignal), signal.Id, signal);
     }
 }
