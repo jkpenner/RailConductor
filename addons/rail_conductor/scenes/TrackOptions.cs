@@ -40,6 +40,17 @@ public partial class TrackOptions : Control
         // Register all press callbacks
         foreach (var (mode, button) in _buttons)
         {
+            button.Text = mode switch
+            {
+                ToolMode.Select => "Select (Q)",
+                ToolMode.PlaceNode => "Create (W)",
+                ToolMode.Insert => "Insert (E)",
+                ToolMode.Link => "Link (R)",
+                ToolMode.PlaceSignal => "Signal (T)",
+                ToolMode.PlacePlatform => "Platform (Y)",
+                _ => button.Text
+            };
+            
             button.Pressed += _setActions[mode];
         }
     }

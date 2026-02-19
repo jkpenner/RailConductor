@@ -22,7 +22,7 @@ public partial class RailConductorPlugin : EditorPlugin, ISerializationListener
     private ToolMode _currentToolMode = ToolMode.None;
     private PluginContext? _context;
     private readonly Dictionary<ToolMode, PluginModeHandler> _modeHandlers = new();
-    
+
     private bool _isInitialized;
     private TrackOptions? _options;
     private readonly NodeLocator<Track> _trackLocator = new();
@@ -32,7 +32,7 @@ public partial class RailConductorPlugin : EditorPlugin, ISerializationListener
 
     public void OnAfterDeserialize() => Initialize();
     public void OnBeforeSerialize() => Cleanup();
-    
+
     public override bool _Handles(GodotObject obj)
     {
         return obj is Track;
@@ -56,7 +56,7 @@ public partial class RailConductorPlugin : EditorPlugin, ISerializationListener
             _currentToolMode = ToolMode.None;
         }
     }
-    
+
     private void Initialize()
     {
         if (_isInitialized)
@@ -65,7 +65,7 @@ public partial class RailConductorPlugin : EditorPlugin, ISerializationListener
         }
 
         _isInitialized = true;
-        
+
         // Set up the current scene being edited
         _trackLocator.SetRoot(EditorInterface.Singleton.GetEditedSceneRoot());
         SceneChanged += _trackLocator.SetRoot;
@@ -77,7 +77,7 @@ public partial class RailConductorPlugin : EditorPlugin, ISerializationListener
         InitializeModes();
         SetForceDrawOverForwardingEnabled();
     }
-    
+
     private void InitializeModes()
     {
         _modeHandlers.Clear();
@@ -93,7 +93,7 @@ public partial class RailConductorPlugin : EditorPlugin, ISerializationListener
             handler.OverlayUpdateRequested += OnUpdateOverlayRequested;
         }
     }
-    
+
     private void Cleanup()
     {
         if (!_isInitialized)
@@ -115,7 +115,7 @@ public partial class RailConductorPlugin : EditorPlugin, ISerializationListener
         }
 
         _modeHandlers.Clear();
-        
+
         SceneChanged -= _trackLocator.SetRoot;
 
         _trackLocator.Reset();
@@ -131,7 +131,6 @@ public partial class RailConductorPlugin : EditorPlugin, ISerializationListener
         UpdateOverlays();
     }
 
-    
 
     private void SetupMenus()
     {
@@ -174,7 +173,7 @@ public partial class RailConductorPlugin : EditorPlugin, ISerializationListener
         {
             return;
         }
-        
+
         if (_modeHandlers.TryGetValue(_currentToolMode, out var prevHandler))
         {
             prevHandler.Disable(ctx);
@@ -190,6 +189,30 @@ public partial class RailConductorPlugin : EditorPlugin, ISerializationListener
         _options?.SetToolMode(toolMode);
     }
 
+    public override void _Input(InputEvent e)
+    {
+        if (e is not InputEventKey { Pressed: true } key || key.Echo)
+        {
+            return;
+        }
+
+        ToolMode? newMode = key.Keycode switch
+        {
+            Key.Q => ToolMode.Select,
+            Key.W => ToolMode.PlaceNode,
+            Key.E => ToolMode.Insert,
+            Key.R => ToolMode.Link,
+            Key.T => ToolMode.PlaceSignal,
+            Key.Y => ToolMode.PlacePlatform,
+            _ => null
+        };
+
+        if (newMode.HasValue)
+        {
+            SetMode(newMode.Value);
+        }
+    }
+
     public override bool _ForwardCanvasGuiInput(InputEvent input)
     {
         // Ignore input events if invalid state.
@@ -200,10 +223,10 @@ public partial class RailConductorPlugin : EditorPlugin, ISerializationListener
         }
 
         // Ignore if no current mode handler.
-        return _modeHandlers.TryGetValue(_currentToolMode, out var handler) 
+        return _modeHandlers.TryGetValue(_currentToolMode, out var handler)
                && handler.HandleGuiInput(ctx, input);
     }
-    
+
     private PluginContext? GetCurrentContext()
     {
         return _context;
@@ -223,7 +246,7 @@ public partial class RailConductorPlugin : EditorPlugin, ISerializationListener
             UndoRedo = GetUndoRedo(),
         };
     }
-    
+
     private void UpdateCurrentContext(Track? track)
     {
         // Clear context on null or invalid data.
@@ -238,10 +261,10 @@ public partial class RailConductorPlugin : EditorPlugin, ISerializationListener
         {
             return;
         }
-        
+
         _context = CreateContext(track);
     }
-    
+
     public override void _ForwardCanvasDrawOverViewport(Control overlay)
     {
         var ctx = GetCurrentContext();
@@ -253,7 +276,7 @@ public partial class RailConductorPlugin : EditorPlugin, ISerializationListener
                 IsVertical = false,
                 DisplayName = "Test"
             });
-            
+
             TrackEditorDrawer.DrawTrack(overlay, ctx);
 
             if (_modeHandlers.TryGetValue(_currentToolMode, out var handler))
@@ -262,23 +285,23 @@ public partial class RailConductorPlugin : EditorPlugin, ISerializationListener
             }
         }
     }
-    
+
     public override void _ForwardCanvasForceDrawOverViewport(Control overlay)
     {
         var currentContext = GetCurrentContext();
-        
-        foreach(var track in _trackLocator.Nodes)
+
+        foreach (var track in _trackLocator.Nodes)
         {
             // Ignore the selected track
             if (currentContext?.Track == track)
             {
                 continue;
             }
-            
+
             var ctx = CreateContext(track);
             if (ctx is not null)
             {
-                TrackEditorDrawer.DrawTrack(overlay, ctx);    
+                TrackEditorDrawer.DrawTrack(overlay, ctx);
             }
         }
     }
