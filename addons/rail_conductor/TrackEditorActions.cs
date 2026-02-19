@@ -161,4 +161,12 @@ public static class TrackEditorActions
         undoRedo.AddDoMethod(track, nameof(TrackData.RemoveSignal), signal.Id);
         undoRedo.AddUndoMethod(track, nameof(TrackData.AddSignal), signal.Id, signal);
     }
+    
+    public static void DeleteTrackPlatform(TrackData track, PlatformData platform, EditorUndoRedoManager undoRedo)
+    {
+        undoRedo.CreateAction("Delete Platform");
+        undoRedo.AddDoMethod(track, nameof(TrackData.RemovePlatform), platform.Id);
+        undoRedo.AddUndoMethod(track, nameof(TrackData.AddPlatform), platform.Id, platform);
+        undoRedo.CommitAction();
+    }
 }
