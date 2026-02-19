@@ -51,6 +51,17 @@ public partial class TrackOptions : Control
                 _ => button.Text
             };
             
+            button.TooltipText = mode switch
+            {
+                ToolMode.Select => "Select and move objects (Q)",
+                ToolMode.PlaceNode => "Place new track node (W)",
+                ToolMode.Insert => "Insert node on existing link (E)",
+                ToolMode.Link => "Link two nodes together (R)",
+                ToolMode.PlaceSignal => "Place signal on a link (T)",
+                ToolMode.PlacePlatform => "Place platform (Y)",
+                _ => ""
+            };
+            
             button.Pressed += _setActions[mode];
         }
     }
