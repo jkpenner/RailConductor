@@ -9,6 +9,9 @@ namespace RailConductor.Plugin;
 /// </summary>
 public class SelectMode : DraggableModeHandler
 {
+    private string _lastClickedId = string.Empty;
+    private double _lastClickTime = 0;
+    
     protected override bool IsDraggable(string id, TrackData data)
         => data.IsNodeId(id) || data.IsPlatformId(id);
 
@@ -162,6 +165,29 @@ public class SelectMode : DraggableModeHandler
         {
             ctx.ClearSelection();
         }
+        
+        if (!btn.ShiftPressed && !string.IsNullOrEmpty(clickedId))
+        {
+            var now = Time.GetTicksMsec();
+            if (clickedId == _lastClickedId && (now - _lastClickTime) < 400) // double-click
+            {
+                // Open editor for this item (Godot will show Inspector automatically)
+                EditorInterface.Singleton.EditResource(GetResourceForId(ctx, clickedId));
+            }
+            else
+            {
+                _lastClickedId = clickedId;
+                _lastClickTime = now;
+            }
+        }
+    }
+    
+    private Resource? GetResourceForId(PluginContext ctx, string id)
+    {
+        if (ctx.TrackData.IsNodeId(id)) return ctx.TrackData.GetNode(id);
+        if (ctx.TrackData.IsPlatformId(id)) return ctx.TrackData.GetPlatform(id);
+        if (ctx.TrackData.IsSignalId(id)) return ctx.TrackData.GetSignal(id);
+        return null;
     }
 
     private void DeleteSelected(PluginContext ctx)
