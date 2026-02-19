@@ -9,7 +9,7 @@ public enum ToolMode
 {
     None,
     Select,
-    Create,
+    PlaceNode,
     Link,
     Insert,
     PlaceSignal,
@@ -75,7 +75,7 @@ public partial class RailConductorPlugin : EditorPlugin, ISerializationListener
 
         // Initialize Mode Handlers
         _modeHandlers.Add(ToolMode.Select, new SelectMode());
-        _modeHandlers.Add(ToolMode.Create, new AddTrackNodeMode());
+        _modeHandlers.Add(ToolMode.PlaceNode, new PlaceNodeMode());
         _modeHandlers.Add(ToolMode.Insert, new InsertTrackNodeMode());
         _modeHandlers.Add(ToolMode.Link, new LinkTrackNodeMode());
         _modeHandlers.Add(ToolMode.PlaceSignal, new PlaceSignalMode());

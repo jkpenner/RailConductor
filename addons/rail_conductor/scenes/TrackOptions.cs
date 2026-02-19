@@ -19,7 +19,7 @@ public partial class TrackOptions : Control
         //General Modes
         _buttons.Add(ToolMode.Select, GetNode<Button>("%SelectModeButton"));
         // Track Nodes
-        _buttons.Add(ToolMode.Create, GetNode<Button>("%CreateNodeButton"));
+        _buttons.Add(ToolMode.PlaceNode, GetNode<Button>("%CreateNodeButton"));
         _buttons.Add(ToolMode.Insert, GetNode<Button>("%InsertNodeButton"));
         _buttons.Add(ToolMode.Link, GetNode<Button>("%LinkNodesButton"));
         // Track Signals

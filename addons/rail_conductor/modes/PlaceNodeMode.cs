@@ -2,7 +2,7 @@
 
 namespace RailConductor.Plugin;
 
-public class AddTrackNodeMode : PluginModeHandler
+public class PlaceNodeMode : PluginModeHandler
 {
     private string _selectedNodeId = string.Empty;
     private Vector2 _originalPosition;
