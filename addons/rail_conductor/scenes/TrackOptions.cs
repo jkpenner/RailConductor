@@ -7,6 +7,7 @@ namespace RailConductor.Plugin;
 [Tool]
 public partial class TrackOptions : Control
 {
+    private Label _modeHint = null!;
     public event Action<ToolMode>? ToolModeSelected;
     
     private readonly Dictionary<ToolMode, Button> _buttons = new();
@@ -14,6 +15,8 @@ public partial class TrackOptions : Control
 
     public override void _Ready()
     {
+        _modeHint = GetNode<Label>("%ModeHint");
+        
         // Register all buttons
         _buttons.Clear();
         //General Modes
@@ -80,6 +83,17 @@ public partial class TrackOptions : Control
         foreach (var (buttonMode, button) in _buttons)
         {
             button.ButtonPressed = buttonMode == mode;
+        }
+        
+        if (_modeHint != null)
+        {
+            _modeHint.Text = mode switch
+            {
+                ToolMode.Link => "Click first node, then second node (or chain)",
+                ToolMode.Insert => "Click on a link to insert a node",
+                ToolMode.PlaceSignal => "Hover a link and click to place signal",
+                _ => ""
+            };
         }
     }
 }
