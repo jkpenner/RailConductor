@@ -188,33 +188,30 @@ public partial class RailConductorPlugin : EditorPlugin, ISerializationListener
 
         _options?.SetToolMode(toolMode);
     }
-
-    public override void _Input(InputEvent e)
-    {
-        if (e is not InputEventKey { Pressed: true } key || key.Echo)
-        {
-            return;
-        }
-
-        ToolMode? newMode = key.Keycode switch
-        {
-            Key.Q => ToolMode.Select,
-            Key.W => ToolMode.PlaceNode,
-            Key.E => ToolMode.Insert,
-            Key.R => ToolMode.Link,
-            Key.T => ToolMode.PlaceSignal,
-            Key.Y => ToolMode.PlacePlatform,
-            _ => null
-        };
-
-        if (newMode.HasValue)
-        {
-            SetMode(newMode.Value);
-        }
-    }
-
+    
     public override bool _ForwardCanvasGuiInput(InputEvent input)
     {
+        // === GLOBAL TOOL MODE HOTKEYS ===
+        if (input is InputEventKey { Pressed: true, Echo: false } key)
+        {
+            ToolMode? newMode = key.Keycode switch
+            {
+                Key.Q => ToolMode.Select,
+                Key.W => ToolMode.PlaceNode,
+                Key.E => ToolMode.Insert,
+                Key.R => ToolMode.Link,
+                Key.T => ToolMode.PlaceSignal,
+                Key.Y => ToolMode.PlacePlatform,
+                _ => null
+            };
+
+            if (newMode.HasValue)
+            {
+                SetMode(newMode.Value);
+                return true; // consume the key so it doesn't do anything else
+            }
+        }
+        
         // Ignore input events if invalid state.
         var ctx = GetCurrentContext();
         if (ctx is null || _currentToolMode == ToolMode.None)
