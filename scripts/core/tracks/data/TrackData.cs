@@ -13,36 +13,84 @@ public partial class TrackData : Resource
     [Export] private Godot.Collections.Dictionary<string, SignalData> _signals = new();
     [Export] private Godot.Collections.Dictionary<string, PlatformData> _platforms = new();
     [Export] private Godot.Collections.Dictionary<string, InterlockingGroupData> _interlockingGroups = new();
+    [Export] private Godot.Collections.Dictionary<string, PlatformGroupData> _platformGroups = new();
 
-    public bool IsValidId(string id) => IsNodeId(id) || IsLinkId(id) || IsSignalId(id) || IsPlatformId(id) || IsInterlockingGroupId(id);
+    private readonly Dictionary<string, string> _linkToPlatformId = new();
+    
+    public bool IsValidId(string id) => IsNodeId(id) || IsLinkId(id) || IsSignalId(id) || IsPlatformId(id) || IsInterlockingGroupId(id) || IsPlatformGroupId(id);
     public bool IsNodeId(string id) => _nodes.ContainsKey(id);
     public bool IsLinkId(string id) => _links.ContainsKey(id);
     public bool IsSignalId(string id) => _signals.ContainsKey(id);
     public bool IsPlatformId(string id) => _platforms.ContainsKey(id);
+    public bool IsPlatformGroupId(string id) => _platformGroups.ContainsKey(id);
     public bool IsInterlockingGroupId(string id) => _interlockingGroups.ContainsKey(id);
 
     public IEnumerable<TrackNodeData> GetNodes() => _nodes.Values;
     public IEnumerable<TrackLinkData> GetLinks() => _links.Values;
     public IEnumerable<SignalData> GetSignals() => _signals.Values;
     public IEnumerable<PlatformData> GetPlatforms() => _platforms.Values;
+    public IEnumerable<PlatformGroupData> GetPlatformGroups() => _platformGroups.Values;
     public IEnumerable<InterlockingGroupData> GetInterlockingGroups() => _interlockingGroups.Values;
 
     public TrackNodeData? GetNode(string id) => _nodes.GetValueOrDefault(id);
     public TrackLinkData? GetLink(string id) => _links.GetValueOrDefault(id);
     public SignalData? GetSignal(string id) => _signals.GetValueOrDefault(id);
     public PlatformData? GetPlatform(string id) => _platforms.GetValueOrDefault(id);
+    public PlatformGroupData? GetPlatformGroup(string id) => _platformGroups.GetValueOrDefault(id);
     public InterlockingGroupData? GetInterlockingGroup(string id) => _interlockingGroups.GetValueOrDefault(id);
 
     public void AddNode(string id, TrackNodeData newNode) => _nodes.Add(id, newNode);
     public void AddLink(string id, TrackLinkData newLink) => _links.Add(id, newLink);
     public void AddSignal(string id, SignalData newSignal) => _signals.Add(id, newSignal);
     public void AddPlatform(string id, PlatformData newPlatform) => _platforms.Add(id, newPlatform);
+    public void AddPlatformGroup(string id, PlatformGroupData newPlatform) => _platformGroups.Add(id, newPlatform);
 
     public void RemoveNode(string id) => _nodes.Remove(id);
     public void RemoveLink(string id) => _links.Remove(id);
     public void RemoveSignal(string id) => _signals.Remove(id);
     public void RemovePlatform(string id) => _platforms.Remove(id);
+    public void RemovePlatformGroup(string id) => _platformGroups.Remove(id);
 
+    /// <summary>
+    /// Rebuilds the fast reverse lookup: which platform is attached to each link.
+    /// Called automatically by undo/redo actions after any platform link change.
+    /// </summary>
+    public void RefreshPlatformLinkCache()
+    {
+        _linkToPlatformId.Clear();
+
+        foreach (var platform in GetPlatforms())
+        {
+            foreach (var linkId in platform.LinkedLinkIds)
+            {
+                if (!string.IsNullOrEmpty(linkId))
+                {
+                    _linkToPlatformId[linkId] = platform.Id;   // One link can only belong to one platform
+                }
+            }
+        }
+    }
+    
+    
+    
+    /// <summary>
+    /// Returns the platform attached to a specific link (null if none).
+    /// Very fast thanks to the cache.
+    /// </summary>
+    public PlatformData? GetPlatformOnLink(string linkId)
+    {
+        return _linkToPlatformId.TryGetValue(linkId, out var platformId)
+            ? GetPlatform(platformId)
+            : null;
+    }
+
+    public IEnumerable<PlatformData> GetPlatformsInGroup(string groupId)
+    {
+        var group = GetPlatformGroup(groupId);
+        if (group == null) return Enumerable.Empty<PlatformData>();
+        return group.PlatformIds.Select(GetPlatform).OfType<PlatformData>();
+    }
+    
     public bool IsLinked(string nodeAId, string nodeBId)
     {
         var nodeA = GetNode(nodeAId);

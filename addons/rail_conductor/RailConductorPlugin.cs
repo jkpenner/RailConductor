@@ -13,7 +13,8 @@ public enum ToolMode
     Link,
     Insert,
     PlaceSignal,
-    PlacePlatform
+    PlacePlatform,
+    AttachPlatform,
 }
 
 [Tool]
@@ -87,6 +88,7 @@ public partial class RailConductorPlugin : EditorPlugin, ISerializationListener
         _modeHandlers.Add(ToolMode.Link, new LinkTrackNodeMode());
         _modeHandlers.Add(ToolMode.PlaceSignal, new PlaceSignalMode());
         _modeHandlers.Add(ToolMode.PlacePlatform, new PlacePlatformMode());
+        _modeHandlers.Add(ToolMode.AttachPlatform, new AttachPlatformToLinkMode());
 
         foreach (var handler in _modeHandlers.Values)
         {

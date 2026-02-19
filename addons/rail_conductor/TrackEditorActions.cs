@@ -142,6 +142,75 @@ public static class TrackEditorActions
         undoRedo.AddDoMethod(track, nameof(TrackData.RemoveLink), link.Id);
         undoRedo.AddUndoMethod(track, nameof(TrackData.AddLink), link.Id, link);
     }
+    
+    /// <summary>
+    /// Attaches a single track link to a platform (supports multiple links per platform).
+    /// Fully undoable with proper snapshot of the entire list.
+    /// </summary>
+    public static void LinkPlatformToTrackLink(PluginContext ctx, PlatformData platform, string linkId)
+    {
+        if (ctx.UndoRedo is null || platform == null || string.IsNullOrEmpty(linkId))
+            return;
+
+        // Prevent duplicate links
+        if (platform.IsLinkedTo(linkId))
+            return;
+
+        // Snapshot the current list for reliable undo
+        var oldLinks = new Godot.Collections.Array<string>(platform.LinkedLinkIds);
+
+        ctx.UndoRedo.CreateAction("Attach Link to Platform");
+
+        // Do: Add the link
+        ctx.UndoRedo.AddDoMethod(platform, nameof(PlatformData.AddLink), linkId);
+
+        // Undo: Restore the previous list exactly
+        ctx.UndoRedo.AddUndoMethod(platform, nameof(PlatformData.ClearLinks));
+        foreach (var oldId in oldLinks)
+        {
+            ctx.UndoRedo.AddUndoMethod(platform, nameof(PlatformData.AddLink), oldId);
+        }
+
+        // Refresh the reverse lookup cache in TrackData
+        ctx.UndoRedo.AddDoMethod(ctx.TrackData, nameof(TrackData.RefreshPlatformLinkCache));
+        ctx.UndoRedo.AddUndoMethod(ctx.TrackData, nameof(TrackData.RefreshPlatformLinkCache));
+
+        ctx.UndoRedo.CommitAction();
+    }
+    
+    public static void UnlinkPlatformFromTrackLink(PluginContext ctx, PlatformData platform, string linkId)
+    {
+        if (ctx.UndoRedo is null || platform == null || string.IsNullOrEmpty(linkId))
+            return;
+
+        if (!platform.IsLinkedTo(linkId))
+            return;
+
+        var oldLinks = new Godot.Collections.Array<string>(platform.LinkedLinkIds);
+
+        ctx.UndoRedo.CreateAction("Detach Link from Platform");
+
+        ctx.UndoRedo.AddDoMethod(platform, nameof(PlatformData.RemoveLink), linkId);
+
+        ctx.UndoRedo.AddUndoMethod(platform, nameof(PlatformData.ClearLinks));
+        foreach (var oldId in oldLinks)
+        {
+            ctx.UndoRedo.AddUndoMethod(platform, nameof(PlatformData.AddLink), oldId);
+        }
+
+        ctx.UndoRedo.AddDoMethod(ctx.TrackData, nameof(TrackData.RefreshPlatformLinkCache));
+        ctx.UndoRedo.AddUndoMethod(ctx.TrackData, nameof(TrackData.RefreshPlatformLinkCache));
+
+        ctx.UndoRedo.CommitAction();
+    }
+
+    public static void AddPlatformGroup(TrackData track, PlatformGroupData group, EditorUndoRedoManager undoRedo)
+    {
+        undoRedo.CreateAction("Add Platform Group");
+        undoRedo.AddDoMethod(track, nameof(TrackData.AddPlatformGroup), group.Id, group);
+        undoRedo.AddUndoMethod(track, nameof(TrackData.RemovePlatformGroup), group.Id);
+        undoRedo.CommitAction();
+    }
 
     public static void DeleteTrackSignal(
         TrackData track,

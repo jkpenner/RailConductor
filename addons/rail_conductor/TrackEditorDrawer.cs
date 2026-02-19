@@ -67,6 +67,8 @@ public static class TrackEditorDrawer
             fontSize: (int)(4f * scale),
             modulate: Colors.Black,
             width: 60f);
+        
+        DrawPlatformLinks(overlay, ctx, platform);
     }
 
     public static void DrawTrackLink(Control overlay, PluginContext ctx, TrackLinkData link)
@@ -246,6 +248,44 @@ public static class TrackEditorDrawer
         }
 
         return ctx.IsHovered(id) ? hover : normal;
+    }
+    
+    /// <summary>
+    /// Draws dashed connection lines from a platform to the midpoint of every linked track link.
+    /// Called automatically from DrawTrackPlatform.
+    /// </summary>
+    public static void DrawPlatformLinks(Control overlay, PluginContext ctx, PlatformData platform)
+    {
+        if (platform.LinkedLinkIds.Count == 0)
+            return;
+
+        var scale = PluginUtility.GetZoom();
+        var platformGlobal = ctx.Track.ToGlobal(platform.Position);
+        var platformScreen = PluginUtility.WorldToScreen(platformGlobal);
+
+        var lineColor = ctx.IsSelected(platform.Id) 
+            ? PluginSettings.SelectedColor 
+            : new Color(0.4f, 0.85f, 1f, 0.65f); // light cyan, semi-transparent
+
+        var lineWidth = 3f * scale;
+
+        foreach (var linkId in platform.LinkedLinkIds)
+        {
+            var link = ctx.TrackData.GetLink(linkId);
+            if (link is null) continue;
+
+            var nodeA = ctx.TrackData.GetNode(link.NodeAId);
+            var nodeB = ctx.TrackData.GetNode(link.NodeBId);
+            if (nodeA is null || nodeB is null) continue;
+
+            // Midpoint of the link
+            var midPoint = nodeA.Position.Lerp(nodeB.Position, 0.5f);
+            var linkGlobal = ctx.Track.ToGlobal(midPoint);
+            var linkScreen = PluginUtility.WorldToScreen(linkGlobal);
+
+            // Draw dashed connection line
+            overlay.DrawDashedLine(platformScreen, linkScreen, lineColor, lineWidth, dash: 8f);
+        }
     }
     
     // Centralised preview drawing – used by all ghost/preview modes

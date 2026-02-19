@@ -29,6 +29,8 @@ public partial class TrackOptions : Control
         _buttons.Add(ToolMode.PlaceSignal, GetNode<Button>("%PlaceSignalButton"));
         _buttons.Add(ToolMode.PlacePlatform, GetNode<Button>("%PlacePlatformButton"));
         
+        _buttons.Add(ToolMode.AttachPlatform, GetNode<Button>("%AttachPlatformButton"));
+        
         // Generate all required callbacks.
         foreach (var mode in Enum.GetValues<ToolMode>())
         {
@@ -51,6 +53,7 @@ public partial class TrackOptions : Control
                 ToolMode.Link => "Link (R)",
                 ToolMode.PlaceSignal => "Signal (T)",
                 ToolMode.PlacePlatform => "Platform (Y)",
+                ToolMode.AttachPlatform => "Attach Platform (U)",
                 _ => button.Text
             };
             
@@ -62,6 +65,7 @@ public partial class TrackOptions : Control
                 ToolMode.Link => "Link two nodes together (R)",
                 ToolMode.PlaceSignal => "Place signal on a link (T)",
                 ToolMode.PlacePlatform => "Place platform (Y)",
+                ToolMode.AttachPlatform => "Attach Platform (U)",
                 _ => ""
             };
             

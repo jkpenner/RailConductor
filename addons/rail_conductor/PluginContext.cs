@@ -11,7 +11,8 @@ public enum SelectionType
     Node = 0x1,
     Link = 0x2,
     Signal = 0x4,
-    All = Node | Link | Signal
+    Platform = 0x8,
+    All = Node | Link | Signal | Platform,
 }
 
 public class PluginContext
