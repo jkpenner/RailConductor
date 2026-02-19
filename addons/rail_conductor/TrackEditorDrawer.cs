@@ -36,11 +36,15 @@ public static class TrackEditorDrawer
 
         var globalPosition = ctx.Track.ToGlobal(platform.Position);
         var center = PluginUtility.WorldToScreen(globalPosition);
-        
+    
         var size = platform.IsVertical 
             ? PluginSettings.PlatformVerticalSize 
             : PluginSettings.PlatformHorizontalSize;
 
+        // === DRAW CONNECTION LINES FIRST (behind the platform) ===
+        DrawPlatformLinks(overlay, ctx, platform);
+
+        // === Then draw the platform itself (on top) ===
         if (ctx.IsSelected(platform.Id))
         {
             var offset = new Vector2(2f, 2f);
@@ -58,7 +62,7 @@ public static class TrackEditorDrawer
         // Draw the display name label
         var labelOffset = center - size * 0.5f;
         var labelSize = new Vector2(20f, 4f) * scale;
-        
+    
         overlay.DrawRect(new Rect2(center - labelOffset, labelSize), Colors.White);
         overlay.DrawString(GetFont(), 
             center - labelOffset,
@@ -67,8 +71,6 @@ public static class TrackEditorDrawer
             fontSize: (int)(4f * scale),
             modulate: Colors.Black,
             width: 60f);
-        
-        DrawPlatformLinks(overlay, ctx, platform);
     }
 
     public static void DrawTrackLink(Control overlay, PluginContext ctx, TrackLinkData link)
@@ -254,14 +256,25 @@ public static class TrackEditorDrawer
     /// Draws dashed connection lines from a platform to the midpoint of every linked track link.
     /// Called automatically from DrawTrackPlatform.
     /// </summary>
+    /// <summary>
+    /// Draws dashed connection lines from the CENTER of the platform to the midpoint of every linked track link.
+    /// Lines are drawn behind the platform (call this before drawing the platform rect).
+    /// </summary>
     public static void DrawPlatformLinks(Control overlay, PluginContext ctx, PlatformData platform)
     {
         if (platform.LinkedLinkIds.Count == 0)
             return;
 
         var scale = PluginUtility.GetZoom();
-        var platformGlobal = ctx.Track.ToGlobal(platform.Position);
-        var platformScreen = PluginUtility.WorldToScreen(platformGlobal);
+
+        // Calculate true center of the platform rectangle
+        var size = platform.IsVertical 
+            ? PluginSettings.PlatformVerticalSize 
+            : PluginSettings.PlatformHorizontalSize;
+    
+        var halfSize = size * 0.5f;
+        var platformCenterLocal = platform.Position + halfSize;
+        var platformCenterScreen = PluginUtility.WorldToScreen(ctx.Track.ToGlobal(platformCenterLocal));
 
         var lineColor = ctx.IsSelected(platform.Id) 
             ? PluginSettings.SelectedColor 
@@ -280,11 +293,10 @@ public static class TrackEditorDrawer
 
             // Midpoint of the link
             var midPoint = nodeA.Position.Lerp(nodeB.Position, 0.5f);
-            var linkGlobal = ctx.Track.ToGlobal(midPoint);
-            var linkScreen = PluginUtility.WorldToScreen(linkGlobal);
+            var linkScreen = PluginUtility.WorldToScreen(ctx.Track.ToGlobal(midPoint));
 
-            // Draw dashed connection line
-            overlay.DrawDashedLine(platformScreen, linkScreen, lineColor, lineWidth, dash: 8f);
+            // Draw dashed connection line from platform CENTER
+            overlay.DrawDashedLine(platformCenterScreen, linkScreen, lineColor, lineWidth, dash: 8f);
         }
     }
     

@@ -16,8 +16,10 @@ public partial class TrackData : Resource
     [Export] private Godot.Collections.Dictionary<string, PlatformGroupData> _platformGroups = new();
 
     private readonly Dictionary<string, string> _linkToPlatformId = new();
-    
-    public bool IsValidId(string id) => IsNodeId(id) || IsLinkId(id) || IsSignalId(id) || IsPlatformId(id) || IsInterlockingGroupId(id) || IsPlatformGroupId(id);
+
+    public bool IsValidId(string id) => IsNodeId(id) || IsLinkId(id) || IsSignalId(id) || IsPlatformId(id) ||
+                                        IsInterlockingGroupId(id) || IsPlatformGroupId(id);
+
     public bool IsNodeId(string id) => _nodes.ContainsKey(id);
     public bool IsLinkId(string id) => _links.ContainsKey(id);
     public bool IsSignalId(string id) => _signals.ContainsKey(id);
@@ -65,14 +67,13 @@ public partial class TrackData : Resource
             {
                 if (!string.IsNullOrEmpty(linkId))
                 {
-                    _linkToPlatformId[linkId] = platform.Id;   // One link can only belong to one platform
+                    _linkToPlatformId[linkId] = platform.Id; // One link can only belong to one platform
                 }
             }
         }
     }
-    
-    
-    
+
+
     /// <summary>
     /// Returns the platform attached to a specific link (null if none).
     /// Very fast thanks to the cache.
@@ -90,7 +91,7 @@ public partial class TrackData : Resource
         if (group == null) return Enumerable.Empty<PlatformData>();
         return group.PlatformIds.Select(GetPlatform).OfType<PlatformData>();
     }
-    
+
     public bool IsLinked(string nodeAId, string nodeBId)
     {
         var nodeA = GetNode(nodeAId);
@@ -242,7 +243,7 @@ public partial class TrackData : Resource
         {
             return string.Empty;
         }
-        
+
         var minDist = float.MaxValue;
         var closest = string.Empty;
 
@@ -259,7 +260,7 @@ public partial class TrackData : Resource
             {
                 return platform.Id;
             }
-            
+
             if (dist >= minDist)
             {
                 continue;
@@ -268,7 +269,7 @@ public partial class TrackData : Resource
             minDist = dist;
             closest = platform.Id;
         }
-        
+
         return minDist < PluginSettings.MaxSelectDistance ? closest : string.Empty;
     }
 
@@ -352,7 +353,7 @@ public partial class TrackData : Resource
         var projection = a + t * ab;
         return p.DistanceTo(projection);
     }
-    
+
     public (Vector2 Position, float Angle)? GetSignalPosition(string signalId)
     {
         var signal = GetSignal(signalId);

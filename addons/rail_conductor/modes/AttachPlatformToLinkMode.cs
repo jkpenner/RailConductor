@@ -3,16 +3,11 @@
 namespace RailConductor.Plugin;
 
 /// <summary>
-/// Attach mode for connecting platforms to one or more track links.
+/// Attach/Detach mode for platforms and track links.
 /// 
-/// Flow:
-/// • Click a platform → it becomes the "current" platform (selected)
-/// • Hover any link → dashed preview line from platform center to link midpoint
-/// • Click the link → attach it to the current platform (multiple links allowed)
-/// • Click another platform → switch the current platform
-/// • Right-click or Escape → clear current platform selection
-/// 
-/// Fully supports the new multi-link PlatformData.LinkedLinkIds.
+/// Fixed:
+/// • Links now have priority over platforms when a platform is selected (no more "platform stealing" clicks/hovers)
+/// • Preview dashed lines now start from the exact center of the platform rectangle
 /// </summary>
 public class AttachPlatformToLinkMode : PluginModeHandler
 {
@@ -47,6 +42,10 @@ public class AttachPlatformToLinkMode : PluginModeHandler
                 return true;
 
             case InputEventMouseButton { ButtonIndex: MouseButton.Right, Pressed: true }:
+                HandleRightClick(ctx, ((InputEventMouseButton)e).Position);
+                RequestOverlayUpdate();
+                return true;
+
             case InputEventKey { Keycode: Key.Escape, Pressed: true }:
                 if (!string.IsNullOrEmpty(_currentPlatformId))
                 {
@@ -54,32 +53,59 @@ public class AttachPlatformToLinkMode : PluginModeHandler
                     RequestOverlayUpdate();
                     return true;
                 }
+
                 break;
         }
 
         return false;
     }
 
+    // ========================================================================
+    // HOVER – Links have priority when a platform is active
+    // ========================================================================
+
     private void UpdateHover(PluginContext ctx, Vector2 screenPosition)
     {
-        if (string.IsNullOrEmpty(_currentPlatformId))
-        {
-            _hoveredLinkId = string.Empty;
-            return;
-        }
-
         var globalPos = PluginUtility.ScreenToWorldSnapped(screenPosition);
         var localPos = ctx.Track.ToLocal(globalPos);
 
-        _hoveredLinkId = ctx.TrackData.FindClosestLink(localPos);
+        if (!string.IsNullOrEmpty(_currentPlatformId))
+        {
+            // When attaching, links ALWAYS take priority
+            _hoveredLinkId = ctx.TrackData.FindClosestLink(localPos);
+            return;
+        }
+
+        // No active platform — just prepare for platform selection
+        _hoveredLinkId = string.Empty;
     }
+
+    // ========================================================================
+    // LEFT CLICK – Same priority rule
+    // ========================================================================
 
     private void HandleLeftClick(PluginContext ctx, Vector2 screenPosition)
     {
         var globalPos = PluginUtility.ScreenToWorldSnapped(screenPosition);
         var localPos = ctx.Track.ToLocal(globalPos);
 
-        // Clicked a platform → make it the new current
+        // 1. If we have a current platform → try link first
+        if (!string.IsNullOrEmpty(_currentPlatformId))
+        {
+            var clickedLinkId = ctx.TrackData.FindClosestLink(localPos);
+            if (!string.IsNullOrEmpty(clickedLinkId))
+            {
+                var platform = ctx.TrackData.GetPlatform(_currentPlatformId);
+                if (platform != null && !platform.IsLinkedTo(clickedLinkId))
+                {
+                    TrackEditorActions.LinkPlatformToTrackLink(ctx, platform, clickedLinkId);
+                }
+
+                return;
+            }
+        }
+
+        // 2. No link hit or no active platform → check for platform selection
         var clickedPlatformId = ctx.TrackData.FindClosestPlatform(localPos);
         if (!string.IsNullOrEmpty(clickedPlatformId))
         {
@@ -88,40 +114,31 @@ public class AttachPlatformToLinkMode : PluginModeHandler
             _hoveredLinkId = string.Empty;
             return;
         }
+    }
 
-        // Clicked a link while a platform is active → attach it
+    // ========================================================================
+    // RIGHT CLICK – Detach or cancel
+    // ========================================================================
+
+    private void HandleRightClick(PluginContext ctx, Vector2 screenPosition)
+    {
         if (string.IsNullOrEmpty(_currentPlatformId) || string.IsNullOrEmpty(_hoveredLinkId))
+        {
+            ResetCurrent(ctx);
             return;
+        }
 
         var platform = ctx.TrackData.GetPlatform(_currentPlatformId);
         if (platform == null) return;
 
         if (platform.IsLinkedTo(_hoveredLinkId))
-            return; // already attached
-
-        // Attach via undoable action
-        AttachLinkToPlatform(ctx, platform, _hoveredLinkId);
-
-        // Stay on the same platform so user can attach more links
-        ctx.SelectOnly(_currentPlatformId);
-    }
-
-    private void AttachLinkToPlatform(PluginContext ctx, PlatformData platform, string linkId)
-    {
-        if (ctx.UndoRedo is null) return;
-
-        var oldLinks = new Godot.Collections.Array<string>(platform.LinkedLinkIds);
-
-        ctx.UndoRedo.CreateAction("Attach Platform to Link");
-
-        ctx.UndoRedo.AddDoMethod(platform, nameof(PlatformData.AddLink), linkId);
-        ctx.UndoRedo.AddUndoMethod(platform, nameof(PlatformData.RemoveLink), linkId);
-
-        // Refresh cache
-        ctx.UndoRedo.AddDoMethod(ctx.TrackData, nameof(TrackData.RefreshPlatformLinkCache));
-        ctx.UndoRedo.AddUndoMethod(ctx.TrackData, nameof(TrackData.RefreshPlatformLinkCache));
-
-        ctx.UndoRedo.CommitAction();
+        {
+            TrackEditorActions.UnlinkPlatformFromTrackLink(ctx, platform, _hoveredLinkId);
+        }
+        else
+        {
+            ResetCurrent(ctx);
+        }
     }
 
     private void ResetCurrent(PluginContext ctx = null)
@@ -130,6 +147,10 @@ public class AttachPlatformToLinkMode : PluginModeHandler
         _hoveredLinkId = string.Empty;
         ctx?.ClearSelection();
     }
+
+    // ========================================================================
+    // DRAW PREVIEW – From platform CENTER
+    // ========================================================================
 
     public override void Draw(Control overlay, PluginContext ctx)
     {
@@ -144,12 +165,23 @@ public class AttachPlatformToLinkMode : PluginModeHandler
         var nodeB = ctx.TrackData.GetNode(link.NodeBId);
         if (nodeA == null || nodeB == null) return;
 
-        var platformScreen = PluginUtility.WorldToScreen(ctx.Track.ToGlobal(platform.Position));
+        // True center of the platform rectangle
+        var size = platform.IsVertical
+            ? PluginSettings.PlatformVerticalSize
+            : PluginSettings.PlatformHorizontalSize;
+
+        var halfSize = size * 0.5f;
+        var platformCenterLocal = platform.Position + halfSize;
+        var platformScreen = PluginUtility.WorldToScreen(ctx.Track.ToGlobal(platformCenterLocal));
+
         var midLink = nodeA.Position.Lerp(nodeB.Position, 0.5f);
         var linkScreen = PluginUtility.WorldToScreen(ctx.Track.ToGlobal(midLink));
 
-        // Dashed preview line (same style as Link mode)
-        var previewColor = new Color(0.4f, 0.85f, 1f, 0.7f);
+        var isAlreadyAttached = platform.IsLinkedTo(_hoveredLinkId);
+        var previewColor = isAlreadyAttached
+            ? new Color(1f, 0.3f, 0.3f, 0.8f) // Red = will detach
+            : new Color(0.4f, 0.85f, 1f, 0.7f); // Cyan = will attach
+
         overlay.DrawDashedLine(platformScreen, linkScreen, previewColor, width: 4f, dash: 10f);
     }
 }
