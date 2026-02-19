@@ -23,6 +23,9 @@ public partial class TrackNodeData : Resource
     public Vector2 Position { get; set; }
 
     [Export]
+    public bool IsIsolator { get; set; } = false;
+    
+    [Export]
     public Godot.Collections.Array<string> Links { get; set; } = [];
 
     [Export]
