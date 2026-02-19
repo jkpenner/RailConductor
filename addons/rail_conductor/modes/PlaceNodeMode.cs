@@ -3,25 +3,61 @@
 namespace RailConductor.Plugin;
 
 /// <summary>
-/// Placement mode for Track Nodes.
-/// 
-/// Flow:
-/// • Left press: creates node at snapped position + immediately starts dragging
-/// • Mouse motion (button held): live drag preview
-/// • Left release: commits final position with undoable Move
-/// • Right-click or Escape while dragging: deletes via TrackEditorActions (undoable)
+/// Placement mode for Track Nodes (now uses reusable drag logic).
+/// Cancel during drag now correctly deletes the object.
 /// </summary>
-public class PlaceNodeMode : PluginModeHandler
+public class PlaceNodeMode : DraggableModeHandler
 {
-    private bool _isDragging;
     private string _placingId = string.Empty;
-    private Vector2 _originalPosition;
 
     protected override void OnEnable(PluginContext ctx)
     {
         ctx.ClearSelection();
-        Cleanup();
+        CleanupDrag();
+        _placingId = string.Empty;
         RequestOverlayUpdate();
+    }
+
+    protected override bool IsDraggable(string id, TrackData data) => data.IsNodeId(id);
+
+    protected override (string Id, Vector2 Delta)[] BuildDragItems(PluginContext ctx, Vector2 initialLocalPos)
+    {
+        if (string.IsNullOrEmpty(_placingId)) return [];
+        var node = ctx.TrackData.GetNode(_placingId);
+        return node is null ? [] : new[] { (_placingId, node.Position - initialLocalPos) };
+    }
+
+    protected override void ApplyPosition(PluginContext ctx, string id, Vector2 newLocalPos)
+    {
+        var node = ctx.TrackData.GetNode(id);
+        if (node != null) node.Position = newLocalPos;
+    }
+
+    protected override void CommitItem(PluginContext ctx, string id, Vector2 finalPos, Vector2 originalPos)
+    {
+        var node = ctx.TrackData.GetNode(id);
+        if (node is null) return;
+
+        ctx.UndoRedo!.AddDoProperty(node, nameof(TrackNodeData.Position), finalPos);
+        ctx.UndoRedo!.AddUndoProperty(node, nameof(TrackNodeData.Position), originalPos);
+        ctx.UndoRedo!.AddDoMethod(node, nameof(TrackNodeData.UpdateConfiguration), ctx.TrackData);
+    }
+
+    // ========================================================================
+    // CANCEL OVERRIDE — DELETE THE OBJECT (this fixes the bug)
+    // ========================================================================
+
+    protected override void OnCancelDrag(PluginContext ctx)
+    {
+        if (string.IsNullOrEmpty(_placingId) || ctx.UndoRedo is null) return;
+
+        var node = ctx.TrackData.GetNode(_placingId);
+        if (node != null)
+        {
+            TrackEditorActions.DeleteTrackNode(ctx.TrackData, node, ctx.UndoRedo);
+        }
+
+        _placingId = string.Empty;
     }
 
     protected override bool OnGuiInput(PluginContext ctx, InputEvent e)
@@ -29,41 +65,42 @@ public class PlaceNodeMode : PluginModeHandler
         switch (e)
         {
             case InputEventMouseButton { ButtonIndex: MouseButton.Left, Pressed: true } btn:
-                if (_isDragging)
+                if (IsDragging)
                 {
-                    FinalizePlacement(ctx);
+                    CommitDrag(ctx, btn.Position);
+                    CleanupDrag();
                 }
                 else
                 {
-                    StartPlacement(ctx, btn);
+                    StartNewNode(ctx, btn);
                 }
                 RequestOverlayUpdate();
                 return true;
 
             case InputEventMouseButton { ButtonIndex: MouseButton.Left, Pressed: false }:
-                if (_isDragging)
+                if (IsDragging)
                 {
-                    FinalizePlacement(ctx);
+                    CommitDrag(ctx, ((InputEventMouseButton)e).Position);
+                    CleanupDrag();
                     RequestOverlayUpdate();
                     return true;
                 }
                 break;
 
-            // Cancel with Right-click or Escape
             case InputEventMouseButton { ButtonIndex: MouseButton.Right, Pressed: true }:
             case InputEventKey { Keycode: Key.Escape, Pressed: true }:
-                if (_isDragging)
+                if (IsDragging)
                 {
-                    CancelPlacement(ctx);
+                    CancelDrag(ctx);
                     RequestOverlayUpdate();
                     return true;
                 }
                 break;
 
             case InputEventMouseMotion mouseMotion:
-                if (_isDragging)
+                if (IsDragging)
                 {
-                    UpdateDragPosition(ctx, mouseMotion.Position);
+                    LiveDragPreview(ctx, mouseMotion.Position);
                 }
                 RequestOverlayUpdate();
                 break;
@@ -72,7 +109,7 @@ public class PlaceNodeMode : PluginModeHandler
         return false;
     }
 
-    private void StartPlacement(PluginContext ctx, InputEventMouseButton btn)
+    private void StartNewNode(PluginContext ctx, InputEventMouseButton btn)
     {
         var globalPos = PluginUtility.ScreenToWorldSnapped(btn.Position);
         var localPos = ctx.Track.ToLocal(globalPos);
@@ -80,63 +117,16 @@ public class PlaceNodeMode : PluginModeHandler
         var newNode = new TrackNodeData { Position = localPos };
 
         _placingId = newNode.Id;
-        _originalPosition = localPos;
-        _isDragging = true;
 
         ctx.SelectOnly(newNode.Id);
         TrackEditorActions.AddTrackNode(ctx.TrackData, newNode, ctx.UndoRedo!);
-    }
 
-    private void UpdateDragPosition(PluginContext ctx, Vector2 screenPosition)
-    {
-        if (string.IsNullOrEmpty(_placingId)) return;
-
-        var globalPos = PluginUtility.ScreenToWorldSnapped(screenPosition);
-        var localPos = ctx.Track.ToLocal(globalPos);
-
-        var node = ctx.TrackData.GetNode(_placingId);
-        if (node != null)
-            node.Position = localPos;
-    }
-
-    private void FinalizePlacement(PluginContext ctx)
-    {
-        if (string.IsNullOrEmpty(_placingId)) return;
-
-        var node = ctx.TrackData.GetNode(_placingId);
-        if (node != null && node.Position != _originalPosition)
-        {
-            TrackEditorActions.MoveTrackNode(
-                ctx.TrackData,
-                node,
-                node.Position,
-                _originalPosition,
-                ctx.UndoRedo!
-            );
-        }
-
-        ctx.ClearSelection();
-        Cleanup();
-    }
-
-    private void CancelPlacement(PluginContext ctx)
-    {
-        if (string.IsNullOrEmpty(_placingId) || ctx.UndoRedo is null) return;
-
-        var node = ctx.TrackData.GetNode(_placingId);
-        if (node != null)
-        {
-            // Uses the proper delete action (undoable)
-            TrackEditorActions.DeleteTrackNode(ctx.TrackData, node, ctx.UndoRedo);
-        }
-
-        ctx.ClearSelection();
-        Cleanup();
+        StartDrag(ctx, btn.Position);
     }
 
     private void Cleanup()
     {
         _placingId = string.Empty;
-        _isDragging = false;
+        CleanupDrag();
     }
 }

@@ -1,20 +1,22 @@
-﻿using System;
-using Godot;
+﻿using Godot;
 
 namespace RailConductor.Plugin;
 
+/// <summary>
+/// Placement mode for Signals (stamp / multi-placement style).
+/// 
+/// Behaviour:
+/// • Hover any link → live ghost preview (auto-faces the closer node)
+/// • Left-click → places the signal instantly + automatically selects it
+/// • You can immediately hover and click again to place another signal (restrictions stay Link-only)
+/// • Right-click or Escape → exits the mode and returns to normal selection
+/// 
+/// Fixes the "restrictions are cleared" bug by re-applying the Link restriction after every placement.
+/// </summary>
 public class PlaceSignalMode : PluginModeHandler
 {
     private string _hoveredLinkId = string.Empty;
-    private float _hoveredLinkDistance = float.MaxValue;
-    private string _selectedLinkId = string.Empty;
-    private Phase _currentPhase = Phase.LinkSelect;
-
-    private enum Phase
-    {
-        LinkSelect,
-        NodeSelect,
-    }
+    private string _previewDirectionNodeId = string.Empty;
 
     protected override void OnEnable(PluginContext ctx)
     {
@@ -31,111 +33,86 @@ public class PlaceSignalMode : PluginModeHandler
 
     protected override bool OnGuiInput(PluginContext ctx, InputEvent e)
     {
-        if (e is InputEventMouseMotion motion)
+        switch (e)
         {
-            if (string.IsNullOrEmpty(_selectedLinkId))
-            {
-                var globalPosition = PluginUtility.ScreenToWorldSnapped(motion.Position);
-                var localPosition = ctx.Track.ToLocal(globalPosition);
-                _hoveredLinkId = ctx.TrackData.FindClosestLink(localPosition);
-                _hoveredLinkDistance = ctx.TrackData.GetClosestLinkDistance(localPosition);
-            }
-        }
+            case InputEventMouseMotion motion:
+                UpdatePreview(ctx, motion.Position);
+                RequestOverlayUpdate();
+                return false;
 
-        if (e is InputEventMouseButton { ButtonIndex: MouseButton.Right, Pressed: true })
-        {
-            // Return back to the previous phase on right click
-            if (_currentPhase == Phase.NodeSelect)
-            {
-                _currentPhase = Phase.LinkSelect;
-                _selectedLinkId = string.Empty;
-                ctx.ClearSelection();
-                ctx.ResetSelectRestrictions();
-                ctx.RestrictSelectionType(SelectionType.Link);
+            case InputEventMouseButton { ButtonIndex: MouseButton.Left, Pressed: true }:
+                PlaceSignal(ctx);
+                RequestOverlayUpdate();
                 return true;
-            }
-        }
 
-        if (e is InputEventMouseButton { ButtonIndex: MouseButton.Left, Pressed: true } btn)
-        {
-            var globalPosition = PluginUtility.ScreenToWorldSnapped(btn.Position);
-            var localPosition = ctx.Track.ToLocal(globalPosition);
-
-            switch (_currentPhase)
-            {
-                case Phase.LinkSelect:
-                    HandleLinkSelectPhase(ctx);
-                    break;
-                case Phase.NodeSelect:
-                    HandleNodeSelectPhase(ctx, localPosition);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-
-            return true;
+            // Exit placement mode
+            case InputEventMouseButton { ButtonIndex: MouseButton.Right, Pressed: true }:
+            case InputEventKey { Keycode: Key.Escape, Pressed: true }:
+                return true; // mode switcher will handle the actual mode change
         }
 
         return false;
     }
 
-    private void HandleLinkSelectPhase(PluginContext ctx)
+    private void UpdatePreview(PluginContext ctx, Vector2 screenPosition)
     {
-        if (_hoveredLinkDistance >= 20f || string.IsNullOrEmpty(_hoveredLinkId))
-        {
+        var globalPos = PluginUtility.ScreenToWorldSnapped(screenPosition);
+        var localPos = ctx.Track.ToLocal(globalPos);
+
+        _hoveredLinkId = ctx.TrackData.FindClosestLink(localPos);
+        _previewDirectionNodeId = string.Empty;
+
+        if (string.IsNullOrEmpty(_hoveredLinkId))
             return;
-        }
 
         var link = ctx.TrackData.GetLink(_hoveredLinkId);
-        if (link is null)
-        {
-            return;
-        }
+        if (link is null) return;
 
-        _currentPhase = Phase.NodeSelect;
-        _selectedLinkId = _hoveredLinkId;
-        ctx.SelectOnly(_selectedLinkId);
-        ctx.RestrictSelectionType(SelectionType.Node);
-        ctx.AddSelectableObject(link.NodeAId);
-        ctx.AddSelectableObject(link.NodeBId);
-        RequestOverlayUpdate();
+        var nodeA = ctx.TrackData.GetNode(link.NodeAId);
+        var nodeB = ctx.TrackData.GetNode(link.NodeBId);
+        if (nodeA is null || nodeB is null) return;
+
+        // Choose the node that is closer to the mouse
+        var closestPoint = Geometry2D.GetClosestPointToSegment(localPos, nodeA.Position, nodeB.Position);
+        var distA = closestPoint.DistanceTo(nodeA.Position);
+        var distB = closestPoint.DistanceTo(nodeB.Position);
+
+        _previewDirectionNodeId = distA <= distB ? link.NodeAId : link.NodeBId;
     }
 
-    private void HandleNodeSelectPhase(PluginContext ctx, Vector2 localPosition)
+    private void PlaceSignal(PluginContext ctx)
     {
-        var closestNodeId = ctx.TrackData.FindClosestNodeId(localPosition);
-        if (string.IsNullOrEmpty(closestNodeId))
-        {
-            _selectedLinkId = string.Empty;
+        if (string.IsNullOrEmpty(_hoveredLinkId) ||
+            string.IsNullOrEmpty(_previewDirectionNodeId) ||
+            ctx.UndoRedo is null)
             return;
-        }
-
-        var link = ctx.TrackData.GetLink(_selectedLinkId);
-        if (link is null)
-        {
-            _selectedLinkId = string.Empty;
-            return;
-        }
-
-        if (closestNodeId != link.NodeAId && closestNodeId != link.NodeBId)
-        {
-            _selectedLinkId = string.Empty;
-            return;
-        }
 
         var newSignal = new SignalData
         {
-            LinkId = _selectedLinkId,
-            DirectionNodeId = closestNodeId
+            LinkId = _hoveredLinkId,
+            DirectionNodeId = _previewDirectionNodeId
         };
 
         TrackEditorActions.AddTrackSignal(ctx.TrackData, newSignal, ctx.UndoRedo);
 
-        _currentPhase = Phase.LinkSelect;
-        _selectedLinkId = string.Empty;
         ctx.SelectOnly(newSignal.Id);
+
+        // CRITICAL FIX: Reset then immediately re-restrict so we can keep placing more signals
         ctx.ResetSelectRestrictions();
         ctx.RestrictSelectionType(SelectionType.Link);
-        RequestOverlayUpdate();
+    }
+
+    public override void Draw(Control overlay, PluginContext ctx)
+    {
+        if (string.IsNullOrEmpty(_hoveredLinkId) || string.IsNullOrEmpty(_previewDirectionNodeId))
+            return;
+
+        var previewSignal = new SignalData
+        {
+            LinkId = _hoveredLinkId,
+            DirectionNodeId = _previewDirectionNodeId
+        };
+
+        TrackEditorDrawer.DrawTrackSignal(overlay, ctx, previewSignal);
     }
 }

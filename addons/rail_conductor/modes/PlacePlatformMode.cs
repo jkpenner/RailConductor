@@ -3,19 +3,16 @@
 namespace RailConductor.Plugin;
 
 /// <summary>
-/// Placement mode for Platforms.
+/// Placement mode for Platforms (uses reusable drag logic from DraggableModeHandler).
 /// 
-/// Flow:
-/// • Left press: creates platform + immediately starts dragging
-/// • Mouse motion (button held): live drag
-/// • Left release: finalizes placement
-/// • Right-click while dragging: deletes via TrackEditorActions (undoable)
-/// • Right-click when NOT dragging: toggles vertical/horizontal (original feature)
-/// • Escape while dragging: deletes
+/// Updated as requested:
+/// • No platform preview/ghost is shown when idle (not dragging).
+/// • The platform only becomes visible once you left-click to place it and start dragging.
+/// • Right-click or Escape while dragging deletes it (undoable).
+/// • All other behaviour (vertical toggle on idle right-click, etc.) preserved.
 /// </summary>
-public class PlacePlatformMode : PluginModeHandler
+public class PlacePlatformMode : DraggableModeHandler
 {
-    private bool _isDragging;
     private string _placingId = string.Empty;
     private Vector2 _placePosition;
     private bool _placeVertical = false;
@@ -23,8 +20,45 @@ public class PlacePlatformMode : PluginModeHandler
     protected override void OnEnable(PluginContext ctx)
     {
         ctx.ClearSelection();
-        Cleanup();
+        CleanupDrag();
         RequestOverlayUpdate();
+    }
+
+    protected override bool IsDraggable(string id, TrackData data) => data.IsPlatformId(id);
+
+    protected override (string Id, Vector2 Delta)[] BuildDragItems(PluginContext ctx, Vector2 initialLocalPos)
+    {
+        if (string.IsNullOrEmpty(_placingId)) return [];
+        var platform = ctx.TrackData.GetPlatform(_placingId);
+        return platform is null ? [] : new[] { (_placingId, platform.Position - initialLocalPos) };
+    }
+
+    protected override void ApplyPosition(PluginContext ctx, string id, Vector2 newLocalPos)
+    {
+        var platform = ctx.TrackData.GetPlatform(id);
+        if (platform != null) platform.Position = newLocalPos;
+    }
+
+    protected override void CommitItem(PluginContext ctx, string id, Vector2 finalPos, Vector2 originalPos)
+    {
+        var platform = ctx.TrackData.GetPlatform(id);
+        if (platform is null) return;
+
+        ctx.UndoRedo!.AddDoProperty(platform, nameof(PlatformData.Position), finalPos);
+        ctx.UndoRedo!.AddUndoProperty(platform, nameof(PlatformData.Position), originalPos);
+    }
+
+    protected override void OnCancelDrag(PluginContext ctx)
+    {
+        if (string.IsNullOrEmpty(_placingId) || ctx.UndoRedo is null) return;
+
+        var platform = ctx.TrackData.GetPlatform(_placingId);
+        if (platform != null)
+        {
+            TrackEditorActions.DeleteTrackPlatform(ctx.TrackData, platform, ctx.UndoRedo);
+        }
+
+        _placingId = string.Empty;
     }
 
     protected override bool OnGuiInput(PluginContext ctx, InputEvent e)
@@ -35,41 +69,40 @@ public class PlacePlatformMode : PluginModeHandler
                 var globalPos = PluginUtility.ScreenToWorldSnapped(motion.Position);
                 _placePosition = ctx.Track.ToLocal(globalPos);
 
-                if (_isDragging)
+                if (IsDragging)
                 {
-                    var platform = ctx.TrackData.GetPlatform(_placingId);
-                    if (platform != null)
-                        platform.Position = _placePosition;
+                    LiveDragPreview(ctx, motion.Position);
                 }
                 RequestOverlayUpdate();
                 return false;
 
             case InputEventMouseButton { ButtonIndex: MouseButton.Left, Pressed: true } btn:
-                if (_isDragging)
+                if (IsDragging)
                 {
-                    FinalizePlacement(ctx);
+                    CommitDrag(ctx, btn.Position);
+                    Cleanup();
                 }
                 else
                 {
-                    StartPlacement(ctx, btn);
+                    StartNewPlatform(ctx, btn);
                 }
                 RequestOverlayUpdate();
                 return true;
 
             case InputEventMouseButton { ButtonIndex: MouseButton.Left, Pressed: false }:
-                if (_isDragging)
+                if (IsDragging)
                 {
-                    FinalizePlacement(ctx);
+                    CommitDrag(ctx, ((InputEventMouseButton)e).Position);
+                    Cleanup();
                     RequestOverlayUpdate();
                     return true;
                 }
                 break;
 
-            // Right-click: cancel if dragging, otherwise toggle orientation
             case InputEventMouseButton { ButtonIndex: MouseButton.Right, Pressed: true }:
-                if (_isDragging)
+                if (IsDragging)
                 {
-                    CancelPlacement(ctx);
+                    CancelDrag(ctx);
                 }
                 else
                 {
@@ -79,9 +112,9 @@ public class PlacePlatformMode : PluginModeHandler
                 return true;
 
             case InputEventKey { Keycode: Key.Escape, Pressed: true }:
-                if (_isDragging)
+                if (IsDragging)
                 {
-                    CancelPlacement(ctx);
+                    CancelDrag(ctx);
                     RequestOverlayUpdate();
                     return true;
                 }
@@ -91,7 +124,7 @@ public class PlacePlatformMode : PluginModeHandler
         return false;
     }
 
-    private void StartPlacement(PluginContext ctx, InputEventMouseButton btn)
+    private void StartNewPlatform(PluginContext ctx, InputEventMouseButton btn)
     {
         var globalPos = PluginUtility.ScreenToWorldSnapped(btn.Position);
         var localPos = ctx.Track.ToLocal(globalPos);
@@ -104,36 +137,16 @@ public class PlacePlatformMode : PluginModeHandler
 
         _placingId = platform.Id;
         _placePosition = localPos;
-        _isDragging = true;
 
         ctx.SelectOnly(platform.Id);
         TrackEditorActions.AddTrackPlatform(ctx, platform);
-    }
 
-    private void FinalizePlacement(PluginContext ctx)
-    {
-        ctx.ClearSelection();
-        Cleanup();
-    }
-
-    private void CancelPlacement(PluginContext ctx)
-    {
-        if (string.IsNullOrEmpty(_placingId) || ctx.UndoRedo is null) return;
-
-        var platform = ctx.TrackData.GetPlatform(_placingId);
-        if (platform != null)
-        {
-            // Uses the new DeleteTrackPlatform (undoable)
-            TrackEditorActions.DeleteTrackPlatform(ctx.TrackData, platform, ctx.UndoRedo);
-        }
-
-        ctx.ClearSelection();
-        Cleanup();
+        StartDrag(ctx, btn.Position);
     }
 
     private void Cleanup()
     {
         _placingId = string.Empty;
-        _isDragging = false;
+        CleanupDrag();
     }
 }

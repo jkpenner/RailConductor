@@ -116,7 +116,7 @@ public static class TrackEditorActions
             }
         }
 
-        // Remove the link from the connected node
+        // Remove the link from the connected node A
         var nodeA = track.GetNode(link.NodeAId);
         if (nodeA is not null)
         {
@@ -127,8 +127,8 @@ public static class TrackEditorActions
             undoRedo.AddUndoMethod(nodeA, nameof(TrackNodeData.UpdateConfiguration), track);
         }
 
-        // Remove the link from the connected node
-        var nodeB = track.GetNode(link.NodeAId);
+        // FIXED: nodeB now correctly uses link.NodeBId (was NodeAId – copy-paste error)
+        var nodeB = track.GetNode(link.NodeBId);
         if (nodeB is not null)
         {
             undoRedo.AddDoMethod(nodeB, nameof(TrackNodeData.RemoveLink), link.Id);
