@@ -74,6 +74,13 @@ public partial class RailConductorPlugin : EditorPlugin, ISerializationListener
         GetUndoRedo().VersionChanged += OnVersionChanged;
 
         // Initialize Mode Handlers
+        InitializeModes();
+        SetForceDrawOverForwardingEnabled();
+    }
+    
+    private void InitializeModes()
+    {
+        _modeHandlers.Clear();
         _modeHandlers.Add(ToolMode.Select, new SelectMode());
         _modeHandlers.Add(ToolMode.PlaceNode, new PlaceNodeMode());
         _modeHandlers.Add(ToolMode.Insert, new InsertTrackNodeMode());
@@ -85,8 +92,6 @@ public partial class RailConductorPlugin : EditorPlugin, ISerializationListener
         {
             handler.OverlayUpdateRequested += OnUpdateOverlayRequested;
         }
-        
-        SetForceDrawOverForwardingEnabled();
     }
     
     private void Cleanup()

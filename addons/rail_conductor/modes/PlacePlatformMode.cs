@@ -19,7 +19,7 @@ public class PlacePlatformMode : DraggableModeHandler
 
     protected override void OnEnable(PluginContext ctx)
     {
-        ctx.ClearSelection();
+        ResetRestrictions(ctx);
         CleanupDrag();
         RequestOverlayUpdate();
     }

@@ -247,4 +247,28 @@ public static class TrackEditorDrawer
 
         return ctx.IsHovered(id) ? hover : normal;
     }
+    
+    // Centralised preview drawing – used by all ghost/preview modes
+    public static void DrawTrackPreview(Control overlay, PluginContext ctx, object previewItem, float alpha = 0.6f)
+    {
+        // Example: tint all previews with transparency
+        // (expand as needed for signals, platforms, etc.)
+        if (previewItem is PlatformData platform)
+        {
+            var originalColor = GetColor(ctx, platform.Id, PluginSettings.LinkNormalColor, 
+                PluginSettings.LinkHoverColor, PluginSettings.LinkDisabledColor);
+            var tinted = new Color(originalColor.R, originalColor.G, originalColor.B, alpha);
+            // temporarily override color for preview (or pass a flag)
+            // for simplicity we just draw with reduced alpha
+            var scale = PluginUtility.GetZoom();
+            var globalPos = ctx.Track.ToGlobal(platform.Position);
+            var center = PluginUtility.WorldToScreen(globalPos);
+            var size = platform.IsVertical 
+                ? PluginSettings.PlatformVerticalSize 
+                : PluginSettings.PlatformHorizontalSize;
+
+            overlay.DrawRect(new Rect2(center, size * scale), tinted);
+        }
+        // Add more types (Signal, Node ghost, etc.) as needed
+    }
 }

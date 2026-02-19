@@ -20,15 +20,13 @@ public class PlaceSignalMode : PluginModeHandler
 
     protected override void OnEnable(PluginContext ctx)
     {
-        ctx.ClearSelection();
-        ctx.RestrictSelectionType(SelectionType.Link);
+        RestrictTo(SelectionType.Link, ctx);
         RequestOverlayUpdate();
     }
 
     protected override void OnDisable(PluginContext ctx)
     {
-        ctx.ResetSelectRestrictions();
-        ctx.ClearSelection();
+        ResetRestrictions(ctx);
     }
 
     protected override bool OnGuiInput(PluginContext ctx, InputEvent e)

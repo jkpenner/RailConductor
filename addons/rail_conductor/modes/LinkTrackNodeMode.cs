@@ -18,16 +18,14 @@ public class LinkTrackNodeMode : PluginModeHandler
 
     protected override void OnEnable(PluginContext ctx)
     {
-        ctx.ClearSelection();
-        ctx.RestrictSelectionType(SelectionType.Node);
+        RestrictTo(SelectionType.Node, ctx);
         ResetChain();
         RequestOverlayUpdate();
     }
 
     protected override void OnDisable(PluginContext ctx)
     {
-        ctx.ResetSelectRestrictions();
-        ctx.ClearSelection();
+        ResetRestrictions(ctx);
         ResetChain();
     }
 

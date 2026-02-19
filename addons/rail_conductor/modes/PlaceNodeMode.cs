@@ -12,7 +12,7 @@ public class PlaceNodeMode : DraggableModeHandler
 
     protected override void OnEnable(PluginContext ctx)
     {
-        ctx.ClearSelection();
+        ResetRestrictions(ctx);
         CleanupDrag();
         _placingId = string.Empty;
         RequestOverlayUpdate();
