@@ -3,16 +3,18 @@
 namespace RailConductor.Plugin;
 
 /// <summary>
-/// Placement mode for Track Nodes (now uses reusable drag logic).
-/// Cancel during drag now correctly deletes the object.
+/// Placement mode for Track Nodes.
+/// • Initial placement now snaps to grid (center-based).
+/// • Consistent with SelectMode drag snapping.
 /// </summary>
 public class PlaceNodeMode : DraggableModeHandler
 {
     private string _placingId = string.Empty;
+    private Vector2 _originalPosition;
 
     protected override void OnEnable(PluginContext ctx)
     {
-        ResetRestrictions(ctx);
+        ctx.ClearSelection();
         CleanupDrag();
         _placingId = string.Empty;
         RequestOverlayUpdate();
@@ -41,23 +43,6 @@ public class PlaceNodeMode : DraggableModeHandler
         ctx.UndoRedo!.AddDoProperty(node, nameof(TrackNodeData.Position), finalPos);
         ctx.UndoRedo!.AddUndoProperty(node, nameof(TrackNodeData.Position), originalPos);
         ctx.UndoRedo!.AddDoMethod(node, nameof(TrackNodeData.UpdateConfiguration), ctx.TrackData);
-    }
-
-    // ========================================================================
-    // CANCEL OVERRIDE — DELETE THE OBJECT (this fixes the bug)
-    // ========================================================================
-
-    protected override void OnCancelDrag(PluginContext ctx)
-    {
-        if (string.IsNullOrEmpty(_placingId) || ctx.UndoRedo is null) return;
-
-        var node = ctx.TrackData.GetNode(_placingId);
-        if (node != null)
-        {
-            TrackEditorActions.DeleteTrackNode(ctx.TrackData, node, ctx.UndoRedo);
-        }
-
-        _placingId = string.Empty;
     }
 
     protected override bool OnGuiInput(PluginContext ctx, InputEvent e)
@@ -114,9 +99,13 @@ public class PlaceNodeMode : DraggableModeHandler
         var globalPos = PluginUtility.ScreenToWorldSnapped(btn.Position);
         var localPos = ctx.Track.ToLocal(globalPos);
 
+        // FIXED: Snap initial placement position
+        localPos = PluginUtility.SnapPosition(localPos);
+
         var newNode = new TrackNodeData { Position = localPos };
 
         _placingId = newNode.Id;
+        _originalPosition = localPos;   // snapped value for Move action
 
         ctx.SelectOnly(newNode.Id);
         TrackEditorActions.AddTrackNode(ctx.TrackData, newNode, ctx.UndoRedo!);

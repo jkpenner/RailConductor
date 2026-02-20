@@ -6,9 +6,9 @@ namespace RailConductor.Plugin;
 /// Insert mode: click on a link to insert a new node in the middle and split the link.
 /// 
 /// Fixed:
-/// • New node is now placed at the **exact mathematical midpoint** of the link (no forced snap on creation)
-/// • Snapping only happens during drag in SelectMode (consistent with PlaceNodeMode / PlacePlatformMode)
-/// • Node now lines up perfectly with the link and can be aligned with other nodes
+/// • New node is now placed at the **exact midpoint** of the link, then snapped to grid.
+/// • Snapping is consistent with PlaceNodeMode / PlacePlatformMode.
+/// • Node now lines up perfectly with other nodes on the grid.
 /// </summary>
 public class InsertTrackNodeMode : PluginModeHandler
 {
@@ -66,12 +66,15 @@ public class InsertTrackNodeMode : PluginModeHandler
         var nodeB = ctx.TrackData.GetNode(link.NodeBId);
         if (nodeA is null || nodeB is null) return;
 
-        // FIXED: Exact midpoint — no SnapPosition on creation
+        // 1. Exact midpoint
         var exactMidpoint = nodeA.Position.Lerp(nodeB.Position, 0.5f);
+
+        // 2. Snap to grid (this fixes the alignment issue)
+        var snappedPosition = PluginUtility.SnapPosition(exactMidpoint);
 
         var newNode = new TrackNodeData
         {
-            Position = exactMidpoint   // ← exact center of the link
+            Position = snappedPosition
         };
 
         var newLink1 = new TrackLinkData { NodeAId = nodeA.Id, NodeBId = newNode.Id };
@@ -117,7 +120,7 @@ public class InsertTrackNodeMode : PluginModeHandler
 
         ctx.UndoRedo.CommitAction();
 
-        // Optional nice touch: immediately select the new node so user can drag it right away
+        // Optional: immediately select the new node so user can drag it
         ctx.SelectOnly(newNode.Id);
     }
 
@@ -137,8 +140,11 @@ public class InsertTrackNodeMode : PluginModeHandler
 
         overlay.DrawDashedLine(p1, p2, Colors.Yellow, width: 6f, dash: 8f);
 
-        var mid = nodeA.Position.Lerp(nodeB.Position, 0.5f);
-        var ghostScreen = PluginUtility.WorldToScreen(ctx.Track.ToGlobal(mid));
+        // Show snapped ghost position
+        var exactMid = nodeA.Position.Lerp(nodeB.Position, 0.5f);
+        var snappedMid = PluginUtility.SnapPosition(exactMid);
+        var ghostScreen = PluginUtility.WorldToScreen(ctx.Track.ToGlobal(snappedMid));
+
         overlay.DrawCircle(ghostScreen, PluginSettings.NodeRadius * PluginUtility.GetZoom(), Colors.Yellow);
     }
 }

@@ -3,13 +3,9 @@
 namespace RailConductor.Plugin;
 
 /// <summary>
-/// Placement mode for Platforms (uses reusable drag logic from DraggableModeHandler).
-/// 
-/// Updated as requested:
-/// • No platform preview/ghost is shown when idle (not dragging).
-/// • The platform only becomes visible once you left-click to place it and start dragging.
-/// • Right-click or Escape while dragging deletes it (undoable).
-/// • All other behaviour (vertical toggle on idle right-click, etc.) preserved.
+/// Placement mode for Platforms.
+/// • Initial placement now snaps to grid (center-based).
+/// • No idle ghost (only shows when dragging, as previously requested).
 /// </summary>
 public class PlacePlatformMode : DraggableModeHandler
 {
@@ -19,7 +15,7 @@ public class PlacePlatformMode : DraggableModeHandler
 
     protected override void OnEnable(PluginContext ctx)
     {
-        ResetRestrictions(ctx);
+        ctx.ClearSelection();
         CleanupDrag();
         RequestOverlayUpdate();
     }
@@ -68,6 +64,7 @@ public class PlacePlatformMode : DraggableModeHandler
             case InputEventMouseMotion motion:
                 var globalPos = PluginUtility.ScreenToWorldSnapped(motion.Position);
                 _placePosition = ctx.Track.ToLocal(globalPos);
+                _placePosition = PluginUtility.SnapPosition(_placePosition);   // Snap ghost preview
 
                 if (IsDragging)
                 {
@@ -129,9 +126,12 @@ public class PlacePlatformMode : DraggableModeHandler
         var globalPos = PluginUtility.ScreenToWorldSnapped(btn.Position);
         var localPos = ctx.Track.ToLocal(globalPos);
 
+        // FIXED: Snap initial placement position
+        localPos = PluginUtility.SnapPosition(localPos);
+
         var platform = new PlatformData
         {
-            Position = localPos,
+            Position = localPos,        // Center
             IsVertical = _placeVertical
         };
 

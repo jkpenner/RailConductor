@@ -4,6 +4,7 @@ namespace RailConductor.Plugin;
 
 /// <summary>
 /// Abstract base class that provides reusable drag logic for nodes and platforms.
+/// Now enforces consistent snapping for both TrackNodes and Platforms.
 /// </summary>
 public abstract class DraggableModeHandler : PluginModeHandler
 {
@@ -14,7 +15,7 @@ public abstract class DraggableModeHandler : PluginModeHandler
     protected (string Id, Vector2 Delta)[] _dragItems = [];
 
     // ========================================================================
-    // ABSTRACT METHODS — IMPLEMENTED BY DERIVED CLASSES
+    // ABSTRACT METHODS
     // ========================================================================
 
     protected abstract bool IsDraggable(string id, TrackData data);
@@ -27,14 +28,8 @@ public abstract class DraggableModeHandler : PluginModeHandler
         return itemCount == 1 ? "Move Track Object" : $"Move {itemCount} Track Objects";
     }
 
-    // ========================================================================
-    // NEW: Virtual cancel behaviour
-    // Placement modes override this to DELETE the object instead of restoring position
-    // ========================================================================
-
     protected virtual void OnCancelDrag(PluginContext ctx)
     {
-        // Default (used by SelectMode): restore original positions
         foreach (var (id, delta) in _dragItems)
         {
             ApplyPosition(ctx, id, _initialPressPosition + delta);
@@ -79,7 +74,8 @@ public abstract class DraggableModeHandler : PluginModeHandler
 
         foreach (var (id, delta) in _dragItems)
         {
-            var finalPos = newOrigin + delta;
+            // FIXED: Snap each object's final position individually
+            var finalPos = PluginUtility.SnapPosition(newOrigin + delta);
             var originalPos = _initialPressPosition + delta;
             CommitItem(ctx, id, finalPos, originalPos);
         }
@@ -89,7 +85,7 @@ public abstract class DraggableModeHandler : PluginModeHandler
 
     protected void CancelDrag(PluginContext ctx)
     {
-        OnCancelDrag(ctx);   // ← placement modes override this to delete
+        OnCancelDrag(ctx);
         CleanupDrag();
     }
 
