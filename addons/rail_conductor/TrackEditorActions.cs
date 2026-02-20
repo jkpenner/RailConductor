@@ -103,45 +103,59 @@ public static class TrackEditorActions
     }
 
     private static void DeleteTrackLinkActions(
-        TrackData track,
-        TrackLinkData link,
-        EditorUndoRedoManager undoRedo)
+    TrackData track,
+    TrackLinkData link,
+    EditorUndoRedoManager undoRedo)
+{
+    // Delete all signals placed on the track link
+    foreach (var signal in track.GetSignals())
     {
-        // Delete all signals placed on the track link
-        foreach (var signal in track.GetSignals())
+        if (signal.LinkId == link.Id)
         {
-            if (signal.LinkId == link.Id)
-            {
-                DeleteTrackSignalActions(track, signal, undoRedo);
-            }
+            DeleteTrackSignalActions(track, signal, undoRedo);
         }
-
-        // Remove the link from the connected node A
-        var nodeA = track.GetNode(link.NodeAId);
-        if (nodeA is not null)
-        {
-            undoRedo.AddDoMethod(nodeA, nameof(TrackNodeData.RemoveLink), link.Id);
-            undoRedo.AddDoMethod(nodeA, nameof(TrackNodeData.UpdateConfiguration), track);
-
-            undoRedo.AddUndoMethod(nodeA, nameof(TrackNodeData.AddLink), link.Id);
-            undoRedo.AddUndoMethod(nodeA, nameof(TrackNodeData.UpdateConfiguration), track);
-        }
-
-        // FIXED: nodeB now correctly uses link.NodeBId (was NodeAId – copy-paste error)
-        var nodeB = track.GetNode(link.NodeBId);
-        if (nodeB is not null)
-        {
-            undoRedo.AddDoMethod(nodeB, nameof(TrackNodeData.RemoveLink), link.Id);
-            undoRedo.AddDoMethod(nodeB, nameof(TrackNodeData.UpdateConfiguration), track);
-
-            undoRedo.AddUndoMethod(nodeB, nameof(TrackNodeData.AddLink), link.Id);
-            undoRedo.AddUndoMethod(nodeB, nameof(TrackNodeData.UpdateConfiguration), track);
-        }
-
-        // Remove the connected link
-        undoRedo.AddDoMethod(track, nameof(TrackData.RemoveLink), link.Id);
-        undoRedo.AddUndoMethod(track, nameof(TrackData.AddLink), link.Id, link);
     }
+
+    // Clean up any platforms that reference this link
+    foreach (var platform in track.GetPlatforms())
+    {
+        if (platform.IsLinkedTo(link.Id))
+        {
+            undoRedo.AddDoMethod(platform, nameof(PlatformData.RemoveLink), link.Id);
+            undoRedo.AddUndoMethod(platform, nameof(PlatformData.AddLink), link.Id);
+        }
+    }
+
+    // Remove the link from the connected node A
+    var nodeA = track.GetNode(link.NodeAId);
+    if (nodeA is not null)
+    {
+        undoRedo.AddDoMethod(nodeA, nameof(TrackNodeData.RemoveLink), link.Id);
+        undoRedo.AddDoMethod(nodeA, nameof(TrackNodeData.UpdateConfiguration), track);
+
+        undoRedo.AddUndoMethod(nodeA, nameof(TrackNodeData.AddLink), link.Id);
+        undoRedo.AddUndoMethod(nodeA, nameof(TrackNodeData.UpdateConfiguration), track);
+    }
+
+    // Remove the link from the connected node B
+    var nodeB = track.GetNode(link.NodeBId);
+    if (nodeB is not null)
+    {
+        undoRedo.AddDoMethod(nodeB, nameof(TrackNodeData.RemoveLink), link.Id);
+        undoRedo.AddDoMethod(nodeB, nameof(TrackNodeData.UpdateConfiguration), track);
+
+        undoRedo.AddUndoMethod(nodeB, nameof(TrackNodeData.AddLink), link.Id);
+        undoRedo.AddUndoMethod(nodeB, nameof(TrackNodeData.UpdateConfiguration), track);
+    }
+
+    // Remove the connected link
+    undoRedo.AddDoMethod(track, nameof(TrackData.RemoveLink), link.Id);
+    undoRedo.AddUndoMethod(track, nameof(TrackData.AddLink), link.Id, link);
+
+    // Refresh platform link cache after deletion
+    undoRedo.AddDoMethod(track, nameof(TrackData.RefreshPlatformLinkCache));
+    undoRedo.AddUndoMethod(track, nameof(TrackData.RefreshPlatformLinkCache));
+}
     
     /// <summary>
     /// Attaches a single track link to a platform (supports multiple links per platform).
