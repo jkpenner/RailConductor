@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
 
 namespace RailConductor.Plugin;
@@ -7,11 +8,13 @@ public static class TrackEditorDrawer
 {
     public static void DrawTrack(Control overlay, PluginContext ctx)
     {
+        DrawPlatformGroups(overlay, ctx);
+
         foreach (var platform in ctx.TrackData.GetPlatforms())
         {
             DrawTrackPlatform(overlay, ctx, platform);
         }
-        
+
         foreach (var link in ctx.TrackData.GetLinks())
         {
             DrawTrackLink(overlay, ctx, link);
@@ -25,6 +28,73 @@ public static class TrackEditorDrawer
         foreach (var signal in ctx.TrackData.GetSignals())
         {
             DrawTrackSignal(overlay, ctx, signal);
+        }
+    }
+
+    /// <summary>
+    /// Draws a small label rect for each PlatformGroup.
+    /// Both the background rect and text now scale perfectly together at all zoom levels.
+    /// </summary>
+    public static void DrawPlatformGroups(Control overlay, PluginContext ctx)
+    {
+        var scale = PluginUtility.GetZoom();
+
+        // Clamp scale for readability at extreme zoom levels
+        var effectiveScale = Mathf.Clamp(scale, 0.4f, 3.5f);
+
+        var baseFill = new Color(0.12f, 0.15f, 0.22f, 0.9f);
+        var baseBorder = new Color(0.55f, 0.65f, 0.95f, 0.9f);
+
+        foreach (var group in ctx.TrackData.GetPlatformGroups())
+        {
+            var labelText = string.IsNullOrEmpty(group.DisplayName) ? "Platform Group" : group.DisplayName;
+            var font = GetFont();
+
+            // Scale font size with zoom
+            var fontSize = Mathf.RoundToInt(14 * effectiveScale);
+
+            // Get text size in screen pixels
+            var textSize = font.GetStringSize(labelText, fontSize: fontSize);
+
+            // Calculate box size in screen space (this is the key fix)
+            var paddingX = 18 * effectiveScale;
+            var paddingY = 10 * effectiveScale;
+            var boxSize = new Vector2(textSize.X + paddingX * 2, textSize.Y + paddingY * 2);
+
+            // Convert group center to screen space
+            var centerScreen = PluginUtility.WorldToScreen(ctx.Track.ToGlobal(group.Position));
+
+            // Create screen-space rect centered on the label
+            var screenRect = new Rect2(
+                centerScreen - boxSize * 0.5f,
+                boxSize
+            );
+
+            bool isSelected = ctx.IsSelected(group.Id);
+            bool isHovered = ctx.IsHovered(group.Id) ||
+                             ctx.TrackData.GetPlatformsInGroup(group.Id).Any(p => ctx.IsHovered(p.Id));
+
+            var fillColor = isSelected
+                ? new Color(0.18f, 0.24f, 0.38f, 0.95f)
+                : baseFill;
+
+            var borderColor = isSelected
+                ? PluginSettings.SelectedColor
+                : (isHovered ? new Color(0.7f, 0.85f, 1f, 1f) : baseBorder);
+
+            var borderWidth = isSelected ? 3.5f * scale : 2f * scale;
+
+            // Draw background rect
+            overlay.DrawRect(screenRect, fillColor);
+            overlay.DrawRect(screenRect, borderColor, filled: false, width: borderWidth);
+
+            // Draw label centered inside the box
+            var textPos = screenRect.Position + new Vector2(
+                (screenRect.Size.X - textSize.X) / 2,
+                (screenRect.Size.Y - textSize.Y) / 2 + 1 * scale
+            );
+
+            overlay.DrawString(font, textPos, labelText, fontSize: fontSize, modulate: Colors.White);
         }
     }
 
@@ -73,7 +143,7 @@ public static class TrackEditorDrawer
         );
 
         overlay.DrawRect(labelRect, Colors.White);
-        overlay.DrawString(GetFont(), 
+        overlay.DrawString(GetFont(),
             centerScreen - (size * 0.5f * scale),
             platform.DisplayName,
             alignment: HorizontalAlignment.Center,
@@ -260,7 +330,7 @@ public static class TrackEditorDrawer
 
         return ctx.IsHovered(id) ? hover : normal;
     }
-    
+
     /// <summary>
     /// Draws dashed connection lines from a platform to the midpoint of every linked track link.
     /// Called automatically from DrawTrackPlatform.
@@ -277,8 +347,8 @@ public static class TrackEditorDrawer
         var scale = PluginUtility.GetZoom();
         var platformCenterScreen = PluginUtility.WorldToScreen(ctx.Track.ToGlobal(platform.Position));
 
-        var lineColor = ctx.IsSelected(platform.Id) 
-            ? PluginSettings.SelectedColor 
+        var lineColor = ctx.IsSelected(platform.Id)
+            ? PluginSettings.SelectedColor
             : new Color(0.4f, 0.85f, 1f, 0.65f);
 
         var lineWidth = 3f * scale;
@@ -298,7 +368,7 @@ public static class TrackEditorDrawer
             overlay.DrawDashedLine(platformCenterScreen, linkScreen, lineColor, lineWidth, dash: 8f);
         }
     }
-    
+
     // Centralised preview drawing – used by all ghost/preview modes
     public static void DrawTrackPreview(Control overlay, PluginContext ctx, object previewItem, float alpha = 0.6f)
     {
@@ -306,7 +376,7 @@ public static class TrackEditorDrawer
         // (expand as needed for signals, platforms, etc.)
         if (previewItem is PlatformData platform)
         {
-            var originalColor = GetColor(ctx, platform.Id, PluginSettings.LinkNormalColor, 
+            var originalColor = GetColor(ctx, platform.Id, PluginSettings.LinkNormalColor,
                 PluginSettings.LinkHoverColor, PluginSettings.LinkDisabledColor);
             var tinted = new Color(originalColor.R, originalColor.G, originalColor.B, alpha);
             // temporarily override color for preview (or pass a flag)
@@ -314,8 +384,8 @@ public static class TrackEditorDrawer
             var scale = PluginUtility.GetZoom();
             var globalPos = ctx.Track.ToGlobal(platform.Position);
             var center = PluginUtility.WorldToScreen(globalPos);
-            var size = platform.IsVertical 
-                ? PluginSettings.PlatformVerticalSize 
+            var size = platform.IsVertical
+                ? PluginSettings.PlatformVerticalSize
                 : PluginSettings.PlatformHorizontalSize;
 
             overlay.DrawRect(new Rect2(center, size * scale), tinted);

@@ -27,9 +27,12 @@ public partial class TrackOptions : Control
         _buttons.Add(ToolMode.Link, GetNode<Button>("%LinkNodesButton"));
         // Track Signals
         _buttons.Add(ToolMode.PlaceSignal, GetNode<Button>("%PlaceSignalButton"));
+        // Platforms
         _buttons.Add(ToolMode.PlacePlatform, GetNode<Button>("%PlacePlatformButton"));
-        
         _buttons.Add(ToolMode.AttachPlatform, GetNode<Button>("%AttachPlatformButton"));
+        // Platform Groups
+        _buttons.Add(ToolMode.PlacePlatformGroup, GetNode<Button>("%PlacePlatformGroupButton"));
+        _buttons.Add(ToolMode.AttachPlatformGroup, GetNode<Button>("%AttachPlatformToGroupButton"));
         
         // Generate all required callbacks.
         foreach (var mode in Enum.GetValues<ToolMode>())
@@ -54,6 +57,8 @@ public partial class TrackOptions : Control
                 ToolMode.PlaceSignal => "Signal (T)",
                 ToolMode.PlacePlatform => "Platform (Y)",
                 ToolMode.AttachPlatform => "Attach Platform (U)",
+                ToolMode.PlacePlatformGroup => "Place Group",
+                ToolMode.AttachPlatformGroup => "Attach To Group",
                 _ => button.Text
             };
             

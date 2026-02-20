@@ -177,10 +177,41 @@ public partial class TrackData : Resource
         {
             return platformId;
         }
+        
+        var platformGroupId = FindClosestPlatformGroup(position);
+        if (!string.IsNullOrEmpty(platformGroupId))
+        {
+            return platformGroupId;
+        }
 
         return string.Empty;
     }
+    
+    public string FindClosestPlatformGroup(Vector2 position)
+    {
+        if (_platformGroups.Count == 0) return string.Empty;
 
+        var minDist = float.MaxValue;
+        var closest = string.Empty;
+
+        foreach (var (id, group) in _platformGroups)
+        {
+            var labelRect = group.GetLabelRect();
+
+            // Use exact rect-based distance (much more accurate)
+            var dist = PluginUtility.DistanceToRect(position, labelRect);
+
+            if (dist < minDist)
+            {
+                minDist = dist;
+                closest = id;
+            }
+        }
+
+        // Slightly larger tolerance because the label is small
+        return minDist < PluginSettings.MaxSelectDistance * 2.5f ? closest : string.Empty;
+    }
+    
     public string FindClosestNodeId(Vector2 position)
     {
         if (_nodes.Count == 0)

@@ -226,6 +226,23 @@ public static class TrackEditorActions
         undoRedo.CommitAction();
     }
 
+    /// <summary>
+    /// Deletes a PlatformGroup. Platforms inside the group are NOT deleted — they just lose the group reference.
+    /// Fully undoable.
+    /// </summary>
+    public static void DeletePlatformGroup(TrackData track, PlatformGroupData group, EditorUndoRedoManager undoRedo)
+    {
+        undoRedo.CreateAction("Delete Platform Group");
+
+        // Do: Remove the group
+        undoRedo.AddDoMethod(track, nameof(TrackData.RemovePlatformGroup), group.Id);
+
+        // Undo: Restore the group
+        undoRedo.AddUndoMethod(track, nameof(TrackData.AddPlatformGroup), group.Id, group);
+
+        undoRedo.CommitAction();
+    }
+    
     public static void DeleteTrackSignal(
         TrackData track,
         SignalData signal,
@@ -251,5 +268,27 @@ public static class TrackEditorActions
         undoRedo.AddDoMethod(track, nameof(TrackData.RemovePlatform), platform.Id);
         undoRedo.AddUndoMethod(track, nameof(TrackData.AddPlatform), platform.Id, platform);
         undoRedo.CommitAction();
+    }
+    
+    public static void AddPlatformToGroup(PluginContext ctx, PlatformData platform, string groupId)
+    {
+        if (ctx.UndoRedo is null) return;
+
+        var oldGroupId = platform.GroupId;
+
+        ctx.UndoRedo.CreateAction("Add Platform to Group");
+        ctx.UndoRedo.AddDoProperty(platform, nameof(PlatformData.GroupId), groupId);
+        ctx.UndoRedo.AddUndoProperty(platform, nameof(PlatformData.GroupId), oldGroupId);
+        ctx.UndoRedo.CommitAction();
+    }
+
+    public static void RemovePlatformFromGroup(PluginContext ctx, PlatformData platform, string groupId)
+    {
+        if (ctx.UndoRedo is null) return;
+
+        ctx.UndoRedo.CreateAction("Remove Platform from Group");
+        ctx.UndoRedo.AddDoProperty(platform, nameof(PlatformData.GroupId), string.Empty);
+        ctx.UndoRedo.AddUndoProperty(platform, nameof(PlatformData.GroupId), groupId);
+        ctx.UndoRedo.CommitAction();
     }
 }

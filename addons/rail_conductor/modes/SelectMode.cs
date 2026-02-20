@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Godot;
 
 namespace RailConductor.Plugin;
@@ -11,15 +12,34 @@ public class SelectMode : DraggableModeHandler
 {
     private string _lastClickedId = string.Empty;
     private double _lastClickTime = 0;
-    
+
     protected override bool IsDraggable(string id, TrackData data)
-        => data.IsNodeId(id) || data.IsPlatformId(id);
+        => data.IsNodeId(id) || data.IsPlatformId(id) || data.IsPlatformGroupId(id);
 
     protected override (string Id, Vector2 Delta)[] BuildDragItems(PluginContext ctx, Vector2 initialLocalPos)
     {
-        return ctx.Selected
-            .Where(id => IsDraggable(id, ctx.TrackData))
-            .Select(id =>
+        var items = new List<(string Id, Vector2 Delta)>();
+
+        foreach (var id in ctx.Selected)
+        {
+            if (ctx.TrackData.IsPlatformGroupId(id))
+            {
+                var group = ctx.TrackData.GetPlatformGroup(id);
+                if (group != null)
+                {
+                    // Drag the group itself
+                    items.Add((id, group.Position - initialLocalPos));
+
+                    // Drag all platforms in this group
+                    foreach (var pId in group.PlatformIds)
+                    {
+                        var platform = ctx.TrackData.GetPlatform(pId);
+                        if (platform != null)
+                            items.Add((pId, platform.Position - initialLocalPos));
+                    }
+                }
+            }
+            else if (ctx.TrackData.IsNodeId(id) || ctx.TrackData.IsPlatformId(id))
             {
                 Vector2 pos = Vector2.Zero;
                 if (ctx.TrackData.IsNodeId(id))
@@ -27,14 +47,21 @@ public class SelectMode : DraggableModeHandler
                 else if (ctx.TrackData.IsPlatformId(id))
                     pos = ctx.TrackData.GetPlatform(id)?.Position ?? Vector2.Zero;
 
-                return (id, pos - initialLocalPos);
-            })
-            .ToArray();
+                items.Add((id, pos - initialLocalPos));
+            }
+        }
+
+        return items.ToArray();
     }
 
     protected override void ApplyPosition(PluginContext ctx, string id, Vector2 newLocalPos)
     {
-        if (ctx.TrackData.IsNodeId(id))
+        if (ctx.TrackData.IsPlatformGroupId(id))
+        {
+            var group = ctx.TrackData.GetPlatformGroup(id);
+            if (group != null) group.Position = newLocalPos;
+        }
+        else if (ctx.TrackData.IsNodeId(id))
         {
             var node = ctx.TrackData.GetNode(id);
             if (node != null) node.Position = newLocalPos;
@@ -48,7 +75,15 @@ public class SelectMode : DraggableModeHandler
 
     protected override void CommitItem(PluginContext ctx, string id, Vector2 finalPos, Vector2 originalPos)
     {
-        if (ctx.TrackData.IsNodeId(id))
+        if (ctx.TrackData.IsPlatformGroupId(id))
+        {
+            var group = ctx.TrackData.GetPlatformGroup(id);
+            if (group is null) return;
+
+            ctx.UndoRedo!.AddDoProperty(group, nameof(PlatformGroupData.Position), finalPos);
+            ctx.UndoRedo!.AddUndoProperty(group, nameof(PlatformGroupData.Position), originalPos);
+        }
+        else if (ctx.TrackData.IsNodeId(id))
         {
             var node = ctx.TrackData.GetNode(id);
             if (node is null) return;
@@ -165,7 +200,7 @@ public class SelectMode : DraggableModeHandler
         {
             ctx.ClearSelection();
         }
-        
+
         if (!btn.ShiftPressed && !string.IsNullOrEmpty(clickedId))
         {
             var now = Time.GetTicksMsec();
@@ -181,12 +216,13 @@ public class SelectMode : DraggableModeHandler
             }
         }
     }
-    
+
     private Resource? GetResourceForId(PluginContext ctx, string id)
     {
         if (ctx.TrackData.IsNodeId(id)) return ctx.TrackData.GetNode(id);
         if (ctx.TrackData.IsPlatformId(id)) return ctx.TrackData.GetPlatform(id);
         if (ctx.TrackData.IsSignalId(id)) return ctx.TrackData.GetSignal(id);
+        if (ctx.TrackData.IsPlatformGroupId(id)) return ctx.TrackData.GetPlatformGroup(id);
         return null;
     }
 
@@ -194,10 +230,13 @@ public class SelectMode : DraggableModeHandler
     {
         if (ctx.UndoRedo is null) return;
 
+        // CORRECT DELETION ORDER:
+        // Signals → Links → Nodes → Platforms → Platform Groups (last)
         var selectedSignals = ctx.Selected.Where(ctx.TrackData.IsSignalId).ToList();
         var selectedLinks = ctx.Selected.Where(ctx.TrackData.IsLinkId).ToList();
         var selectedNodes = ctx.Selected.Where(ctx.TrackData.IsNodeId).ToList();
         var selectedPlatforms = ctx.Selected.Where(ctx.TrackData.IsPlatformId).ToList();
+        var selectedGroups = ctx.Selected.Where(ctx.TrackData.IsPlatformGroupId).ToList();
 
         foreach (var id in selectedSignals)
         {
@@ -225,6 +264,14 @@ public class SelectMode : DraggableModeHandler
             var platform = ctx.TrackData.GetPlatform(id);
             if (platform != null)
                 TrackEditorActions.DeleteTrackPlatform(ctx.TrackData, platform, ctx.UndoRedo);
+        }
+
+        // Platform Groups last
+        foreach (var id in selectedGroups)
+        {
+            var group = ctx.TrackData.GetPlatformGroup(id);
+            if (group != null)
+                TrackEditorActions.DeletePlatformGroup(ctx.TrackData, group, ctx.UndoRedo);
         }
 
         ctx.ClearSelection();

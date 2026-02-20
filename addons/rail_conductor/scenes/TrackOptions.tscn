@@ -164,9 +164,35 @@ expand_icon = true
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 38)
 layout_mode = 2
-tooltip_text = "Place platform (Y)"
+tooltip_text = "Attach Platform (U)"
 toggle_mode = true
 text = "Attach Platform (U)"
+icon = ExtResource("7_vwfrl")
+flat = true
+alignment = 0
+text_overrun_behavior = 5
+expand_icon = true
+
+[node name="PlacePlatformGroupButton" type="Button" parent="MarginContainer/Control/ObjectOptions/MarginContainer/VBoxContainer" unique_id=666323892]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 38)
+layout_mode = 2
+tooltip_text = "Attach Platform (U)"
+toggle_mode = true
+text = "Place Group"
+icon = ExtResource("7_vwfrl")
+flat = true
+alignment = 0
+text_overrun_behavior = 5
+expand_icon = true
+
+[node name="AttachPlatformToGroupButton" type="Button" parent="MarginContainer/Control/ObjectOptions/MarginContainer/VBoxContainer" unique_id=776392054]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 38)
+layout_mode = 2
+tooltip_text = "Attach Platform (U)"
+toggle_mode = true
+text = "Attach To Group"
 icon = ExtResource("7_vwfrl")
 flat = true
 alignment = 0

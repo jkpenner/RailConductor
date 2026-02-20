@@ -15,6 +15,8 @@ public enum ToolMode
     PlaceSignal,
     PlacePlatform,
     AttachPlatform,
+    PlacePlatformGroup,
+    AttachPlatformGroup,
 }
 
 [Tool]
@@ -89,6 +91,8 @@ public partial class RailConductorPlugin : EditorPlugin, ISerializationListener
         _modeHandlers.Add(ToolMode.PlaceSignal, new PlaceSignalMode());
         _modeHandlers.Add(ToolMode.PlacePlatform, new PlacePlatformMode());
         _modeHandlers.Add(ToolMode.AttachPlatform, new AttachPlatformToLinkMode());
+        _modeHandlers.Add(ToolMode.PlacePlatformGroup, new PlacePlatformGroupMode());
+        _modeHandlers.Add(ToolMode.AttachPlatformGroup, new AttachPlatformToGroupMode());
 
         foreach (var handler in _modeHandlers.Values)
         {
