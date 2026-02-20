@@ -240,31 +240,21 @@ public partial class TrackData : Resource
     public string FindClosestPlatform(Vector2 position)
     {
         if (_platforms.Count == 0)
-        {
             return string.Empty;
-        }
 
         var minDist = float.MaxValue;
         var closest = string.Empty;
 
         foreach (var platform in GetPlatforms())
         {
-            var size = platform.IsVertical
-                ? PluginSettings.PlatformVerticalSize
-                : PluginSettings.PlatformHorizontalSize;
-            var rect = new Rect2(platform.Position, size);
+            var rect = platform.GetRect();
             var dist = PluginUtility.DistanceToRect(position, rect);
 
-            // If the position is in the rect just return it.
             if (rect.HasPoint(position))
-            {
                 return platform.Id;
-            }
 
             if (dist >= minDist)
-            {
                 continue;
-            }
 
             minDist = dist;
             closest = platform.Id;

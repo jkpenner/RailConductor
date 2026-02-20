@@ -34,38 +34,47 @@ public static class TrackEditorDrawer
     {
         var scale = PluginUtility.GetZoom();
 
-        var globalPosition = ctx.Track.ToGlobal(platform.Position);
-        var center = PluginUtility.WorldToScreen(globalPosition);
-    
-        var size = platform.IsVertical 
-            ? PluginSettings.PlatformVerticalSize 
-            : PluginSettings.PlatformHorizontalSize;
+        // Position is the CENTER of the platform
+        var centerScreen = PluginUtility.WorldToScreen(ctx.Track.ToGlobal(platform.Position));
+        var size = platform.GetSize();
 
-        // === DRAW CONNECTION LINES FIRST (behind the platform) ===
+        // === 1. Draw connection lines FIRST (behind the platform) ===
         DrawPlatformLinks(overlay, ctx, platform);
 
-        // === Then draw the platform itself (on top) ===
+        // === 2. Selection / Hover outline (perfectly aligned) ===
         if (ctx.IsSelected(platform.Id))
         {
-            var offset = new Vector2(2f, 2f);
-            var selectedSize = (size + offset) * scale;
-            overlay.DrawRect(new Rect2(center - (offset * 0.5f * scale), selectedSize), PluginSettings.SelectedColor);
+            var outlineThickness = 2f;
+            var selectedSize = size + new Vector2(outlineThickness * 2, outlineThickness * 2);
+            var selectedRect = new Rect2(
+                centerScreen - (selectedSize * 0.5f * scale),
+                selectedSize * scale
+            );
+            overlay.DrawRect(selectedRect, PluginSettings.SelectedColor);
         }
 
+        // === 3. Main platform rectangle (centered) ===
+        var platformRect = new Rect2(
+            centerScreen - (size * 0.5f * scale),
+            size * scale
+        );
         var color = GetColor(ctx, platform.Id,
             PluginSettings.LinkNormalColor,
             PluginSettings.LinkHoverColor,
             PluginSettings.LinkDisabledColor);
 
-        overlay.DrawRect(new Rect2(center, size * scale), color);
+        overlay.DrawRect(platformRect, color);
 
-        // Draw the display name label
-        var labelOffset = center - size * 0.5f;
+        // === 4. Display name label (centered) ===
         var labelSize = new Vector2(20f, 4f) * scale;
-    
-        overlay.DrawRect(new Rect2(center - labelOffset, labelSize), Colors.White);
+        var labelRect = new Rect2(
+            centerScreen - (size * 0.5f * scale),
+            labelSize
+        );
+
+        overlay.DrawRect(labelRect, Colors.White);
         overlay.DrawString(GetFont(), 
-            center - labelOffset,
+            centerScreen - (size * 0.5f * scale),
             platform.DisplayName,
             alignment: HorizontalAlignment.Center,
             fontSize: (int)(4f * scale),
@@ -266,19 +275,11 @@ public static class TrackEditorDrawer
             return;
 
         var scale = PluginUtility.GetZoom();
-
-        // Calculate true center of the platform rectangle
-        var size = platform.IsVertical 
-            ? PluginSettings.PlatformVerticalSize 
-            : PluginSettings.PlatformHorizontalSize;
-    
-        var halfSize = size * 0.5f;
-        var platformCenterLocal = platform.Position + halfSize;
-        var platformCenterScreen = PluginUtility.WorldToScreen(ctx.Track.ToGlobal(platformCenterLocal));
+        var platformCenterScreen = PluginUtility.WorldToScreen(ctx.Track.ToGlobal(platform.Position));
 
         var lineColor = ctx.IsSelected(platform.Id) 
             ? PluginSettings.SelectedColor 
-            : new Color(0.4f, 0.85f, 1f, 0.65f); // light cyan, semi-transparent
+            : new Color(0.4f, 0.85f, 1f, 0.65f);
 
         var lineWidth = 3f * scale;
 
@@ -291,11 +292,9 @@ public static class TrackEditorDrawer
             var nodeB = ctx.TrackData.GetNode(link.NodeBId);
             if (nodeA is null || nodeB is null) continue;
 
-            // Midpoint of the link
             var midPoint = nodeA.Position.Lerp(nodeB.Position, 0.5f);
             var linkScreen = PluginUtility.WorldToScreen(ctx.Track.ToGlobal(midPoint));
 
-            // Draw dashed connection line from platform CENTER
             overlay.DrawDashedLine(platformCenterScreen, linkScreen, lineColor, lineWidth, dash: 8f);
         }
     }

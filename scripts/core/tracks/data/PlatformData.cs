@@ -24,6 +24,8 @@ public partial class PlatformData : Resource
     [Export]
     public string GroupId { get; set; } = string.Empty;
 
+    
+    
     public void AddLink(string linkId)
     {
         if (!string.IsNullOrEmpty(linkId) && !LinkedLinkIds.Contains(linkId))
