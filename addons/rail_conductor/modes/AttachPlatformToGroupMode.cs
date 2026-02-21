@@ -95,13 +95,11 @@ public class AttachPlatformToGroupMode : PluginModeHandler
 
         if (platform.GroupId == _currentGroupId)
         {
-            // Already in group → remove
-            TrackEditorActions.RemovePlatformFromGroup(ctx, platform, _currentGroupId);
+            TrackEditorActions.RemovePlatformFromGroup(ctx, platform, group);
         }
         else
         {
-            // Not in group → add
-            TrackEditorActions.AddPlatformToGroup(ctx, platform, _currentGroupId);
+            TrackEditorActions.AddPlatformToGroup(ctx, platform, group);
         }
 
         ctx.SelectOnly(_currentGroupId);

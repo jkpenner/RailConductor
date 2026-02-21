@@ -31,4 +31,17 @@ public partial class PlatformGroupData : Resource
     {
         return PlatformIds.Contains(platformId);
     }
+    
+    public void ClearPlatforms()
+    {
+        PlatformIds.Clear();
+    }
+
+    public void SetPlatforms(Godot.Collections.Array<string> newIds)
+    {
+        PlatformIds.Clear();
+        foreach (var id in newIds)
+            if (!string.IsNullOrEmpty(id))
+                PlatformIds.Add(id);
+    }
 }

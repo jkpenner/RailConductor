@@ -227,17 +227,28 @@ public static class TrackEditorActions
     }
 
     /// <summary>
-    /// Deletes a PlatformGroup. Platforms inside the group are NOT deleted — they just lose the group reference.
+    /// Deletes a PlatformGroup and clears the GroupId reference from ALL platforms that belonged to it.
+    /// Platforms themselves are NOT deleted — they simply become ungrouped.
     /// Fully undoable.
     /// </summary>
     public static void DeletePlatformGroup(TrackData track, PlatformGroupData group, EditorUndoRedoManager undoRedo)
     {
+        if (track == null || group == null || undoRedo == null)
+            return;
+
         undoRedo.CreateAction("Delete Platform Group");
 
-        // Do: Remove the group
-        undoRedo.AddDoMethod(track, nameof(TrackData.RemovePlatformGroup), group.Id);
+        // 1. Clear GroupId on every platform that was in this group
+        foreach (var platform in track.GetPlatformsInGroup(group.Id))
+        {
+            if (platform == null) continue;
 
-        // Undo: Restore the group
+            undoRedo.AddDoProperty(platform, nameof(PlatformData.GroupId), string.Empty);
+            undoRedo.AddUndoProperty(platform, nameof(PlatformData.GroupId), group.Id);
+        }
+
+        // 2. Remove the group itself
+        undoRedo.AddDoMethod(track, nameof(TrackData.RemovePlatformGroup), group.Id);
         undoRedo.AddUndoMethod(track, nameof(TrackData.AddPlatformGroup), group.Id, group);
 
         undoRedo.CommitAction();
@@ -262,33 +273,69 @@ public static class TrackEditorActions
         undoRedo.AddUndoMethod(track, nameof(TrackData.AddSignal), signal.Id, signal);
     }
     
+    /// <summary>
+    /// Deletes a platform and also cleans up its membership in any PlatformGroup (prevents orphaned IDs in the group).
+    /// </summary>
     public static void DeleteTrackPlatform(TrackData track, PlatformData platform, EditorUndoRedoManager undoRedo)
     {
         undoRedo.CreateAction("Delete Platform");
+
+        // Clean up group membership (if any)
+        if (!string.IsNullOrEmpty(platform.GroupId))
+        {
+            var group = track.GetPlatformGroup(platform.GroupId);
+            if (group != null)
+            {
+                undoRedo.AddDoMethod(group, nameof(PlatformGroupData.RemovePlatform), platform.Id);
+                undoRedo.AddUndoMethod(group, nameof(PlatformGroupData.AddPlatform), platform.Id);
+            }
+        }
+
         undoRedo.AddDoMethod(track, nameof(TrackData.RemovePlatform), platform.Id);
         undoRedo.AddUndoMethod(track, nameof(TrackData.AddPlatform), platform.Id, platform);
+
         undoRedo.CommitAction();
     }
     
-    public static void AddPlatformToGroup(PluginContext ctx, PlatformData platform, string groupId)
+    public static void AddPlatformToGroup(PluginContext ctx, PlatformData platform, PlatformGroupData group)
     {
-        if (ctx.UndoRedo is null) return;
+        if (ctx.UndoRedo is null || platform == null || group == null) return;
 
         var oldGroupId = platform.GroupId;
+        var oldPlatformIds = new Godot.Collections.Array<string>(group.PlatformIds);
 
         ctx.UndoRedo.CreateAction("Add Platform to Group");
-        ctx.UndoRedo.AddDoProperty(platform, nameof(PlatformData.GroupId), groupId);
+
+        // Platform side
+        ctx.UndoRedo.AddDoProperty(platform, nameof(PlatformData.GroupId), group.Id);
         ctx.UndoRedo.AddUndoProperty(platform, nameof(PlatformData.GroupId), oldGroupId);
+
+        // Group side (snapshot for perfect undo)
+        ctx.UndoRedo.AddDoMethod(group, nameof(PlatformGroupData.AddPlatform), platform.Id);
+        ctx.UndoRedo.AddUndoMethod(group, nameof(PlatformGroupData.ClearPlatforms));
+        foreach (var id in oldPlatformIds)
+            ctx.UndoRedo.AddUndoMethod(group, nameof(PlatformGroupData.AddPlatform), id);
+
         ctx.UndoRedo.CommitAction();
     }
 
-    public static void RemovePlatformFromGroup(PluginContext ctx, PlatformData platform, string groupId)
+    public static void RemovePlatformFromGroup(PluginContext ctx, PlatformData platform, PlatformGroupData group)
     {
-        if (ctx.UndoRedo is null) return;
+        if (ctx.UndoRedo is null || platform == null || group == null) return;
+        if (platform.GroupId != group.Id) return;
+
+        var oldPlatformIds = new Godot.Collections.Array<string>(group.PlatformIds);
 
         ctx.UndoRedo.CreateAction("Remove Platform from Group");
+
         ctx.UndoRedo.AddDoProperty(platform, nameof(PlatformData.GroupId), string.Empty);
-        ctx.UndoRedo.AddUndoProperty(platform, nameof(PlatformData.GroupId), groupId);
+        ctx.UndoRedo.AddDoMethod(group, nameof(PlatformGroupData.RemovePlatform), platform.Id);
+
+        ctx.UndoRedo.AddUndoProperty(platform, nameof(PlatformData.GroupId), group.Id);
+        ctx.UndoRedo.AddUndoMethod(group, nameof(PlatformGroupData.ClearPlatforms));
+        foreach (var id in oldPlatformIds)
+            ctx.UndoRedo.AddUndoMethod(group, nameof(PlatformGroupData.AddPlatform), id);
+
         ctx.UndoRedo.CommitAction();
     }
 }
