@@ -27,16 +27,9 @@ public class SelectMode : DraggableModeHandler
                 var group = ctx.TrackData.GetPlatformGroup(id);
                 if (group != null)
                 {
-                    // Drag the group itself
+                    // ONLY drag the group label itself
+                    // Platforms inside the group are NO LONGER auto-moved
                     items.Add((id, group.Position - initialLocalPos));
-
-                    // Drag all platforms in this group
-                    foreach (var pId in group.PlatformIds)
-                    {
-                        var platform = ctx.TrackData.GetPlatform(pId);
-                        if (platform != null)
-                            items.Add((pId, platform.Position - initialLocalPos));
-                    }
                 }
             }
             else if (ctx.TrackData.IsNodeId(id) || ctx.TrackData.IsPlatformId(id))
@@ -53,7 +46,7 @@ public class SelectMode : DraggableModeHandler
 
         return items.ToArray();
     }
-
+    
     protected override void ApplyPosition(PluginContext ctx, string id, Vector2 newLocalPos)
     {
         if (ctx.TrackData.IsPlatformGroupId(id))
