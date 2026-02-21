@@ -24,6 +24,7 @@ public class EditSignalRoutesMode : PluginModeHandler
             var packed = ResourceLoader.Load<PackedScene>("res://addons/rail_conductor/scenes/SignalRoutePanel.tscn");
             _panel = packed.Instantiate<SignalRoutePanel>();
             _panel.Position = new Vector2(30, 30);
+            _panel.Visible = false;
         }
 
         _panel.ActiveSelectionChanged += OnPanelSelectionChanged;   // ← connect
@@ -113,6 +114,7 @@ public class EditSignalRoutesMode : PluginModeHandler
             _activeSignalId = id;
             ctx.SelectOnly(id);
             _panel.SetSignal(ctx.TrackData.GetSignal(id), ctx);
+            _panel.Visible = true;
             return;
         }
 
@@ -155,7 +157,12 @@ public class EditSignalRoutesMode : PluginModeHandler
         _activeSignalId = string.Empty;
         _hoveredLinkId = string.Empty;
         ctx?.ClearSelection();
-        _panel?.Clear();
+
+        if (_panel is not null)
+        {
+            _panel.Clear();
+            _panel.Visible = false;
+        }
     }
 
     public override void Draw(Control overlay, PluginContext ctx)
