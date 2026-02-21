@@ -1,0 +1,167 @@
+[gd_scene format=3 uid="uid://dx2ytm2ux5o6p"]
+
+[ext_resource type="Script" uid="uid://javkqktaxlxk" path="res://addons/rail_conductor/scenes/SignalRoutePanel.cs" id="1_14b8a"]
+[ext_resource type="PackedScene" uid="uid://bftuegmth5x0n" path="res://addons/rail_conductor/scenes/SignalRouteEntry.tscn" id="1_y4glv"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_14b8a"]
+bg_color = Color(0.1254902, 0.1254902, 0.14901961, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_vedns"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_y4glv"]
+
+[node name="SignalRoutePanel" type="PanelContainer" unique_id=1685122790]
+size_flags_horizontal = 0
+size_flags_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_14b8a")
+script = ExtResource("1_14b8a")
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=232115581]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=1552669904]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer" unique_id=846568825]
+layout_mode = 2
+text = "Signal: #"
+
+[node name="RouteDefinitions" type="VBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=1980055798]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="HeaderRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer/RouteDefinitions" unique_id=687631678]
+layout_mode = 2
+
+[node name="Header" type="Label" parent="MarginContainer/VBoxContainer/RouteDefinitions/HeaderRow" unique_id=1225660168]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6378432, 0.6378432, 0.63784313, 1)
+theme_override_font_sizes/font_size = 12
+text = "Route Definitions"
+
+[node name="VSeparator" type="VSeparator" parent="MarginContainer/VBoxContainer/RouteDefinitions/HeaderRow" unique_id=960104520]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/separator = SubResource("StyleBoxEmpty_vedns")
+
+[node name="NewButton" type="Button" parent="MarginContainer/VBoxContainer/RouteDefinitions/HeaderRow" unique_id=1603912552]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "+ Definition"
+
+[node name="Entries" type="VBoxContainer" parent="MarginContainer/VBoxContainer/RouteDefinitions" unique_id=1512210004]
+layout_mode = 2
+
+[node name="SignalRouteEntry" parent="MarginContainer/VBoxContainer/RouteDefinitions/Entries" unique_id=1655234950 instance=ExtResource("1_y4glv")]
+layout_mode = 2
+
+[node name="SignalRouteEntry2" parent="MarginContainer/VBoxContainer/RouteDefinitions/Entries" unique_id=358118369 instance=ExtResource("1_y4glv")]
+layout_mode = 2
+
+[node name="SignalRouteEntry3" parent="MarginContainer/VBoxContainer/RouteDefinitions/Entries" unique_id=994505923 instance=ExtResource("1_y4glv")]
+layout_mode = 2
+
+[node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer" unique_id=1767463239]
+layout_mode = 2
+theme_override_constants/separation = 10
+theme_override_styles/separator = SubResource("StyleBoxEmpty_y4glv")
+
+[node name="RouteDefinitionsOptions" type="VBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=74647172]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="HeaderRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer/RouteDefinitionsOptions" unique_id=364947923]
+layout_mode = 2
+
+[node name="Header" type="Label" parent="MarginContainer/VBoxContainer/RouteDefinitionsOptions/HeaderRow" unique_id=2014451473]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Route Definition Options"
+
+[node name="Entries" type="VBoxContainer" parent="MarginContainer/VBoxContainer/RouteDefinitionsOptions" unique_id=407024332]
+layout_mode = 2
+
+[node name="MinRouteCodeLabel" type="Label" parent="MarginContainer/VBoxContainer/RouteDefinitionsOptions/Entries" unique_id=324347510]
+layout_mode = 2
+text = "Route Code Min"
+
+[node name="MinRouteCode" type="TextEdit" parent="MarginContainer/VBoxContainer/RouteDefinitionsOptions/Entries" unique_id=1315638999]
+layout_mode = 2
+
+[node name="MaxRouteCodeLabel" type="Label" parent="MarginContainer/VBoxContainer/RouteDefinitionsOptions/Entries" unique_id=348593422]
+layout_mode = 2
+text = "Route Code Max"
+
+[node name="MaxRouteCode" type="TextEdit" parent="MarginContainer/VBoxContainer/RouteDefinitionsOptions/Entries" unique_id=1754745117]
+layout_mode = 2
+
+[node name="Routes" type="VBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=1836679995]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="HeaderRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer/Routes" unique_id=501078951]
+layout_mode = 2
+
+[node name="Header" type="Label" parent="MarginContainer/VBoxContainer/Routes/HeaderRow" unique_id=1067366807]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6378432, 0.6378432, 0.63784313, 1)
+theme_override_font_sizes/font_size = 12
+text = "Routes"
+
+[node name="VSeparator" type="VSeparator" parent="MarginContainer/VBoxContainer/Routes/HeaderRow" unique_id=879364273]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/separator = SubResource("StyleBoxEmpty_vedns")
+
+[node name="NewButton" type="Button" parent="MarginContainer/VBoxContainer/Routes/HeaderRow" unique_id=750297267]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "+ Route"
+
+[node name="Entries" type="VBoxContainer" parent="MarginContainer/VBoxContainer/Routes" unique_id=408374597]
+layout_mode = 2
+
+[node name="SignalRouteEntry" parent="MarginContainer/VBoxContainer/Routes/Entries" unique_id=1004607680 instance=ExtResource("1_y4glv")]
+layout_mode = 2
+
+[node name="SignalRouteEntry2" parent="MarginContainer/VBoxContainer/Routes/Entries" unique_id=1431393256 instance=ExtResource("1_y4glv")]
+layout_mode = 2
+
+[node name="SignalRouteEntry3" parent="MarginContainer/VBoxContainer/Routes/Entries" unique_id=1825260054 instance=ExtResource("1_y4glv")]
+layout_mode = 2
+
+[node name="HSeparator2" type="HSeparator" parent="MarginContainer/VBoxContainer" unique_id=1006034213]
+layout_mode = 2
+theme_override_constants/separation = 10
+theme_override_styles/separator = SubResource("StyleBoxEmpty_y4glv")
+
+[node name="RouteOptions" type="VBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=2128649855]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="HeaderRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer/RouteOptions" unique_id=1264559282]
+layout_mode = 2
+
+[node name="Header" type="Label" parent="MarginContainer/VBoxContainer/RouteOptions/HeaderRow" unique_id=1075746536]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Route Options"
+
+[node name="Entries" type="VBoxContainer" parent="MarginContainer/VBoxContainer/RouteOptions" unique_id=132162205]
+layout_mode = 2
+
+[node name="PriorityLabel" type="Label" parent="MarginContainer/VBoxContainer/RouteOptions/Entries" unique_id=1303687467]
+layout_mode = 2
+text = "Route Code Min"
+
+[node name="Priority" type="TextEdit" parent="MarginContainer/VBoxContainer/RouteOptions/Entries" unique_id=1400706552]
+unique_name_in_owner = true
+layout_mode = 2

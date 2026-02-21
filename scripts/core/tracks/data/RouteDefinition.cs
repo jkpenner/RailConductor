@@ -14,13 +14,27 @@ public partial class RouteDefinition : Resource
 
     [Export] public bool IsAnyAvailable { get; set; } = false;
 
-    // For normal / range routes → fixed alignments
-    [Export]
-    public Godot.Collections.Dictionary<string, SwitchAlignment> SwitchAlignments { get; set; } = new();  // key = nodeId of switch
-
     // For IsAnyAvailable = true → list of alternatives
     [Export(PropertyHint.ArrayType, nameof(Route))]
     public Godot.Collections.Array<Route> Routes { get; set; } = [];
+    
+    // Helpers for clean undo/redo
+    public void AddRoute(Route route)
+    {
+        if (route != null && !Routes.Contains(route))
+            Routes.Add(route);
+    }
+
+    public void RemoveRoute(int index)
+    {
+        if (index >= 0 && index < Routes.Count)
+            Routes.RemoveAt(index);
+    }
+
+    public void ClearRoutes()
+    {
+        Routes.Clear();
+    }
 
     public bool Matches(string requestedCode)
     {

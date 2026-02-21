@@ -147,6 +147,19 @@ alignment = 0
 text_overrun_behavior = 5
 expand_icon = true
 
+[node name="EditRoutesButton" type="Button" parent="MarginContainer/Control/ObjectOptions/MarginContainer/VBoxContainer" unique_id=1026161659]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 38)
+layout_mode = 2
+tooltip_text = "Place signal on a link (T)"
+toggle_mode = true
+text = "Routes (I)"
+icon = ExtResource("6_c0dpc")
+flat = true
+alignment = 0
+text_overrun_behavior = 5
+expand_icon = true
+
 [node name="PlacePlatformButton" type="Button" parent="MarginContainer/Control/ObjectOptions/MarginContainer/VBoxContainer" unique_id=1981471413]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 38)
@@ -177,7 +190,6 @@ expand_icon = true
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 38)
 layout_mode = 2
-tooltip_text = "Attach Platform (U)"
 toggle_mode = true
 text = "Place Group"
 icon = ExtResource("7_vwfrl")
@@ -190,7 +202,6 @@ expand_icon = true
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 38)
 layout_mode = 2
-tooltip_text = "Attach Platform (U)"
 toggle_mode = true
 text = "Attach To Group"
 icon = ExtResource("7_vwfrl")

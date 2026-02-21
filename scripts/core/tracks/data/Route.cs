@@ -23,4 +23,24 @@ public partial class Route : Resource
     /// </summary>
     [Export]
     public Godot.Collections.Dictionary<string, SwitchAlignment> SwitchAlignments { get; set; } = [];
+    
+    public void SetSwitchAlignment(string switchId, SwitchAlignment alignment)
+    {
+        if (string.IsNullOrEmpty(switchId)) return;
+        SwitchAlignments[switchId] = alignment;
+    }
+    
+    /// <summary>
+    /// Undo/redo-friendly setter (accepts int because Godot Variant only supports primitive enums this way).
+    /// </summary>
+    public void SetSwitchAlignment(string switchId, int alignmentInt)
+    {
+        if (string.IsNullOrEmpty(switchId)) return;
+        SwitchAlignments[switchId] = (SwitchAlignment)alignmentInt;
+    }
+
+    public void ClearSwitchAlignments()
+    {
+        SwitchAlignments.Clear();
+    }
 }

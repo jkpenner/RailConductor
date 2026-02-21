@@ -42,7 +42,7 @@ public static class TrackEditorActions
         undoRedo.AddDoMethod(node, nameof(TrackNodeData.UpdateConfiguration), track);
         undoRedo.CommitAction();
     }
-    
+
     public static void AddTrackPlatform(
         PluginContext ctx,
         PlatformData platform)
@@ -51,7 +51,7 @@ public static class TrackEditorActions
         {
             return;
         }
-        
+
         ctx.UndoRedo.CreateAction("Place Platform");
         ctx.UndoRedo.AddDoMethod(ctx.TrackData, nameof(TrackData.AddPlatform), platform.Id, platform);
         ctx.UndoRedo.AddUndoMethod(ctx.TrackData, nameof(TrackData.RemovePlatform), platform.Id);
@@ -103,60 +103,60 @@ public static class TrackEditorActions
     }
 
     private static void DeleteTrackLinkActions(
-    TrackData track,
-    TrackLinkData link,
-    EditorUndoRedoManager undoRedo)
-{
-    // Delete all signals placed on the track link
-    foreach (var signal in track.GetSignals())
+        TrackData track,
+        TrackLinkData link,
+        EditorUndoRedoManager undoRedo)
     {
-        if (signal.LinkId == link.Id)
+        // Delete all signals placed on the track link
+        foreach (var signal in track.GetSignals())
         {
-            DeleteTrackSignalActions(track, signal, undoRedo);
+            if (signal.LinkId == link.Id)
+            {
+                DeleteTrackSignalActions(track, signal, undoRedo);
+            }
         }
-    }
 
-    // Clean up any platforms that reference this link
-    foreach (var platform in track.GetPlatforms())
-    {
-        if (platform.IsLinkedTo(link.Id))
+        // Clean up any platforms that reference this link
+        foreach (var platform in track.GetPlatforms())
         {
-            undoRedo.AddDoMethod(platform, nameof(PlatformData.RemoveLink), link.Id);
-            undoRedo.AddUndoMethod(platform, nameof(PlatformData.AddLink), link.Id);
+            if (platform.IsLinkedTo(link.Id))
+            {
+                undoRedo.AddDoMethod(platform, nameof(PlatformData.RemoveLink), link.Id);
+                undoRedo.AddUndoMethod(platform, nameof(PlatformData.AddLink), link.Id);
+            }
         }
+
+        // Remove the link from the connected node A
+        var nodeA = track.GetNode(link.NodeAId);
+        if (nodeA is not null)
+        {
+            undoRedo.AddDoMethod(nodeA, nameof(TrackNodeData.RemoveLink), link.Id);
+            undoRedo.AddDoMethod(nodeA, nameof(TrackNodeData.UpdateConfiguration), track);
+
+            undoRedo.AddUndoMethod(nodeA, nameof(TrackNodeData.AddLink), link.Id);
+            undoRedo.AddUndoMethod(nodeA, nameof(TrackNodeData.UpdateConfiguration), track);
+        }
+
+        // Remove the link from the connected node B
+        var nodeB = track.GetNode(link.NodeBId);
+        if (nodeB is not null)
+        {
+            undoRedo.AddDoMethod(nodeB, nameof(TrackNodeData.RemoveLink), link.Id);
+            undoRedo.AddDoMethod(nodeB, nameof(TrackNodeData.UpdateConfiguration), track);
+
+            undoRedo.AddUndoMethod(nodeB, nameof(TrackNodeData.AddLink), link.Id);
+            undoRedo.AddUndoMethod(nodeB, nameof(TrackNodeData.UpdateConfiguration), track);
+        }
+
+        // Remove the connected link
+        undoRedo.AddDoMethod(track, nameof(TrackData.RemoveLink), link.Id);
+        undoRedo.AddUndoMethod(track, nameof(TrackData.AddLink), link.Id, link);
+
+        // Refresh platform link cache after deletion
+        undoRedo.AddDoMethod(track, nameof(TrackData.RefreshPlatformLinkCache));
+        undoRedo.AddUndoMethod(track, nameof(TrackData.RefreshPlatformLinkCache));
     }
 
-    // Remove the link from the connected node A
-    var nodeA = track.GetNode(link.NodeAId);
-    if (nodeA is not null)
-    {
-        undoRedo.AddDoMethod(nodeA, nameof(TrackNodeData.RemoveLink), link.Id);
-        undoRedo.AddDoMethod(nodeA, nameof(TrackNodeData.UpdateConfiguration), track);
-
-        undoRedo.AddUndoMethod(nodeA, nameof(TrackNodeData.AddLink), link.Id);
-        undoRedo.AddUndoMethod(nodeA, nameof(TrackNodeData.UpdateConfiguration), track);
-    }
-
-    // Remove the link from the connected node B
-    var nodeB = track.GetNode(link.NodeBId);
-    if (nodeB is not null)
-    {
-        undoRedo.AddDoMethod(nodeB, nameof(TrackNodeData.RemoveLink), link.Id);
-        undoRedo.AddDoMethod(nodeB, nameof(TrackNodeData.UpdateConfiguration), track);
-
-        undoRedo.AddUndoMethod(nodeB, nameof(TrackNodeData.AddLink), link.Id);
-        undoRedo.AddUndoMethod(nodeB, nameof(TrackNodeData.UpdateConfiguration), track);
-    }
-
-    // Remove the connected link
-    undoRedo.AddDoMethod(track, nameof(TrackData.RemoveLink), link.Id);
-    undoRedo.AddUndoMethod(track, nameof(TrackData.AddLink), link.Id, link);
-
-    // Refresh platform link cache after deletion
-    undoRedo.AddDoMethod(track, nameof(TrackData.RefreshPlatformLinkCache));
-    undoRedo.AddUndoMethod(track, nameof(TrackData.RefreshPlatformLinkCache));
-}
-    
     /// <summary>
     /// Attaches a single track link to a platform (supports multiple links per platform).
     /// Fully undoable with proper snapshot of the entire list.
@@ -191,7 +191,7 @@ public static class TrackEditorActions
 
         ctx.UndoRedo.CommitAction();
     }
-    
+
     public static void UnlinkPlatformFromTrackLink(PluginContext ctx, PlatformData platform, string linkId)
     {
         if (ctx.UndoRedo is null || platform == null || string.IsNullOrEmpty(linkId))
@@ -253,7 +253,7 @@ public static class TrackEditorActions
 
         undoRedo.CommitAction();
     }
-    
+
     public static void DeleteTrackSignal(
         TrackData track,
         SignalData signal,
@@ -272,7 +272,7 @@ public static class TrackEditorActions
         undoRedo.AddDoMethod(track, nameof(TrackData.RemoveSignal), signal.Id);
         undoRedo.AddUndoMethod(track, nameof(TrackData.AddSignal), signal.Id, signal);
     }
-    
+
     /// <summary>
     /// Deletes a platform and also cleans up its membership in any PlatformGroup (prevents orphaned IDs in the group).
     /// </summary>
@@ -296,7 +296,7 @@ public static class TrackEditorActions
 
         undoRedo.CommitAction();
     }
-    
+
     public static void AddPlatformToGroup(PluginContext ctx, PlatformData platform, PlatformGroupData group)
     {
         if (ctx.UndoRedo is null || platform == null || group == null) return;
@@ -335,6 +335,106 @@ public static class TrackEditorActions
         ctx.UndoRedo.AddUndoMethod(group, nameof(PlatformGroupData.ClearPlatforms));
         foreach (var id in oldPlatformIds)
             ctx.UndoRedo.AddUndoMethod(group, nameof(PlatformGroupData.AddPlatform), id);
+
+        ctx.UndoRedo.CommitAction();
+    }
+
+    public static void AddRouteDefinition(PluginContext ctx, SignalData signal, RouteDefinition newDef)
+    {
+        if (ctx.UndoRedo is null || signal == null || newDef == null) return;
+
+        var oldDefs = new Godot.Collections.Array<RouteDefinition>(signal.RouteDefinitions);
+
+        ctx.UndoRedo.CreateAction("Add Route Definition");
+
+        ctx.UndoRedo.AddDoMethod(signal, nameof(SignalData.AddRouteDefinition), newDef);
+        ctx.UndoRedo.AddUndoMethod(signal, nameof(SignalData.ClearRouteDefinitions));
+        foreach (var def in oldDefs)
+            ctx.UndoRedo.AddUndoMethod(signal, nameof(SignalData.AddRouteDefinition), def);
+
+        ctx.UndoRedo.CommitAction();
+        signal.NotifyPropertyListChanged();
+    }
+
+    public static void RemoveRouteDefinition(PluginContext ctx, SignalData signal, int index)
+    {
+        if (ctx.UndoRedo is null || signal == null || index < 0 || index >= signal.RouteDefinitions.Count) return;
+
+        var oldDefs = new Godot.Collections.Array<RouteDefinition>(signal.RouteDefinitions);
+
+        ctx.UndoRedo.CreateAction("Remove Route Definition");
+
+        ctx.UndoRedo.AddDoMethod(signal, nameof(SignalData.RemoveRouteDefinitionAt), index);
+        ctx.UndoRedo.AddUndoMethod(signal, nameof(SignalData.ClearRouteDefinitions));
+        foreach (var def in oldDefs)
+            ctx.UndoRedo.AddUndoMethod(signal, nameof(SignalData.AddRouteDefinition), def);
+
+        ctx.UndoRedo.CommitAction();
+        signal.NotifyPropertyListChanged();
+    }
+
+    public static void AddRouteToDefinition(PluginContext ctx, RouteDefinition def, Route newRoute)
+    {
+        if (ctx.UndoRedo is null || def == null || newRoute == null) return;
+
+        var oldRoutes = new Godot.Collections.Array<Route>(def.Routes);
+
+        ctx.UndoRedo.CreateAction("Add Route");
+
+        ctx.UndoRedo.AddDoMethod(def, nameof(RouteDefinition.AddRoute), newRoute);
+        ctx.UndoRedo.AddUndoMethod(def, nameof(RouteDefinition.ClearRoutes));
+        foreach (var r in oldRoutes)
+            ctx.UndoRedo.AddUndoMethod(def, nameof(RouteDefinition.AddRoute), r);
+
+        ctx.UndoRedo.CommitAction();
+    }
+
+    public static void RemoveRouteFromDefinition(PluginContext ctx, RouteDefinition def, int index)
+    {
+        if (ctx.UndoRedo is null || def == null || index < 0 || index >= def.Routes.Count) return;
+
+        var oldRoutes = new Godot.Collections.Array<Route>(def.Routes);
+
+        ctx.UndoRedo.CreateAction("Remove Route");
+
+        ctx.UndoRedo.AddDoMethod(def, nameof(RouteDefinition.RemoveRoute), index);
+        ctx.UndoRedo.AddUndoMethod(def, nameof(RouteDefinition.ClearRoutes));
+        foreach (var r in oldRoutes)
+            ctx.UndoRedo.AddUndoMethod(def, nameof(RouteDefinition.AddRoute), r);
+
+        ctx.UndoRedo.CommitAction();
+    }
+
+    public static void SetRouteTargetLink(PluginContext ctx, Route route, string linkId)
+    {
+        if (ctx.UndoRedo is null || route == null) return;
+
+        var oldLink = route.TargetLinkId;
+
+        ctx.UndoRedo.CreateAction("Set Route Target Link");
+        ctx.UndoRedo.AddDoProperty(route, nameof(Route.TargetLinkId), linkId);
+        ctx.UndoRedo.AddUndoProperty(route, nameof(Route.TargetLinkId), oldLink);
+        ctx.UndoRedo.CommitAction();
+    }
+
+    public static void SetRouteSwitchAlignment(PluginContext ctx, Route route, string switchId, SwitchAlignment alignment)
+    {
+        if (ctx.UndoRedo is null || route == null) return;
+
+        // Full dictionary snapshot (same reliable pattern used everywhere else)
+        var oldDict = new Godot.Collections.Dictionary<string, SwitchAlignment>(route.SwitchAlignments);
+
+        ctx.UndoRedo.CreateAction("Set Switch Alignment");
+
+        // Do: set the new alignment (cast enum to int for Godot Variant)
+        ctx.UndoRedo.AddDoMethod(route, nameof(Route.SetSwitchAlignment), switchId, (int)alignment);
+
+        // Undo: restore entire dictionary
+        ctx.UndoRedo.AddUndoMethod(route, nameof(Route.ClearSwitchAlignments));
+        foreach (var kvp in oldDict)
+        {
+            ctx.UndoRedo.AddUndoMethod(route, nameof(Route.SetSwitchAlignment), kvp.Key, (int)kvp.Value);
+        }
 
         ctx.UndoRedo.CommitAction();
     }

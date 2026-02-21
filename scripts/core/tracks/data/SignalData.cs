@@ -20,4 +20,21 @@ public partial class SignalData : Resource
     
     [Export]
     public string InterlockingGroupId { get; set; } = "";
+    
+    public void AddRouteDefinition(RouteDefinition def)
+    {
+        if (def != null && !RouteDefinitions.Contains(def))
+            RouteDefinitions.Add(def);
+    }
+
+    public void RemoveRouteDefinitionAt(int index)
+    {
+        if (index >= 0 && index < RouteDefinitions.Count)
+            RouteDefinitions.RemoveAt(index);
+    }
+
+    public void ClearRouteDefinitions()
+    {
+        RouteDefinitions.Clear();
+    }
 }

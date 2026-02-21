@@ -27,6 +27,7 @@ public partial class TrackOptions : Control
         _buttons.Add(ToolMode.Link, GetNode<Button>("%LinkNodesButton"));
         // Track Signals
         _buttons.Add(ToolMode.PlaceSignal, GetNode<Button>("%PlaceSignalButton"));
+        _buttons.Add(ToolMode.EditSignalRoutes, GetNode<Button>("%EditRoutesButton"));
         // Platforms
         _buttons.Add(ToolMode.PlacePlatform, GetNode<Button>("%PlacePlatformButton"));
         _buttons.Add(ToolMode.AttachPlatform, GetNode<Button>("%AttachPlatformButton"));
@@ -59,6 +60,7 @@ public partial class TrackOptions : Control
                 ToolMode.AttachPlatform => "Attach Platform (U)",
                 ToolMode.PlacePlatformGroup => "Place Group",
                 ToolMode.AttachPlatformGroup => "Attach To Group",
+                ToolMode.EditSignalRoutes => "Routes (I)",
                 _ => button.Text
             };
             
@@ -71,6 +73,7 @@ public partial class TrackOptions : Control
                 ToolMode.PlaceSignal => "Place signal on a link (T)",
                 ToolMode.PlacePlatform => "Place platform (Y)",
                 ToolMode.AttachPlatform => "Attach Platform (U)",
+                ToolMode.EditSignalRoutes => "Edit Signal Routes (I)",
                 _ => ""
             };
             
