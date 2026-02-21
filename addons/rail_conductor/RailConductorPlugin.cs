@@ -105,18 +105,25 @@ public partial class RailConductorPlugin : EditorPlugin, ISerializationListener
     private void Cleanup()
     {
         if (!_isInitialized)
-        {
             return;
-        }
 
         _isInitialized = false;
+
+        // === CRITICAL: Clean up the route panel on plugin reload/recompile ===
+        foreach (var handler in _modeHandlers.Values)
+        {
+            if (handler is EditSignalRoutesMode routeMode)
+            {
+                routeMode.Cleanup();
+            }
+        }
+
         ClearMenus();
 
-        // Clean up undo/redo callbacks.
-        // Setup undo/redo callback handling.
+        // Clean up undo/redo callbacks
         GetUndoRedo().VersionChanged -= OnVersionChanged;
 
-        // Clean up mode handlers.
+        // Clean up mode handlers
         foreach (var handler in _modeHandlers.Values)
         {
             handler.OverlayUpdateRequested -= OnUpdateOverlayRequested;
@@ -125,7 +132,6 @@ public partial class RailConductorPlugin : EditorPlugin, ISerializationListener
         _modeHandlers.Clear();
 
         SceneChanged -= _trackLocator.SetRoot;
-
         _trackLocator.Reset();
     }
 

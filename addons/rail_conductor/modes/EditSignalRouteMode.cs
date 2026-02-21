@@ -35,6 +35,7 @@ public class EditSignalRoutesMode : PluginModeHandler
     {
         ResetRestrictions(ctx);
         Reset();
+        Cleanup();
 
         if (_panel != null)
         {
@@ -74,6 +75,25 @@ public class EditSignalRoutesMode : PluginModeHandler
                 return true;
         }
         return false;
+    }
+    
+    /// <summary>
+    /// Called by main plugin during full cleanup/reload to ensure the panel is destroyed.
+    /// </summary>
+    public void Cleanup()
+    {
+        if (_panel != null)
+        {
+            _panel.ActiveSelectionChanged -= OnPanelSelectionChanged;
+
+            if (_panel.GetParent() != null)
+            {
+                _panel.GetParent().RemoveChild(_panel);
+            }
+
+            _panel.QueueFree();
+            _panel = null;
+        }
     }
 
     private void UpdateHover(PluginContext ctx, Vector2 screenPos)
