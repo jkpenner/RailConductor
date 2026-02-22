@@ -1,7 +1,7 @@
 ﻿using System;
 using Godot;
 
-namespace RailConductor;
+namespace RailConductor.GraphOld;
 
 public record TrackLocation(TrackGraphLink Link, TrackGraphNode Face, float NormalizedPosition = 1f)
 {

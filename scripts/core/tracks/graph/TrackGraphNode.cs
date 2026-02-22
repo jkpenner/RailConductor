@@ -1,52 +1,22 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Godot;
 
 namespace RailConductor;
 
 public class TrackGraphNode
 {
-    public required int Id { get; init; }
-    public required Vector2 GlobalPosition { get; init; }
+    public string Id { get; set; } = string.Empty;
+    public TrackNodeType NodeType { get; set; }
+    public Vector2 Position { get; set; }
+    public bool IsIsolator { get; set; }
 
-    public bool IsSwitch { get; set; }
-    public int ActiveIncomingLink { get; set; }
-    public int ActiveOutgoingLink { get; set; }
-
-    public TrackGraphLink[] IncomingLinks { get; set; } = [];
-    public TrackGraphLink[] OutgoingLinks { get; set; } = [];
-
-    public bool IsCircuitIsolator { get; set; }
-
-    private Dictionary<TrackGraphLink, TrackGraphLink> _connections = [];
-
-    public void RebuildConnections()
+    public List<TrackGraphEdge> OutgoingEdges { get; } = [];
+    
+    public TrackGraphNode(string id, Vector2 position, TrackNodeType type, bool isIsolator = false)
     {
-        _connections = new Dictionary<TrackGraphLink, TrackGraphLink>();
-
-        if (IsSwitch)
-        {
-            foreach (var incoming in IncomingLinks)
-            {
-                _connections.Add(incoming, OutgoingLinks[ActiveOutgoingLink]);
-            }
-
-            foreach (var outgoing in OutgoingLinks)
-            {
-                _connections.Add(outgoing, IncomingLinks[ActiveIncomingLink]);
-            }
-        }
-        else
-        {
-            // We assume a one-to-one relationship, otherwise the link terminates
-            var minLength = Mathf.Min(IncomingLinks.Length, OutgoingLinks.Length);
-            for (var i = 0; i < minLength; i++)
-            {
-                _connections.Add(IncomingLinks[i], OutgoingLinks[i]);
-                _connections.Add(OutgoingLinks[i], IncomingLinks[i]);
-            }
-        }
+        Id = id;
+        Position = position;
+        NodeType = type;
+        IsIsolator = isIsolator;
     }
-
-    public TrackGraphLink? GetConnectedLink(TrackGraphLink link)
-        => _connections.GetValueOrDefault(link);
 }

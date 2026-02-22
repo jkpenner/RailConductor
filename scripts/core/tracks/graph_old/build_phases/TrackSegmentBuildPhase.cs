@@ -1,6 +1,6 @@
 ﻿using Godot;
 
-namespace RailConductor;
+namespace RailConductor.GraphOld;
 
 public class TrackSegmentBuildPhase : ProcessNodeBuildPhase<TrackSegment>
 {

@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 
-namespace RailConductor;
+namespace RailConductor.GraphOld;
 
 public class ValidateConnectionBuildPhase : TrackGraphBuildPhase
 {

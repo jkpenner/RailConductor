@@ -1,6 +1,6 @@
 ﻿using Godot;
 
-namespace RailConductor;
+namespace RailConductor.GraphOld;
 
 public class TrackSwitchBuildPhase : ProcessNodeBuildPhase<TrackSwitch>
 {
@@ -46,7 +46,7 @@ public class TrackSwitchBuildPhase : ProcessNodeBuildPhase<TrackSwitch>
         node.OutgoingLinks = [outSegmentA, outSegmentB];
         
         // Inject required graph information.
-        trackSwitch.Graph = graph;
-        trackSwitch.Node = node;
+        // trackSwitch.Graph = graph;
+        // trackSwitch.Node = node;
     }
 }

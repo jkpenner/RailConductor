@@ -1,4 +1,4 @@
-﻿namespace RailConductor;
+﻿namespace RailConductor.GraphOld;
 
 public class TrackNodeBuildPhase : ProcessNodeBuildPhase<TrackNode>
 {

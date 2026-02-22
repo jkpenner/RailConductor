@@ -1,6 +1,6 @@
 using System.IO;
 
-namespace RailConductor;
+namespace RailConductor.GraphOld;
 
 public class TrackGraphLink
 {

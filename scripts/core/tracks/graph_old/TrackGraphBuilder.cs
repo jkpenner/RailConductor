@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using Godot;
 
-namespace RailConductor;
+namespace RailConductor.GraphOld;
 
 public class TrackGraphBuilder
 {
     private readonly List<TrackGraphBuildPhase> _phases = [];
+
+    public static TrackGraphBuilder Create()
+
     
     public void AddBuildPhase(TrackGraphBuildPhase phase)
     {

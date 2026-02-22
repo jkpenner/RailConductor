@@ -1329,7 +1329,6 @@ SwitchAlignments = Dictionary[String, int]({
 
 [sub_resource type="Resource" id="Resource_kl6lc"]
 script = ExtResource("11_vivmo")
-RouteCode = "001"
 Routes = Array[ExtResource("12_mwfav")]([SubResource("Resource_xhvtq")])
 
 [sub_resource type="Resource" id="Resource_53vpr"]
@@ -1339,11 +1338,24 @@ LinkId = "ffe40938-54cc-42a1-94d4-8e6f550cce21"
 DirectionNodeId = "f45d292d-7087-484a-b7d1-d3bae235daa0"
 RouteDefinitions = Array[ExtResource("11_vivmo")]([SubResource("Resource_kl6lc")])
 
+[sub_resource type="Resource" id="Resource_y7a8c"]
+script = ExtResource("12_mwfav")
+TargetLinkId = "e5120d8b-fa2d-4e5c-9a52-ba9f0ff37153"
+SwitchAlignments = Dictionary[String, int]({
+"51354e66-4314-44ea-a2d9-3ea508df8b32": 0,
+"e66509af-9669-4aac-aa54-39644482e69f": 1
+})
+
+[sub_resource type="Resource" id="Resource_dbbpe"]
+script = ExtResource("11_vivmo")
+Routes = Array[ExtResource("12_mwfav")]([SubResource("Resource_y7a8c")])
+
 [sub_resource type="Resource" id="Resource_wx3mf"]
 script = ExtResource("8_w48qg")
 Id = "48e7321a-e538-4896-9383-86b8a31232a8"
 LinkId = "5c007577-21bd-4aad-8cea-5d2c7c74e633"
 DirectionNodeId = "075ef4cc-279f-4cbb-b350-d7c343b4c0d4"
+RouteDefinitions = Array[ExtResource("11_vivmo")]([SubResource("Resource_dbbpe")])
 
 [sub_resource type="Resource" id="Resource_1xo7d"]
 script = ExtResource("12_mwfav")
@@ -1356,7 +1368,6 @@ SwitchAlignments = Dictionary[String, int]({
 
 [sub_resource type="Resource" id="Resource_envfe"]
 script = ExtResource("11_vivmo")
-RouteCode = "001"
 Routes = Array[ExtResource("12_mwfav")]([SubResource("Resource_1xo7d")])
 
 [sub_resource type="Resource" id="Resource_4sdmg"]
@@ -1369,7 +1380,6 @@ SwitchAlignments = Dictionary[String, int]({
 
 [sub_resource type="Resource" id="Resource_otest"]
 script = ExtResource("11_vivmo")
-RouteCode = "002"
 Routes = Array[ExtResource("12_mwfav")]([SubResource("Resource_4sdmg")])
 
 [sub_resource type="Resource" id="Resource_hyd5t"]
@@ -1386,7 +1396,6 @@ Priority = 2
 
 [sub_resource type="Resource" id="Resource_edp2v"]
 script = ExtResource("11_vivmo")
-RouteCode = "003"
 Routes = Array[ExtResource("12_mwfav")]([SubResource("Resource_hyd5t"), SubResource("Resource_0vh1g")])
 
 [sub_resource type="Resource" id="Resource_yxed4"]
@@ -1405,7 +1414,6 @@ SwitchAlignments = Dictionary[String, int]({
 
 [sub_resource type="Resource" id="Resource_sxx0b"]
 script = ExtResource("11_vivmo")
-RouteCode = "001"
 Routes = Array[ExtResource("12_mwfav")]([SubResource("Resource_5r0v3")])
 
 [sub_resource type="Resource" id="Resource_2xl32"]
@@ -1421,7 +1429,6 @@ TargetLinkId = "e4925f1e-46d0-4fdc-9165-7aebaedd586c"
 
 [sub_resource type="Resource" id="Resource_enf31"]
 script = ExtResource("11_vivmo")
-RouteCode = "001"
 Routes = Array[ExtResource("12_mwfav")]([SubResource("Resource_730sn")])
 
 [sub_resource type="Resource" id="Resource_u48eh"]
@@ -1441,7 +1448,6 @@ SwitchAlignments = Dictionary[String, int]({
 
 [sub_resource type="Resource" id="Resource_lwhox"]
 script = ExtResource("11_vivmo")
-RouteCode = "001"
 Routes = Array[ExtResource("12_mwfav")]([SubResource("Resource_lph76")])
 
 [sub_resource type="Resource" id="Resource_wsfrk"]
@@ -1467,7 +1473,6 @@ SwitchAlignments = Dictionary[String, int]({
 
 [sub_resource type="Resource" id="Resource_euk7l"]
 script = ExtResource("11_vivmo")
-RouteCode = "001"
 Routes = Array[ExtResource("12_mwfav")]([SubResource("Resource_4bbev")])
 
 [sub_resource type="Resource" id="Resource_pmlxg"]
@@ -1493,7 +1498,6 @@ SwitchAlignments = Dictionary[String, int]({
 
 [sub_resource type="Resource" id="Resource_std7w"]
 script = ExtResource("11_vivmo")
-RouteCode = "001"
 Routes = Array[ExtResource("12_mwfav")]([SubResource("Resource_mpw2q")])
 
 [sub_resource type="Resource" id="Resource_ev2em"]
@@ -1506,6 +1510,7 @@ RouteDefinitions = Array[ExtResource("11_vivmo")]([SubResource("Resource_std7w")
 [sub_resource type="Resource" id="Resource_bfh1w"]
 script = ExtResource("12_mwfav")
 TargetLinkId = "57d24efb-dc6a-493e-b4f9-8a3d4e5b3bc1"
+Priority = 6
 SwitchAlignments = Dictionary[String, int]({
 "234875c2-c7d3-4e5b-a9e7-8260bc96f988": 1,
 "6a66e86a-0080-446c-9d10-5e67853e9f76": 1
@@ -1513,7 +1518,7 @@ SwitchAlignments = Dictionary[String, int]({
 
 [sub_resource type="Resource" id="Resource_8vg3j"]
 script = ExtResource("11_vivmo")
-RouteCode = "001"
+MaxRouteCode = 10
 Routes = Array[ExtResource("12_mwfav")]([SubResource("Resource_bfh1w")])
 
 [sub_resource type="Resource" id="Resource_m5n6s"]
@@ -1526,12 +1531,14 @@ SwitchAlignments = Dictionary[String, int]({
 
 [sub_resource type="Resource" id="Resource_nf24p"]
 script = ExtResource("11_vivmo")
-RouteCode = "002"
+MinRouteCode = 11
+MaxRouteCode = 12
 Routes = Array[ExtResource("12_mwfav")]([SubResource("Resource_m5n6s")])
 
 [sub_resource type="Resource" id="Resource_qp8ff"]
 script = ExtResource("12_mwfav")
 TargetLinkId = "57d24efb-dc6a-493e-b4f9-8a3d4e5b3bc1"
+Priority = 1
 SwitchAlignments = Dictionary[String, int]({
 "234875c2-c7d3-4e5b-a9e7-8260bc96f988": 1,
 "6a66e86a-0080-446c-9d10-5e67853e9f76": 1
@@ -1540,7 +1547,6 @@ SwitchAlignments = Dictionary[String, int]({
 [sub_resource type="Resource" id="Resource_ri8he"]
 script = ExtResource("12_mwfav")
 TargetLinkId = "c482a859-5ad1-4b6c-b0ca-fac87186b76e"
-Priority = 1
 SwitchAlignments = Dictionary[String, int]({
 "6a66e86a-0080-446c-9d10-5e67853e9f76": 0,
 "c202008d-a12a-4e9c-b6bd-fb94e7b01c1c": 0
@@ -1548,7 +1554,8 @@ SwitchAlignments = Dictionary[String, int]({
 
 [sub_resource type="Resource" id="Resource_4ekdp"]
 script = ExtResource("11_vivmo")
-RouteCode = "003"
+MinRouteCode = 13
+MaxRouteCode = 999
 Routes = Array[ExtResource("12_mwfav")]([SubResource("Resource_qp8ff"), SubResource("Resource_ri8he")])
 
 [sub_resource type="Resource" id="Resource_e0url"]
@@ -1560,7 +1567,6 @@ RouteDefinitions = Array[ExtResource("11_vivmo")]([SubResource("Resource_8vg3j")
 
 [sub_resource type="Resource" id="Resource_x8qvp"]
 script = ExtResource("11_vivmo")
-RouteCode = "001"
 
 [sub_resource type="Resource" id="Resource_ultn8"]
 script = ExtResource("8_w48qg")

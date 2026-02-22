@@ -1,4 +1,4 @@
-namespace RailConductor;
+namespace RailConductor.GraphOld;
 
 public static class TrackBuildPhase
 {
