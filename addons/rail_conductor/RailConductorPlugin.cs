@@ -262,14 +262,24 @@ public partial class RailConductorPlugin : EditorPlugin, ISerializationListener
 
     private void UpdateCurrentContext(Track? track)
     {
-        // Clear context on null or invalid data.
+        // CRITICAL FIX: Hide any floating panel (SignalRoutePanel) when switching scenes/tracks
+        if (_context != null && _context.Track != track)
+        {
+            if (_modeHandlers.TryGetValue(ToolMode.EditSignalRoutes, out var handler) &&
+                handler is EditSignalRoutesMode routeMode)
+            {
+                routeMode.HidePanel();
+            }
+        }
+
+        // Clear context on null or invalid data
         if (track?.Data is null)
         {
             _context = null;
             return;
         }
 
-        // Ignore updating to the same track.
+        // Ignore updating to the same track
         if (_context != null && _context.Track == track)
         {
             return;

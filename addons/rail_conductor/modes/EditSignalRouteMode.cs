@@ -6,6 +6,11 @@ namespace RailConductor.Plugin;
 /// Uses the real SignalRoutePanel.tscn scene attached to the editor overlay.
 /// The panel is fixed, zoom-independent, and always above the world.
 /// World highlights (switch N/R labels + dashed target link) are still drawn.
+///
+/// FIXED: Panel is now created ONCE and reused across mode entries/exits.
+///        Only fully destroyed on plugin unload (RailConductorPlugin.Cleanup).
+///        This eliminates the re-entry bug where second+ signal selection
+///        was treated as "nothing selected".
 /// </summary>
 public class EditSignalRoutesMode : PluginModeHandler
 {
@@ -17,38 +22,78 @@ public class EditSignalRoutesMode : PluginModeHandler
     protected override void OnEnable(PluginContext ctx)
     {
         RestrictTo(SelectionType.Signal, ctx);
-        Reset();
+        Reset();                    // clear state only – do NOT destroy panel
 
-        if (_panel == null)
-        {
-            var packed = ResourceLoader.Load<PackedScene>("res://addons/rail_conductor/scenes/SignalRoutePanel.tscn");
-            _panel = packed.Instantiate<SignalRoutePanel>();
-            _panel.Position = new Vector2(30, 30);
-            _panel.Visible = false;
-        }
+        EnsurePanelCreated();
 
-        _panel.ActiveSelectionChanged += OnPanelSelectionChanged;   // ← connect
+        _panel.ActiveSelectionChanged += OnPanelSelectionChanged;
 
+        // Make sure panel is parented to current overlay
         RequestOverlayUpdate();
     }
 
     protected override void OnDisable(PluginContext ctx)
     {
         ResetRestrictions(ctx);
-        Reset();
-        Cleanup();
+        Reset();                    // clear state + hide panel
 
         if (_panel != null)
         {
-            _panel.ActiveSelectionChanged -= OnPanelSelectionChanged;   // ← disconnect
+            _panel.ActiveSelectionChanged -= OnPanelSelectionChanged;
+        }
+        // DO NOT call Cleanup() here – panel survives mode switches
+    }
+
+    /// <summary>
+    /// Called ONLY by RailConductorPlugin.Cleanup() on full plugin unload/recompile.
+    /// </summary>
+    public void Cleanup()
+    {
+        if (_panel != null)
+        {
+            _panel.ActiveSelectionChanged -= OnPanelSelectionChanged;
+
             if (_panel.GetParent() != null)
+            {
                 _panel.GetParent().RemoveChild(_panel);
+            }
+
+            _panel.QueueFree();
+            _panel = null;
         }
     }
     
+    /// <summary>
+    /// Called by RailConductorPlugin when switching scenes or losing the current Track.
+    /// Ensures the panel never sticks around after scene change.
+    /// </summary>
+    public void HidePanel()
+    {
+        if (_panel != null)
+        {
+            _panel.Clear();
+            _panel.Visible = false;
+
+            if (_panel.GetParent() != null)
+                _panel.GetParent().RemoveChild(_panel);
+        }
+        Reset();
+    }
+
+    private void EnsurePanelCreated()
+    {
+        if (_panel != null)
+            return;
+
+        var packed = ResourceLoader.Load<PackedScene>("res://addons/rail_conductor/scenes/SignalRoutePanel.tscn");
+        _panel = packed.Instantiate<SignalRoutePanel>();
+        _panel.Position = new Vector2(30, 30);
+        _panel.Visible = false;
+    }
+
     private void OnPanelSelectionChanged()
     {
-        RequestOverlayUpdate();   // ← this is the key line that refreshes world drawing
+        RequestOverlayUpdate();
     }
 
     protected override bool OnGuiInput(PluginContext ctx, InputEvent e)
@@ -76,25 +121,6 @@ public class EditSignalRoutesMode : PluginModeHandler
                 return true;
         }
         return false;
-    }
-    
-    /// <summary>
-    /// Called by main plugin during full cleanup/reload to ensure the panel is destroyed.
-    /// </summary>
-    public void Cleanup()
-    {
-        if (_panel != null)
-        {
-            _panel.ActiveSelectionChanged -= OnPanelSelectionChanged;
-
-            if (_panel.GetParent() != null)
-            {
-                _panel.GetParent().RemoveChild(_panel);
-            }
-
-            _panel.QueueFree();
-            _panel = null;
-        }
     }
 
     private void UpdateHover(PluginContext ctx, Vector2 screenPos)
@@ -167,12 +193,14 @@ public class EditSignalRoutesMode : PluginModeHandler
 
     public override void Draw(Control overlay, PluginContext ctx)
     {
+        // Re-parent panel if overlay changed (safe on every draw)
         if (_currentOverlay != overlay)
         {
             if (_currentOverlay != null && _panel != null && _panel.GetParent() == _currentOverlay)
                 _currentOverlay.RemoveChild(_panel);
 
             _currentOverlay = overlay;
+
             if (_panel != null && _panel.GetParent() == null)
                 _currentOverlay.AddChild(_panel);
         }
@@ -189,7 +217,6 @@ public class EditSignalRoutesMode : PluginModeHandler
         var activeRoute = _panel.GetActiveRoute();
         if (activeRoute != null)
         {
-            // Switch highlights + target link preview for the CURRENTLY SELECTED route
             foreach (var (swId, align) in activeRoute.SwitchAlignments)
             {
                 var node = ctx.TrackData.GetNode(swId);
@@ -216,6 +243,7 @@ public class EditSignalRoutesMode : PluginModeHandler
             }
         }
     }
+
     private Vector2 GetSignalScreenPos(PluginContext ctx, SignalData signal)
     {
         var pos = ctx.TrackData.GetSignalPosition(signal);

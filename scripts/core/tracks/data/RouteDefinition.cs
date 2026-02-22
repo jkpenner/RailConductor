@@ -1,23 +1,19 @@
 ﻿using Godot;
-using System.Collections.Generic;
 
 namespace RailConductor;
 
 [GlobalClass, Tool]
 public partial class RouteDefinition : Resource
 {
-    [Export] public string RouteCode { get; set; } = "";
-
-    [Export] public bool IsRange { get; set; } = false;
-    [Export] public string RangeStart { get; set; } = "";
-    [Export] public string RangeEnd { get; set; } = "";
+    [Export] public int MinRouteCode { get; set; } = 1;
+    [Export] public int MaxRouteCode { get; set; } = 1;
 
     [Export] public bool IsAnyAvailable { get; set; } = false;
 
     // For IsAnyAvailable = true → list of alternatives
     [Export(PropertyHint.ArrayType, nameof(Route))]
     public Godot.Collections.Array<Route> Routes { get; set; } = [];
-    
+
     // Helpers for clean undo/redo
     public void AddRoute(Route route)
     {
@@ -36,19 +32,31 @@ public partial class RouteDefinition : Resource
         Routes.Clear();
     }
 
+    /// <summary>
+    /// Returns true if the requested code falls inside this definition (inclusive).
+    /// Single code when Min == Max; range when Min != Max.
+    /// </summary>
     public bool Matches(string requestedCode)
     {
-        string norm = requestedCode.PadLeft(3, '0');
+        if (string.IsNullOrEmpty(requestedCode)) return false;
 
         if (IsAnyAvailable)
-            return norm.StartsWith("ANY") || requestedCode == "ANY";  // or customize
+            return requestedCode.ToUpper().StartsWith("ANY") || requestedCode.ToUpper() == "ANY";
 
-        if (!IsRange)
-            return norm == RouteCode.PadLeft(3, '0');
+        if (!int.TryParse(requestedCode, out int code))
+            return false;
 
-        string start = RangeStart.PadLeft(3, '0');
-        string end   = RangeEnd.PadLeft(3, '0');
+        return code >= MinRouteCode && code <= MaxRouteCode;
+    }
 
-        return string.Compare(norm, start) >= 0 && string.Compare(norm, end) <= 0;
+    /// <summary>
+    /// Nice display string for UI lists (e.g. "005" or "012-018")
+    /// </summary>
+    public string GetDisplayCode()
+    {
+        if (MinRouteCode == MaxRouteCode)
+            return MinRouteCode.ToString("D3");
+
+        return $"{MinRouteCode:D3}-{MaxRouteCode:D3}";
     }
 }

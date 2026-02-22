@@ -91,17 +91,29 @@ layout_mode = 2
 
 [node name="MinRouteCodeLabel" type="Label" parent="MarginContainer/VBoxContainer/RouteDefinitionsOptions/Entries" unique_id=324347510]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.5882353, 0.5882353, 0.627451, 1)
+theme_override_font_sizes/font_size = 9
 text = "Route Code Min"
 
-[node name="MinRouteCode" type="TextEdit" parent="MarginContainer/VBoxContainer/RouteDefinitionsOptions/Entries" unique_id=1315638999]
+[node name="MinRouteCode" type="SpinBox" parent="MarginContainer/VBoxContainer/RouteDefinitionsOptions/Entries" unique_id=922687542]
+unique_name_in_owner = true
 layout_mode = 2
+max_value = 999.0
+rounded = true
+alignment = 2
 
 [node name="MaxRouteCodeLabel" type="Label" parent="MarginContainer/VBoxContainer/RouteDefinitionsOptions/Entries" unique_id=348593422]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.5882353, 0.5882353, 0.627451, 1)
+theme_override_font_sizes/font_size = 9
 text = "Route Code Max"
 
-[node name="MaxRouteCode" type="TextEdit" parent="MarginContainer/VBoxContainer/RouteDefinitionsOptions/Entries" unique_id=1754745117]
+[node name="MaxRouteCode" type="SpinBox" parent="MarginContainer/VBoxContainer/RouteDefinitionsOptions/Entries" unique_id=512030386]
+unique_name_in_owner = true
 layout_mode = 2
+max_value = 999.0
+rounded = true
+alignment = 2
 
 [node name="Routes" type="VBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=1836679995]
 unique_name_in_owner = true
@@ -160,8 +172,13 @@ layout_mode = 2
 
 [node name="PriorityLabel" type="Label" parent="MarginContainer/VBoxContainer/RouteOptions/Entries" unique_id=1303687467]
 layout_mode = 2
-text = "Route Code Min"
+theme_override_colors/font_color = Color(0.5882353, 0.5882353, 0.627451, 1)
+theme_override_font_sizes/font_size = 9
+text = "Priority"
 
-[node name="Priority" type="TextEdit" parent="MarginContainer/VBoxContainer/RouteOptions/Entries" unique_id=1400706552]
+[node name="PrioritySpinBox" type="SpinBox" parent="MarginContainer/VBoxContainer/RouteOptions/Entries" unique_id=474261928]
 unique_name_in_owner = true
 layout_mode = 2
+max_value = 999.0
+rounded = true
+alignment = 2

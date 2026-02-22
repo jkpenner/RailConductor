@@ -53,6 +53,6 @@ public partial class SignalRouteEntry : Control
 
     private void OnDeletePressed()
     {
-        Deleted?.Invoke();   // let the panel handle the actual deletion
+        Deleted?.Invoke();
     }
 }

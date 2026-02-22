@@ -438,4 +438,36 @@ public static class TrackEditorActions
 
         ctx.UndoRedo.CommitAction();
     }
+    
+    public static void SetRoutePriority(PluginContext ctx, Route route, int newPriority)
+    {
+        if (ctx.UndoRedo is null || route == null) return;
+
+        var oldPriority = route.Priority;
+
+        ctx.UndoRedo.CreateAction("Set Route Priority");
+        ctx.UndoRedo.AddDoProperty(route, nameof(Route.Priority), newPriority);
+        ctx.UndoRedo.AddUndoProperty(route, nameof(Route.Priority), oldPriority);
+        ctx.UndoRedo.CommitAction();
+    }
+    
+    public static void SetRouteDefinitionMinCode(PluginContext ctx, RouteDefinition def, int newMin)
+    {
+        if (ctx.UndoRedo is null || def == null) return;
+        var old = def.MinRouteCode;
+        ctx.UndoRedo.CreateAction("Set Route Definition Min Code");
+        ctx.UndoRedo.AddDoProperty(def, nameof(RouteDefinition.MinRouteCode), newMin);
+        ctx.UndoRedo.AddUndoProperty(def, nameof(RouteDefinition.MinRouteCode), old);
+        ctx.UndoRedo.CommitAction();
+    }
+
+    public static void SetRouteDefinitionMaxCode(PluginContext ctx, RouteDefinition def, int newMax)
+    {
+        if (ctx.UndoRedo is null || def == null) return;
+        var old = def.MaxRouteCode;
+        ctx.UndoRedo.CreateAction("Set Route Definition Max Code");
+        ctx.UndoRedo.AddDoProperty(def, nameof(RouteDefinition.MaxRouteCode), newMax);
+        ctx.UndoRedo.AddUndoProperty(def, nameof(RouteDefinition.MaxRouteCode), old);
+        ctx.UndoRedo.CommitAction();
+    }
 }

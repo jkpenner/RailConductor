@@ -1345,17 +1345,19 @@ Id = "48e7321a-e538-4896-9383-86b8a31232a8"
 LinkId = "5c007577-21bd-4aad-8cea-5d2c7c74e633"
 DirectionNodeId = "075ef4cc-279f-4cbb-b350-d7c343b4c0d4"
 
-[sub_resource type="Resource" id="Resource_m5n6s"]
-script = ExtResource("12_mwfav")
-
 [sub_resource type="Resource" id="Resource_1xo7d"]
 script = ExtResource("12_mwfav")
+TargetLinkId = "57d24efb-dc6a-493e-b4f9-8a3d4e5b3bc1"
 Priority = 1
+SwitchAlignments = Dictionary[String, int]({
+"234875c2-c7d3-4e5b-a9e7-8260bc96f988": 0,
+"ed0e8a40-9b44-4931-bd4e-ae6918d74bfa": 0
+})
 
 [sub_resource type="Resource" id="Resource_envfe"]
 script = ExtResource("11_vivmo")
 RouteCode = "001"
-Routes = Array[ExtResource("12_mwfav")]([SubResource("Resource_m5n6s"), SubResource("Resource_1xo7d")])
+Routes = Array[ExtResource("12_mwfav")]([SubResource("Resource_1xo7d")])
 
 [sub_resource type="Resource" id="Resource_4sdmg"]
 script = ExtResource("12_mwfav")
@@ -1378,15 +1380,6 @@ SwitchAlignments = Dictionary[String, int]({
 "ed0e8a40-9b44-4931-bd4e-ae6918d74bfa": 0
 })
 
-[sub_resource type="Resource" id="Resource_nf24p"]
-script = ExtResource("12_mwfav")
-TargetLinkId = "c482a859-5ad1-4b6c-b0ca-fac87186b76e"
-Priority = 1
-SwitchAlignments = Dictionary[String, int]({
-"c202008d-a12a-4e9c-b6bd-fb94e7b01c1c": 1,
-"ed0e8a40-9b44-4931-bd4e-ae6918d74bfa": 1
-})
-
 [sub_resource type="Resource" id="Resource_0vh1g"]
 script = ExtResource("12_mwfav")
 Priority = 2
@@ -1394,7 +1387,7 @@ Priority = 2
 [sub_resource type="Resource" id="Resource_edp2v"]
 script = ExtResource("11_vivmo")
 RouteCode = "003"
-Routes = Array[ExtResource("12_mwfav")]([SubResource("Resource_hyd5t"), SubResource("Resource_nf24p"), SubResource("Resource_0vh1g")])
+Routes = Array[ExtResource("12_mwfav")]([SubResource("Resource_hyd5t"), SubResource("Resource_0vh1g")])
 
 [sub_resource type="Resource" id="Resource_yxed4"]
 script = ExtResource("8_w48qg")
@@ -1512,18 +1505,58 @@ RouteDefinitions = Array[ExtResource("11_vivmo")]([SubResource("Resource_std7w")
 
 [sub_resource type="Resource" id="Resource_bfh1w"]
 script = ExtResource("12_mwfav")
+TargetLinkId = "57d24efb-dc6a-493e-b4f9-8a3d4e5b3bc1"
+SwitchAlignments = Dictionary[String, int]({
+"234875c2-c7d3-4e5b-a9e7-8260bc96f988": 1,
+"6a66e86a-0080-446c-9d10-5e67853e9f76": 1
+})
 
 [sub_resource type="Resource" id="Resource_8vg3j"]
 script = ExtResource("11_vivmo")
 RouteCode = "001"
 Routes = Array[ExtResource("12_mwfav")]([SubResource("Resource_bfh1w")])
 
+[sub_resource type="Resource" id="Resource_m5n6s"]
+script = ExtResource("12_mwfav")
+TargetLinkId = "c482a859-5ad1-4b6c-b0ca-fac87186b76e"
+SwitchAlignments = Dictionary[String, int]({
+"6a66e86a-0080-446c-9d10-5e67853e9f76": 0,
+"c202008d-a12a-4e9c-b6bd-fb94e7b01c1c": 0
+})
+
+[sub_resource type="Resource" id="Resource_nf24p"]
+script = ExtResource("11_vivmo")
+RouteCode = "002"
+Routes = Array[ExtResource("12_mwfav")]([SubResource("Resource_m5n6s")])
+
+[sub_resource type="Resource" id="Resource_qp8ff"]
+script = ExtResource("12_mwfav")
+TargetLinkId = "57d24efb-dc6a-493e-b4f9-8a3d4e5b3bc1"
+SwitchAlignments = Dictionary[String, int]({
+"234875c2-c7d3-4e5b-a9e7-8260bc96f988": 1,
+"6a66e86a-0080-446c-9d10-5e67853e9f76": 1
+})
+
+[sub_resource type="Resource" id="Resource_ri8he"]
+script = ExtResource("12_mwfav")
+TargetLinkId = "c482a859-5ad1-4b6c-b0ca-fac87186b76e"
+Priority = 1
+SwitchAlignments = Dictionary[String, int]({
+"6a66e86a-0080-446c-9d10-5e67853e9f76": 0,
+"c202008d-a12a-4e9c-b6bd-fb94e7b01c1c": 0
+})
+
+[sub_resource type="Resource" id="Resource_4ekdp"]
+script = ExtResource("11_vivmo")
+RouteCode = "003"
+Routes = Array[ExtResource("12_mwfav")]([SubResource("Resource_qp8ff"), SubResource("Resource_ri8he")])
+
 [sub_resource type="Resource" id="Resource_e0url"]
 script = ExtResource("8_w48qg")
 Id = "f2e57ff2-3eaa-46be-bc7c-f1a59bb8fcee"
 LinkId = "373d4205-aae5-44c7-bb6e-a2b6ec711e59"
 DirectionNodeId = "af35cc8d-b357-4af5-ab13-56d7a2214965"
-RouteDefinitions = Array[ExtResource("11_vivmo")]([SubResource("Resource_8vg3j")])
+RouteDefinitions = Array[ExtResource("11_vivmo")]([SubResource("Resource_8vg3j"), SubResource("Resource_nf24p"), SubResource("Resource_4ekdp")])
 
 [sub_resource type="Resource" id="Resource_x8qvp"]
 script = ExtResource("11_vivmo")
