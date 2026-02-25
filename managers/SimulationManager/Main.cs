@@ -5,7 +5,7 @@ namespace RailConductor;
 public partial class Main : Node
 {
     [Export] public Track? track;
-    [Export] public TrackSegment? segment;
+    [Export] public SegmentVisual? segment;
     [Export] public Train? train;
 
     public override void _Ready()
@@ -18,22 +18,22 @@ public partial class Main : Node
         PlaceTrain(train, segment);
     }
 
-    public bool PlaceTrain(Train train, TrackSegment segment)
+    public bool PlaceTrain(Train train, SegmentVisual segmentVisual)
     {
-        var keyA = segment.EndA.GetTrackKey();
-        var keyB = segment.EndB.GetTrackKey();
-
-        var graph = track?.GetGraph();
-        var link = graph?.GetLink(keyA, keyB);
-        var node = graph?.GetNode(keyB);
-
-        if (graph is null || link is null || node is null || !link.Contains(node))
-        {
-            GD.PushError($"Failed to spawn train, invalid position details.");
-            return false;
-        }
-
-        train.SetTrack(graph, link, node);
+        // var keyA = segmentVisual.EndA.GetTrackKey();
+        // var keyB = segmentVisual.EndB.GetTrackKey();
+        //
+        // var graph = track?.GetGraph();
+        // var link = graph?.GetLink(keyA, keyB);
+        // var node = graph?.GetNode(keyB);
+        //
+        // if (graph is null || link is null || node is null || !link.Contains(node))
+        // {
+        //     GD.PushError($"Failed to spawn train, invalid position details.");
+        //     return false;
+        // }
+        //
+        // train.SetTrack(graph, link, node);
         return true;
     }
 }

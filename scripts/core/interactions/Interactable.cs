@@ -1,14 +1,17 @@
-﻿using Godot;
+﻿using System;
+using Godot;
 
 namespace RailConductor;
 
-public abstract partial class Interactable : Area2D
+public partial class Interactable : Area2D
 {
     [Export]
     public int InteractPriority { get; set; } = 0;
 
     [Export]
     public bool IsInteractEnabled { get; set; } = true;
+
+    public event Action? Interacted;
     
     public override void _InputEvent(Viewport viewport, InputEvent @event, int shapeIdx)
     {
@@ -26,8 +29,8 @@ public abstract partial class Interactable : Area2D
             return;
         }
         
-        OnInteraction();
+        Interacted?.Invoke();
     }
 
-    protected abstract void OnInteraction();
+    
 }

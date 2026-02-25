@@ -2,6 +2,6 @@
 
 public enum SwitchAlignment
 {
-    Normal,   // Straight / default
-    Reverse   // Diverging / thrown
+    Normal = 0,
+    Diverging = 1,
 }

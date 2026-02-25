@@ -5,9 +5,17 @@ namespace RailConductor;
 public sealed class TrackGraphEdge
 {
     public string Id { get; }
+    
     public TrackGraphNode NodeA { get; set; }
     public TrackGraphNode NodeB { get; set; }
-    public float Length { get; }
+    public float Length { get; private set; }
+
+    /// <summary>
+    /// An alternate not unique id that references another edge. Used in
+    /// cases of inserting an edge not contained within the original track
+    /// data, such as when inserting extra edge for switches.
+    /// </summary>
+    public string AltId { get; set;  } = string.Empty;
     
     public PlatformData? Platform { get; set; }
 

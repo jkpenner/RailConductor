@@ -4,30 +4,9 @@ using Godot;
 namespace RailConductor;
 
 [GlobalClass, Tool]
-public partial class TrackSegment : Interactable
+public partial class SegmentVisual : TrackVisual
 {
-    [Export]
-    public float SegmentWidth
-    {
-        get => _segmentWidth;
-        set
-        {
-            _segmentWidth = value;
-            if (Engine.IsEditorHint())
-            {
-                UpdateTrackSegment();
-            }
-        }
-    }
-
-    [Export]
-    public TrackSettings? Settings { get; set; }
-
-    private float _segmentWidth = 20f;
-
     private Line2D? _line;
-    private TrackNode? _endA;
-    private TrackNode? _endB;
     private CollisionShape2D? _shape;
 
     private bool _useOverrideColor = false;
@@ -38,9 +17,6 @@ public partial class TrackSegment : Interactable
     /// </summary>
     public bool IsUsable { get; private set; }
 
-    public TrackNode EndA => _endA ?? throw new NullReferenceException();
-    public TrackNode EndB => _endB ?? throw new NullReferenceException();
-
     /// <summary>
     /// Occurs when the value of the IsUsable property changes.
     /// </summary>
@@ -49,22 +25,57 @@ public partial class TrackSegment : Interactable
     public override void _Ready()
     {
         _line = GetNodeOrNull<Line2D>(nameof(Line2D));
-        _endA = GetNodeOrNull<TrackNode>("ConnectionA");
-        _endB = GetNodeOrNull<TrackNode>("ConnectionB");
         _shape = GetNodeOrNull<CollisionShape2D>(nameof(CollisionShape2D));
 
         if (Engine.IsEditorHint())
         {
-            _endA.LocalPositionChanged += OnJunctionChanged;
-            _endB.LocalPositionChanged += OnJunctionChanged;
+            // _endA.LocalPositionChanged += OnJunctionChanged;
+            // _endB.LocalPositionChanged += OnJunctionChanged;
         }
     }
-
-    protected override void OnInteraction()
+    
+    public override void OnAttach(Track track, string id)
     {
-        // Interaction
+        var state = track.State?.GetSegmentState(id);
+        if (state is null)
+        {
+            return;
+        }
+
+        state.Changed += OnStateChanged;
+        OnStateChanged(state);
+    }
+    
+    public override void OnDetach(Track track, string id)
+    {
+        var state = track.State?.GetSegmentState(id);
+        if (state is null)
+        {
+            return;
+        }
+
+        state.Changed -= OnStateChanged;
     }
 
+    private void OnStateChanged(SegmentState state)
+    {
+        this.Visible = state.IsVisible;
+    }
+    
+    public override void Sync(Track track, string id)
+    {
+        var edge = track.Graph?.GetEdge(id);
+        if (edge is null)
+        {
+            return;
+        }
+
+        var nodeA = edge.NodeA;
+        var nodeB = edge.NodeB;
+        
+        UpdateTrackSegment(nodeA, nodeB, track.Settings.SegmentWidth);
+    }
+    
     public void SetOverrideColor(Color color)
     {
         _useOverrideColor = true;
@@ -93,13 +104,8 @@ public partial class TrackSegment : Interactable
             _line.Modulate = _overrideColor;
             return;
         }
-
-        if (Settings is null)
-        {
-            return;
-        }
-
-        _line.Modulate = Settings.SegmentNormalColor;
+        
+        // _line.Modulate = Settings.SegmentNormalColor;
     }
 
     public void SetIsUsable(bool isUsable)
@@ -109,40 +115,12 @@ public partial class TrackSegment : Interactable
         UsabilityChanged?.Invoke();
     }
     
-    private void OnJunctionChanged()
-    {
-        if (Engine.IsEditorHint())
-        {
-            UpdateTrackSegment();
-        }
-    }
 
-    private void UpdateTrackSegment()
+    private void UpdateTrackSegment(TrackGraphNode nodeA, TrackGraphNode nodeB, float width)
     {
         // Get the current positions of both ends of the segment.
-        var endA = _endA?.GlobalPosition ?? GlobalPosition;
-        var endB = _endB?.GlobalPosition ?? GlobalPosition;
-
-        // Disable end notifications to prevent infinite loop.
-        _endA?.SetNotifyLocalTransform(false);
-        _endB?.SetNotifyLocalTransform(false);
-
-        // Move segments position between both ends
-        GlobalPosition = endA.Lerp(endB, 0.5f);
-
-        if (_endA is not null)
-        {
-            _endA.GlobalPosition = endA; // = ToLocal(endA);
-        }
-
-        if (_endB is not null)
-        {
-            _endB.GlobalPosition = endB; //ToLocal(endB);
-        }
-
-        // Restore notifications after position updates.
-        _endA?.SetNotifyLocalTransform(true);
-        _endB?.SetNotifyLocalTransform(true);
+        var endA = nodeA.Position;
+        var endB = nodeB.Position;
 
         // Update the Line2D based on the junctions
         if (_line is not null)
@@ -163,7 +141,7 @@ public partial class TrackSegment : Interactable
                 _shape.Shape = shape;
             }
 
-            shape.Size = new Vector2((endB - endA).Length(), SegmentWidth);
+            shape.Size = new Vector2((endB - endA).Length(), width);
         }
     }
 }

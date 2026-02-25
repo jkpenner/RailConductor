@@ -12,8 +12,6 @@ public class AddSwitchPhase : TrackGraphBuildPhase
 
     public override void Process(TrackGraph graph, TrackData data, TrackSettings settings)
     {
-        var _edgesByLinkId = new Dictionary<string, TrackGraphEdge>();
-
         // Process all switches.
         foreach (var node in data.GetNodes().Where(n => n.NodeType == TrackNodeType.Switch))
         {
@@ -55,16 +53,9 @@ public class AddSwitchPhase : TrackGraphBuildPhase
                     newNode,
                     space
                 );
+                newEdge.AltId = edge.Id;
                 graph.AddEdge(newEdge);
-                
-                // Store reference to new edge for switch edge assignments.
-                _edgesByLinkId[edge.Id] = newEdge;
             }
-            
-            // Setup edges for switch
-            
-            // Clear stored references
-            _edgesByLinkId.Clear();
         }
     }
 
@@ -84,7 +75,7 @@ public class AddSwitchPhase : TrackGraphBuildPhase
             return 0f;
         }
 
-        // Only less then half of the link can be used for spacers.
+        // Only less than half of the link can be used for spacers.
         return (nodeA.Position - nodeB.Position).Length() * 0.4f;
     }
 }

@@ -14,6 +14,10 @@
 [ext_resource type="Script" uid="uid://c70ocdqxg436o" path="res://scripts/core/tracks/data/RouteDefinition.cs" id="11_vivmo"]
 [ext_resource type="Script" uid="uid://c2oyfivfqjjgc" path="res://scripts/core/tracks/data/Route.cs" id="12_mwfav"]
 [ext_resource type="PackedScene" uid="uid://cx7rnb56o6a7r" path="res://entities/train/Train.tscn" id="13_qmy6f"]
+[ext_resource type="PackedScene" uid="uid://dpib8yf15r63n" path="res://entities/tracks/BasicTrackNode.tscn" id="14_ft6cd"]
+[ext_resource type="PackedScene" uid="uid://d38phvi2cgoye" path="res://entities/tracks/TrackSegement.tscn" id="15_bb450"]
+[ext_resource type="PackedScene" uid="uid://cjmcrngec807n" path="res://entities/tracks/SwitchVisual.tscn" id="15_nfivy"]
+[ext_resource type="Script" uid="uid://cii8h6fpvlu1d" path="res://scripts/core/tracks/TrackSettings.cs" id="16_nfivy"]
 
 [sub_resource type="Resource" id="Resource_uer86"]
 script = ExtResource("5_dg77c")
@@ -1738,6 +1742,13 @@ _platformGroups = Dictionary[String, ExtResource("9_mwfav")]({
 })
 metadata/_custom_type_script = "uid://16mgebho3rd5"
 
+[sub_resource type="Resource" id="Resource_fv5rl"]
+script = ExtResource("16_nfivy")
+SwitchSpacing = 100.0
+TrackSegmentScene = ExtResource("15_bb450")
+BasicNodeScene = ExtResource("14_ft6cd")
+SwitchNodeScene = ExtResource("15_nfivy")
+
 [sub_resource type="Curve2D" id="Curve2D_vke2r"]
 
 [node name="Main" type="Node" unique_id=2111924343]
@@ -1752,6 +1763,7 @@ script = ExtResource("9_kek77")
 position = Vector2(0, 1)
 script = ExtResource("3_1bvp3")
 Data = SubResource("Resource_1x1rp")
+Settings = SubResource("Resource_fv5rl")
 
 [node name="Marker2D" type="Marker2D" parent="Track" unique_id=2067568665]
 position = Vector2(305, 34)

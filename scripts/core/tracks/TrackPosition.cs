@@ -1,18 +1,18 @@
 ﻿using System;
 using Godot;
 
-namespace RailConductor.GraphOld;
+namespace RailConductor;
 
-public record TrackLocation(TrackGraphLink Link, TrackGraphNode Face, float NormalizedPosition = 1f)
+public record TrackPosition(TrackGraphEdge Edge, TrackGraphNode Face, float NormalizedPosition = 1f)
 {
-    public TrackGraphNode Other => Link.GetOtherNode(Face);
+    public TrackGraphNode Other => Edge.GetOtherNode(Face);
 
     /// <summary>
     /// Gets the node in which the location is facing.
     /// </summary>
     public float DistanceToNextNode()
     {
-        var linkLength = Link.GetLength();
+        var linkLength = Edge.Length;
         if (linkLength <= 0f)
         {
             return 0f;
@@ -25,17 +25,17 @@ public record TrackLocation(TrackGraphLink Link, TrackGraphNode Face, float Norm
     /// Creates a new track location that if facing the opposite direction.
     /// </summary>
     /// <returns></returns>
-    public TrackLocation FlipDirection()
-        => new(Link, Link.GetOtherNode(Face), 1f - NormalizedPosition);
+    public TrackPosition FlipDirection()
+        => new(Edge, Edge.GetOtherNode(Face), 1f - NormalizedPosition);
 
     /// <summary>
     /// Creates a new track location that is moved along the track link by the given
     /// distances. The moved location is clamped to the link. This will return any
     /// remaining distance not used by the move.
     /// </summary>
-    public TrackLocation Move(float distance, out float remainder)
+    public TrackPosition Move(float distance, out float remainder)
     {
-        var linkLength = Link.GetLength();
+        var linkLength = Edge.Length;
         if (linkLength == 0f)
         {
             remainder = distance;
@@ -60,16 +60,16 @@ public record TrackLocation(TrackGraphLink Link, TrackGraphNode Face, float Norm
     /// Calculates the global position along the track segment.
     /// </summary>
     public Vector2 GetGlobalPosition()
-        => Other.GlobalPosition.Lerp(Face.GlobalPosition, NormalizedPosition);
+        => Other.Position.Lerp(Face.Position, NormalizedPosition);
 
     /// <summary>
     /// Gets the forward direction (toward Face).
     /// </summary>
     public Vector2 GetForward()
     {
-        var vec = Face.GlobalPosition - GetGlobalPosition();
+        var vec = Face.Position - GetGlobalPosition();
         return vec == Vector2.Zero
-            ? (Face.GlobalPosition - Other.GlobalPosition).Normalized()
+            ? (Face.Position - Other.Position).Normalized()
             : vec.Normalized();
     }
 

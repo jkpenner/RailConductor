@@ -174,7 +174,7 @@ public class EditSignalRoutesMode : PluginModeHandler
         {
             var node = ctx.TrackData.GetNode(id);
             if (node?.NodeType == TrackNodeType.Switch)
-                TrackEditorActions.SetRouteSwitchAlignment(ctx, route, id, SwitchAlignment.Reverse);
+                TrackEditorActions.SetRouteSwitchAlignment(ctx, route, id, SwitchAlignment.Diverging);
         }
     }
 

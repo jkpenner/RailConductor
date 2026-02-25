@@ -1,0 +1,66 @@
+[gd_scene format=3 uid="uid://cjmcrngec807n"]
+
+[ext_resource type="Script" uid="uid://bwpq3caw61t4m" path="res://scripts/core/tracks/visuals/types/SwitchVisual.cs" id="1_c7rfo"]
+[ext_resource type="Texture2D" uid="uid://djuh3tra4ijeq" path="res://assets/textures/Circle.png" id="2_gi64a"]
+[ext_resource type="Script" uid="uid://b566yaetqrp38" path="res://scripts/core/interactions/Interactable.cs" id="3_gi64a"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_6x7m7"]
+
+[node name="SwitchVisual" type="Node2D" unique_id=1833687142 node_paths=PackedStringArray("IdText", "StateText", "Indicator", "Interactable")]
+script = ExtResource("1_c7rfo")
+IdText = NodePath("Id")
+StateText = NodePath("State")
+Indicator = NodePath("Indicator")
+Interactable = NodePath("Interactable")
+
+[node name="Interactable" type="Area2D" parent="." unique_id=1511248674]
+script = ExtResource("3_gi64a")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Interactable" unique_id=1254044126]
+shape = SubResource("CircleShape2D_6x7m7")
+
+[node name="Indicator" type="Sprite2D" parent="." unique_id=1385102046]
+self_modulate = Color(0.26745227, 0.550313, 0.99999696, 1)
+scale = Vector2(0.07, 0.07)
+texture = ExtResource("2_gi64a")
+
+[node name="Fill" type="Sprite2D" parent="." unique_id=267634196]
+scale = Vector2(0.05, 0.05)
+texture = ExtResource("2_gi64a")
+
+[node name="State" type="Label" parent="." unique_id=423828565]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -6.5
+offset_top = -11.5
+offset_right = 6.5
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.14406255, 0.14406255, 0.14406255, 1)
+theme_override_font_sizes/font_size = 12
+text = "N"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Id" type="Label" parent="." unique_id=1948697174]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -6.5
+offset_top = -35.0
+offset_right = 6.5
+grow_horizontal = 2
+grow_vertical = 0
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.14406255, 0.14406255, 0.14406255, 1)
+theme_override_font_sizes/font_size = 12
+text = "N"
+horizontal_alignment = 1
+vertical_alignment = 1

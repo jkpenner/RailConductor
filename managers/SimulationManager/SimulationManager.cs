@@ -31,7 +31,7 @@ public partial class SimulationManager : Node
     public SimTimeMod TimeMod { get; private set; } = SimTimeMod.Modx1;
 
     public event Action<double> SimulationTick;
-    public event Action<TrackCircuit> OccupancyChanged;
+    // public event Action<TrackCircuit> OccupancyChanged;
     public event Action<Train, PlatformData> TrainArrivedAtPlatform;
     public event Action<string> ScenarioTriggered;
     public event Action<SimTimeMod> SimTimeChanged;

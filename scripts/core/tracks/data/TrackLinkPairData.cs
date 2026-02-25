@@ -10,4 +10,7 @@ public partial class TrackLinkPairData : Resource
 
     [Export]
     public string LinkBId { get; set; } = string.Empty;
+
+    public bool Contains(string id)
+        => LinkAId == id || LinkBId == id;
 }
