@@ -1,7 +1,17 @@
-﻿namespace RailConductor;
+﻿using Godot;
+
+namespace RailConductor;
 
 public partial class SignalVisual : TrackVisual
 {
+    private Node2D _visual = null!;
+    private Track? _track;
+
+    public override void _Ready()
+    {
+        _visual = GetNode<Node2D>("Visual");
+    }
+
     public override void OnAttach(Track track, string id)
     {
         var state = track.State?.GetSignalState(id);
@@ -9,8 +19,11 @@ public partial class SignalVisual : TrackVisual
         {
             return;
         }
+        
+        _track = track;
 
         state.Changed += OnStateChanged;
+        OnStateChanged(state);
     }
     
     public override void OnDetach(Track track, string id)
@@ -37,19 +50,15 @@ public partial class SignalVisual : TrackVisual
             return;
         }
 
-        var edge = track.Graph?.GetEdge(signal.LinkId);
-        if (edge is null)
-        {
-            return;
-        }
-
-        var node = GetTargetNode(edge, signal.Id);
-        if (node is null)
+        var orientation = track.Data?.GetSignalPosition(signal, _track?.Settings.SignalOffset ?? 12);
+        if (orientation is null)
         {
             return;
         }
         
-        // Todo: Get the signal's correct position.
+        var (position, angle) = orientation.Value;
+        Position = position;
+        _visual.Rotation = angle;
     }
     
     private TrackGraphNode? GetTargetNode(TrackGraphEdge edge, string nodeId)

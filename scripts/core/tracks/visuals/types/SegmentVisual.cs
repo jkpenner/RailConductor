@@ -6,8 +6,10 @@ namespace RailConductor;
 [GlobalClass, Tool]
 public partial class SegmentVisual : TrackVisual
 {
-    private Line2D? _line;
-    private CollisionShape2D? _shape;
+    private Track? _track;
+    
+    private Line2D _line = null!;
+    private CollisionShape2D _shape = null!;
 
     private bool _useOverrideColor = false;
     private Color _overrideColor;
@@ -26,12 +28,6 @@ public partial class SegmentVisual : TrackVisual
     {
         _line = GetNodeOrNull<Line2D>(nameof(Line2D));
         _shape = GetNodeOrNull<CollisionShape2D>(nameof(CollisionShape2D));
-
-        if (Engine.IsEditorHint())
-        {
-            // _endA.LocalPositionChanged += OnJunctionChanged;
-            // _endB.LocalPositionChanged += OnJunctionChanged;
-        }
     }
     
     public override void OnAttach(Track track, string id)
@@ -42,6 +38,9 @@ public partial class SegmentVisual : TrackVisual
             return;
         }
 
+        _track = track;
+        
+        
         state.Changed += OnStateChanged;
         OnStateChanged(state);
     }
@@ -55,6 +54,7 @@ public partial class SegmentVisual : TrackVisual
         }
 
         state.Changed -= OnStateChanged;
+        _track = null;
     }
 
     private void OnStateChanged(SegmentState state)
@@ -74,6 +74,8 @@ public partial class SegmentVisual : TrackVisual
         var nodeB = edge.NodeB;
         
         UpdateTrackSegment(nodeA, nodeB, track.Settings.SegmentWidth);
+        
+        _line.Width = _track?.Settings.SegmentWidth ?? _line.Width;
     }
     
     public void SetOverrideColor(Color color)
@@ -105,7 +107,7 @@ public partial class SegmentVisual : TrackVisual
             return;
         }
         
-        // _line.Modulate = Settings.SegmentNormalColor;
+        _line.Modulate = _track?.Settings.SegmentNormalColor ?? Colors.Bisque;
     }
 
     public void SetIsUsable(bool isUsable)

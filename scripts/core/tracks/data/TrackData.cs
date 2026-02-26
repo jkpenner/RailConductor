@@ -294,13 +294,13 @@ public partial class TrackData : Resource
         return p.DistanceTo(projection);
     }
 
-    public (Vector2 Position, float Angle)? GetSignalPosition(string signalId)
+    public (Vector2 Position, float Angle)? GetSignalPosition(string signalId, int signalOffset = 12)
     {
         var signal = GetSignal(signalId);
         return signal is null ? null : GetSignalPosition(signal);
     }
 
-    public (Vector2 Position, float Angle)? GetSignalPosition(SignalData signal)
+    public (Vector2 Position, float Angle)? GetSignalPosition(SignalData signal, int signalOffset = 12)
     {
         var link = GetLink(signal.LinkId);
         if (link is null) return null;
@@ -312,7 +312,7 @@ public partial class TrackData : Resource
         var direction = (nodeA.Position - nodeB.Position).Normalized();
         var angle = direction.Angle();
         var rotated = direction.Rotated(Mathf.DegToRad(90f));
-        var position = nodeA.Position + rotated * 12;
+        var position = nodeA.Position + rotated * signalOffset;
         return (position, angle);
     }
 }

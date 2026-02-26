@@ -1,12 +1,15 @@
 [gd_scene format=3 uid="uid://dpib8yf15r63n"]
 
 [ext_resource type="Script" uid="uid://c7lqywmwnlwe3" path="res://scripts/core/tracks/visuals/types/BasicNodeVisual.cs" id="1_myq10"]
-[ext_resource type="Texture2D" uid="uid://djuh3tra4ijeq" path="res://assets/textures/Circle.png" id="2_gb3b4"]
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_shqcf"]
+load_path = "res://.godot/imported/Circle.png-a75a7f672f6055f2a8cbf048c99105ba.ctex"
 
 [node name="BasicTrackNode" type="Node2D" unique_id=1833687142]
+visible = false
 script = ExtResource("1_myq10")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=267634196]
 self_modulate = Color(0, 0.8276267, 0.828744, 1)
-scale = Vector2(0.05, 0.05)
-texture = ExtResource("2_gb3b4")
+scale = Vector2(0.02, 0.02)
+texture = SubResource("CompressedTexture2D_shqcf")

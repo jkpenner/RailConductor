@@ -34,6 +34,9 @@ public partial class TrackSettings : Resource
     [Export]
     public Color SignalProperColor { get; set; } = Colors.Green;
     
+    [Export]
+    public int SignalOffset { get; set; } = 20;
+    
     [ExportGroup("Scenes")]
     [Export] public PackedScene? TrackSegmentScene { get; set; }
     [Export] public PackedScene? BasicNodeScene { get; set; }

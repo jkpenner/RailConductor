@@ -23,6 +23,7 @@ public sealed class TrackVisualBuilder(Track track)
 
         BuildNodes();
         BuildSegments();
+        BuildSignals();
     }
 
     private void Clear()
@@ -97,6 +98,35 @@ public sealed class TrackVisualBuilder(Track track)
             }
 
             visual.Sync(track, edge.Id);
+        }
+    }
+    
+    private void BuildSignals()
+    {
+        if (track.Data is null)
+        {
+            return;
+        }
+        
+        foreach (var signal in track.Data.GetSignals())
+        {
+            if (!_visuals.TryGetValue(signal.Id, out var visual))
+            {
+                var packedScene = track.Settings.SignalScene;
+                visual = packedScene?.InstantiateOrNull<TrackVisual>();
+                if (visual is null)
+                {
+                    continue;
+                }
+
+                var parent = _signals ?? track;
+                parent.AddChild(visual);
+                
+                _visuals[signal.Id] = visual;
+                visual.OnAttach(track, signal.Id);
+            }
+
+            visual.Sync(track, signal.Id);
         }
     }
 
