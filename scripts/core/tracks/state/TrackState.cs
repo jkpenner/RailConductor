@@ -101,4 +101,29 @@ public class TrackState
             edgeState.IsVisible = pair.Contains(edge.Id) || pair.Contains(edge.AltId);
         }
     }
+    
+    /// <summary>
+    /// Attempts to authorize a route for a signal.
+    /// Returns true if the signal has a matching RouteDefinition and we set it permissive.
+    /// This is the "place selection" fulfilment.
+    /// </summary>
+    public bool TryAuthorizeRoute(string signalId, string requestedRouteCode)
+    {
+        var signal = _data.GetSignal(signalId);
+        if (signal is null) return false;
+
+        foreach (var def in signal.RouteDefinitions)
+        {
+            if (def.Matches(requestedRouteCode))
+            {
+                var state = GetSignalState(signalId);
+                if (state is not null)
+                {
+                    state.IsPermissive = true;
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 }

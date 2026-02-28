@@ -36,17 +36,18 @@ public record TrackPosition(TrackGraphEdge Edge, TrackGraphNode Face, float Norm
     public TrackPosition Move(float distance, out float remainder)
     {
         var linkLength = Edge.Length;
-        if (linkLength == 0f)
+        if (linkLength <= 0f)
         {
             remainder = distance;
             return this;
         }
 
         var deltaT = distance / linkLength;
-        var target = NormalizedPosition + deltaT;
-        var newT = Mathf.Clamp(target, 0f, 1f);
+        
+        // Clamp the new normalized position
+        var newT = Mathf.Clamp(NormalizedPosition + deltaT, 0f, 1f);
+        remainder = (NormalizedPosition + deltaT - newT) * linkLength;
 
-        remainder = (target - newT) * linkLength;
         return this with { NormalizedPosition = newT };
     }
 

@@ -1,60 +1,102 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
 
-
 namespace RailConductor;
 
+/// <summary>
+/// Inserts spacer nodes on switch branches for clean visuals.
+/// 
+/// FIXED (Feb 27 2026):
+/// • After ReplaceNode we now explicitly add the original long edge to spacer.OutgoingEdges.
+/// • This ensures GetNextEdge() on the spacer can find the continuation.
+/// • PairedLinks are rebuilt correctly on both switch and spacers.
+/// </summary>
 public class AddSwitchPhase : TrackGraphBuildPhase
 {
     public override int PhaseOrder => TrackGraphBuildPhaseOrder.AddSwitches;
 
     public override void Process(TrackGraph graph, TrackData data, TrackSettings settings)
     {
-        // Process all switches.
-        foreach (var node in data.GetNodes().Where(n => n.NodeType == TrackNodeType.Switch))
+        foreach (var dataNode in data.GetNodes().Where(n => n.NodeType == TrackNodeType.Switch))
         {
-            var target = graph.GetNode(node.Id);
-            if (target is null)
+            var switchNode = graph.GetNode(dataNode.Id);
+            if (switchNode is null) continue;
+
+            var originalPairs = dataNode.PairedLinks.ToArray();
+            var branchToNewShortEdge = new Dictionary<string, TrackGraphEdge>();
+
+            foreach (var longEdge in switchNode.OutgoingEdges.ToList())
             {
-                continue;
-            }
-            
-            foreach (var edge in target.OutgoingEdges.ToList())
-            {
-                var maxSpace = GetMaxSpacerDistance(data, edge.Id);
+                var maxSpace = GetMaxSpacerDistance(data, longEdge.Id);
                 if (maxSpace <= Mathf.Epsilon || settings.SwitchSpacing <= Mathf.Epsilon)
-                {
                     continue;
-                }
-                
-                // Calculate the offset position for the new node.
-                var otherNode = edge.GetOtherNode(target);
+
+                var otherNode = longEdge.GetOtherNode(switchNode);
                 var space = Mathf.Min(settings.SwitchSpacing, maxSpace);
-                var direction = (otherNode.Position - target.Position).Normalized();
-                var position = target.Position + direction * space;
+                var spacerPos = switchNode.Position + (otherNode.Position - switchNode.Position).Normalized() * space;
 
-                // Remove the working edge
-                target.OutgoingEdges.Remove(edge);
+                switchNode.OutgoingEdges.Remove(longEdge);
 
-                // Replace the target with new node
-                var newNode = new TrackGraphNode(
+                var spacer = new TrackGraphNode(
                     Guid.NewGuid().ToString(),
-                    position,
+                    spacerPos,
                     TrackNodeType.Basic
                 );
-                edge.ReplaceNode(target, newNode);
+                spacer.AltId = longEdge.Id;
 
-                // Add the new edge, outgoing update by Graph.AddEdge.
-                var newEdge = new TrackGraphEdge(
+                // CRITICAL FIX: Update the long edge to start at spacer instead of switch
+                longEdge.ReplaceNode(switchNode, spacer);
+
+                // ADD THE LONG EDGE TO THE SPACER'S OUTGOING LIST (this was missing!)
+                spacer.OutgoingEdges.Add(longEdge);
+
+                // Create short edge: switch → spacer
+                var shortEdge = new TrackGraphEdge(
                     Guid.NewGuid().ToString(),
-                    target,
-                    newNode,
+                    switchNode,
+                    spacer,
                     space
                 );
-                newEdge.AltId = edge.Id;
-                graph.AddEdge(newEdge);
+                shortEdge.AltId = longEdge.Id;
+
+                graph.AddEdge(shortEdge);
+
+                if (originalPairs.Any(p => p.Contains(longEdge.Id)))
+                    branchToNewShortEdge[longEdge.Id] = shortEdge;
+            }
+
+            // Rebuild PairedLinks on switch (now points to short edges)
+            var newPairs = new List<TrackLinkPairData>(originalPairs.Length);
+            foreach (var origPair in originalPairs)
+            {
+                var linkA = origPair.LinkAId;
+                var linkB = origPair.LinkBId;
+
+                if (branchToNewShortEdge.TryGetValue(linkA, out var shortA)) linkA = shortA.Id;
+                if (branchToNewShortEdge.TryGetValue(linkB, out var shortB)) linkB = shortB.Id;
+
+                newPairs.Add(new TrackLinkPairData { LinkAId = linkA, LinkBId = linkB });
+            }
+            switchNode.PairedLinks = newPairs.ToArray();
+
+            // Set PairedLinks on each spacer (single pair: short ↔ long)
+            foreach (var shortEdge in branchToNewShortEdge.Values)
+            {
+                var spacer = shortEdge.NodeB;
+                if (spacer is null) continue;
+
+                spacer.PairedLinks = new[]
+                {
+                    new TrackLinkPairData
+                    {
+                        LinkAId = shortEdge.Id,
+                        LinkBId = shortEdge.AltId
+                    }
+                };
             }
         }
     }
@@ -62,20 +104,12 @@ public class AddSwitchPhase : TrackGraphBuildPhase
     private float GetMaxSpacerDistance(TrackData data, string linkId)
     {
         var link = data.GetLink(linkId);
-        if (link is null)
-        {
-            return 0f;
-        }
+        if (link is null) return 0f;
 
         var nodeA = data.GetNode(link.NodeAId);
         var nodeB = data.GetNode(link.NodeBId);
+        if (nodeA is null || nodeB is null) return 0f;
 
-        if (nodeA is null || nodeB is null)
-        {
-            return 0f;
-        }
-
-        // Only less than half of the link can be used for spacers.
         return (nodeA.Position - nodeB.Position).Length() * 0.4f;
     }
 }

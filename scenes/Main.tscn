@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cywxbsbvsaka6" path="res://managers/SimulationManager/Main.cs" id="1_0xm2m"]
 [ext_resource type="PackedScene" uid="uid://coim6fdt86gu8" path="res://scenes/core/CameraController.tscn" id="2_0xm2m"]
+[ext_resource type="Script" uid="uid://b7gv11vf3r72w" path="res://managers/SimulationManager/SimulationManager.cs" id="2_cvmbd"]
 [ext_resource type="Script" uid="uid://b1h881bnaxfu1" path="res://scripts/core/tracks/Track.cs" id="3_1bvp3"]
 [ext_resource type="Script" uid="uid://mcyc06807gh6" path="res://scripts/core/tracks/data/TrackLinkData.cs" id="5_dg77c"]
 [ext_resource type="Script" uid="uid://dlpa5obf7cd0w" path="res://scripts/core/tracks/data/TrackNodeData.cs" id="5_efxa6"]
@@ -14,11 +15,7 @@
 [ext_resource type="Script" uid="uid://c70ocdqxg436o" path="res://scripts/core/tracks/data/RouteDefinition.cs" id="11_vivmo"]
 [ext_resource type="Script" uid="uid://c2oyfivfqjjgc" path="res://scripts/core/tracks/data/Route.cs" id="12_mwfav"]
 [ext_resource type="PackedScene" uid="uid://cx7rnb56o6a7r" path="res://entities/train/Train.tscn" id="13_qmy6f"]
-[ext_resource type="PackedScene" uid="uid://dpib8yf15r63n" path="res://entities/tracks/BasicTrackNode.tscn" id="14_ft6cd"]
-[ext_resource type="PackedScene" uid="uid://cymvd6j0e7xte" path="res://entities/tracks/SignalVisual.tscn" id="15_1nqs0"]
-[ext_resource type="PackedScene" uid="uid://d38phvi2cgoye" path="res://entities/tracks/TrackSegement.tscn" id="15_bb450"]
-[ext_resource type="PackedScene" uid="uid://cjmcrngec807n" path="res://entities/tracks/SwitchVisual.tscn" id="15_nfivy"]
-[ext_resource type="Script" uid="uid://cii8h6fpvlu1d" path="res://scripts/core/tracks/TrackSettings.cs" id="16_nfivy"]
+[ext_resource type="Resource" uid="uid://br87f1fwx0scj" path="res://scenes/MainTrack.tres" id="16_cvmbd"]
 
 [sub_resource type="Resource" id="Resource_uer86"]
 script = ExtResource("5_dg77c")
@@ -97,6 +94,12 @@ script = ExtResource("5_dg77c")
 Id = "373d4205-aae5-44c7-bb6e-a2b6ec711e59"
 NodeAId = "6e4dd45a-edc8-45cf-bb63-f5838b681456"
 NodeBId = "af35cc8d-b357-4af5-ab13-56d7a2214965"
+
+[sub_resource type="Resource" id="Resource_vwcyu"]
+script = ExtResource("5_dg77c")
+Id = "37c04d72-4805-4da3-81be-bd14b8293eaf"
+NodeAId = "9d672653-dc4b-4bb6-8b41-b93afcc52a9b"
+NodeBId = "c63ee203-23fb-466e-acae-6230b2792d00"
 
 [sub_resource type="Resource" id="Resource_gia1l"]
 script = ExtResource("5_dg77c")
@@ -248,6 +251,12 @@ Id = "a823fdd6-009e-4e29-af86-e6534c341048"
 NodeAId = "33ce42cf-3f51-4168-a01b-e47337cc13c1"
 NodeBId = "1c6fd24e-a193-4e81-929c-d58236e8d0ac"
 
+[sub_resource type="Resource" id="Resource_ugmlg"]
+script = ExtResource("5_dg77c")
+Id = "aa62ffbf-4ab8-4970-9c40-1c039010b145"
+NodeAId = "10de76b7-c731-457a-a769-24eb0020c577"
+NodeBId = "f45d292d-7087-484a-b7d1-d3bae235daa0"
+
 [sub_resource type="Resource" id="Resource_bb450"]
 script = ExtResource("5_dg77c")
 Id = "ae8735de-36b6-464e-8b25-fd57a35f4e92"
@@ -398,18 +407,6 @@ Id = "ffe40938-54cc-42a1-94d4-8e6f550cce21"
 NodeAId = "f45d292d-7087-484a-b7d1-d3bae235daa0"
 NodeBId = "9d672653-dc4b-4bb6-8b41-b93afcc52a9b"
 
-[sub_resource type="Resource" id="Resource_vwcyu"]
-script = ExtResource("5_dg77c")
-Id = "37c04d72-4805-4da3-81be-bd14b8293eaf"
-NodeAId = "9d672653-dc4b-4bb6-8b41-b93afcc52a9b"
-NodeBId = "c63ee203-23fb-466e-acae-6230b2792d00"
-
-[sub_resource type="Resource" id="Resource_ugmlg"]
-script = ExtResource("5_dg77c")
-Id = "aa62ffbf-4ab8-4970-9c40-1c039010b145"
-NodeAId = "10de76b7-c731-457a-a769-24eb0020c577"
-NodeBId = "f45d292d-7087-484a-b7d1-d3bae235daa0"
-
 [sub_resource type="Resource" id="Resource_u5ctp"]
 script = ExtResource("7_ycdy4")
 LinkAId = "58cc81aa-d66f-4b1c-b773-3191b6a996dd"
@@ -470,12 +467,12 @@ PairedLinks = Array[ExtResource("7_ycdy4")]([SubResource("Resource_fco76")])
 [sub_resource type="Resource" id="Resource_nu61c"]
 script = ExtResource("7_ycdy4")
 LinkAId = "ebdafd16-e762-464d-8d38-25cd73c8d06e"
-LinkBId = "b8eb34ca-38ba-4dbb-984c-c26e5919c831"
+LinkBId = "69a95aa3-e459-4690-90d2-e3e15b9980f8"
 
 [sub_resource type="Resource" id="Resource_e2bht"]
 script = ExtResource("7_ycdy4")
-LinkAId = "69a95aa3-e459-4690-90d2-e3e15b9980f8"
-LinkBId = "824dd15c-f555-4ef0-8d14-2099611d95bd"
+LinkAId = "824dd15c-f555-4ef0-8d14-2099611d95bd"
+LinkBId = "b8eb34ca-38ba-4dbb-984c-c26e5919c831"
 
 [sub_resource type="Resource" id="Resource_a3hxr"]
 script = ExtResource("5_efxa6")
@@ -1743,19 +1740,15 @@ _platformGroups = Dictionary[String, ExtResource("9_mwfav")]({
 })
 metadata/_custom_type_script = "uid://16mgebho3rd5"
 
-[sub_resource type="Resource" id="Resource_fv5rl"]
-script = ExtResource("16_nfivy")
-SegmentWidth = 5.0
-SwitchSpacing = 30.0
-TrackSegmentScene = ExtResource("15_bb450")
-BasicNodeScene = ExtResource("14_ft6cd")
-SwitchNodeScene = ExtResource("15_nfivy")
-SignalScene = ExtResource("15_1nqs0")
-
 [sub_resource type="Curve2D" id="Curve2D_vke2r"]
 
 [node name="Main" type="Node" unique_id=2111924343]
 script = ExtResource("1_0xm2m")
+
+[node name="SimulationManager" type="Node" parent="." unique_id=175637802]
+script = ExtResource("2_cvmbd")
+TrainScene = ExtResource("13_qmy6f")
+metadata/_custom_type_script = "uid://b7gv11vf3r72w"
 
 [node name="Interactions" type="Node" parent="." unique_id=137138085]
 script = ExtResource("9_kek77")
@@ -1766,13 +1759,12 @@ script = ExtResource("9_kek77")
 position = Vector2(0, 1)
 script = ExtResource("3_1bvp3")
 Data = SubResource("Resource_1x1rp")
-Settings = SubResource("Resource_fv5rl")
+Settings = ExtResource("16_cvmbd")
 
 [node name="Marker2D" type="Marker2D" parent="Track" unique_id=2067568665]
 position = Vector2(305, 34)
 
 [node name="Train" parent="." unique_id=995265002 instance=ExtResource("13_qmy6f")]
-visible = false
 position = Vector2(102, -52)
 
 [node name="Node2D" type="Node2D" parent="." unique_id=1993713351]

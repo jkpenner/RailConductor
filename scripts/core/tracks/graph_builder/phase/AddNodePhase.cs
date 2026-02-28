@@ -1,4 +1,6 @@
-﻿namespace RailConductor;
+﻿using System.Linq;
+
+namespace RailConductor;
 
 public class AddNodePhase : TrackGraphBuildPhase
 {
@@ -8,12 +10,15 @@ public class AddNodePhase : TrackGraphBuildPhase
     {
         foreach (var node in data.GetNodes())
         {
-            graph.AddNode(new TrackGraphNode(
+            var graphNode = new TrackGraphNode(
                 node.Id,
                 node.Position,
                 node.NodeType,
                 node.IsIsolator
-            ));
+            );
+
+            graphNode.PairedLinks = node.PairedLinks.ToArray();
+            graph.AddNode(graphNode);
         }
     }
 }

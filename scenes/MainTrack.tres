@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="TrackSettings" format=3 uid="uid://br87f1fwx0scj"]
+
+[ext_resource type="Script" uid="uid://cii8h6fpvlu1d" path="res://scripts/core/tracks/TrackSettings.cs" id="1_r3dun"]
+[ext_resource type="PackedScene" uid="uid://dpib8yf15r63n" path="res://entities/tracks/BasicTrackNode.tscn" id="1_u4voh"]
+[ext_resource type="PackedScene" uid="uid://cymvd6j0e7xte" path="res://entities/tracks/SignalVisual.tscn" id="2_uksws"]
+[ext_resource type="PackedScene" uid="uid://cjmcrngec807n" path="res://entities/tracks/SwitchVisual.tscn" id="3_52qh8"]
+[ext_resource type="PackedScene" uid="uid://d38phvi2cgoye" path="res://entities/tracks/TrackSegement.tscn" id="4_fck4p"]
+
+[resource]
+script = ExtResource("1_r3dun")
+SwitchSpacing = 50.0
+TrackSegmentScene = ExtResource("4_fck4p")
+BasicNodeScene = ExtResource("1_u4voh")
+SwitchNodeScene = ExtResource("3_52qh8")
+SignalScene = ExtResource("2_uksws")
