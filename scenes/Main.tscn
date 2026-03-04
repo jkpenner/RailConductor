@@ -1740,8 +1740,6 @@ _platformGroups = Dictionary[String, ExtResource("9_mwfav")]({
 })
 metadata/_custom_type_script = "uid://16mgebho3rd5"
 
-[sub_resource type="Curve2D" id="Curve2D_vke2r"]
-
 [node name="Main" type="Node" unique_id=2111924343]
 script = ExtResource("1_0xm2m")
 
@@ -1763,12 +1761,3 @@ Settings = ExtResource("16_cvmbd")
 
 [node name="Marker2D" type="Marker2D" parent="Track" unique_id=2067568665]
 position = Vector2(305, 34)
-
-[node name="Train" parent="." unique_id=995265002 instance=ExtResource("13_qmy6f")]
-position = Vector2(102, -52)
-
-[node name="Node2D" type="Node2D" parent="." unique_id=1993713351]
-position = Vector2(0, -200)
-
-[node name="Path2D" type="Path2D" parent="." unique_id=762627728]
-curve = SubResource("Curve2D_vke2r")
