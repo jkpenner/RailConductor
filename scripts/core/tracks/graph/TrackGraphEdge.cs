@@ -8,7 +8,7 @@ public sealed class TrackGraphEdge
     
     public TrackGraphNode NodeA { get; set; }
     public TrackGraphNode NodeB { get; set; }
-    public float Length { get; private set; }
+    public float Length { get; set; }
 
     /// <summary>
     /// An alternate not unique id that references another edge. Used in

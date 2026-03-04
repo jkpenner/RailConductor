@@ -15,6 +15,7 @@ public sealed class TrackGraphBuilder
         builder.AddPhase(new AddNodePhase());
         builder.AddPhase(new AddEdgePhase());
         builder.AddPhase(new AddSwitchPhase());
+        builder.AddPhase(new CalcEdgeLengthPhase());
         return builder;
     }
 
