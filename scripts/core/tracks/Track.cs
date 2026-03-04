@@ -2,14 +2,14 @@
 
 namespace RailConductor;
 
-[Tool]
+[GlobalClass, Tool]
 public partial class Track : Node2D
 {
     [Export]
     public TrackData? Data { get; set; }
 
     [Export]
-    public TrackSettings Settings { get; set; } = new();
+    public TrackSettings? Settings { get; set; }
 
     public TrackGraph? Graph { get; private set; }
     public TrackState? State { get; private set; }

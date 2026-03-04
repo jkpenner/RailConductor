@@ -2,7 +2,7 @@
 
 namespace RailConductor;
 
-[GlobalClass]
+[GlobalClass, Tool]
 public partial class TrackSettings : Resource
 {
     [Export] public bool GenerateCollision { get; set; } = true;
