@@ -54,8 +54,7 @@ public record TrackPosition(TrackGraphEdge Edge, TrackGraphNode Face, float Norm
     /// <summary>
     /// Returns true if the position is approximately at a node (using float epsilon).
     /// </summary>
-    public bool IsApproxAtNode()
-        => Mathf.IsEqualApprox(NormalizedPosition, 1f) || Mathf.IsZeroApprox(NormalizedPosition);
+    public bool IsApproxAtNode() => IsAtFaceNode() || IsAtRearNode();
 
     /// <summary>
     /// Calculates the global position along the track segment.
@@ -79,4 +78,7 @@ public record TrackPosition(TrackGraphEdge Edge, TrackGraphNode Face, float Norm
     /// </summary>
     public Vector2 GetRight()
         => GetForward().Rotated(Mathf.Pi * 0.5f);
+
+    public bool IsAtFaceNode() => Mathf.IsEqualApprox(NormalizedPosition, 1f);
+    public bool IsAtRearNode() => Mathf.IsZeroApprox(NormalizedPosition);
 }

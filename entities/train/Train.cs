@@ -47,11 +47,11 @@ public partial class Train : Node2D
     private bool _isAtSignal = false;
     private string? _currentSignalId;
 
-    private Sprite2D? _visual;
+    private Node2D? _visual;
 
     public override void _Ready()
     {
-        _visual = GetNodeOrNull<Sprite2D>("Visual");
+        _visual = GetNodeOrNull<Node2D>("Visual");
         _track = GetTree().Root.GetNodeOrNull<Track>("Main/Track");
 
         if (_track is null)
@@ -88,6 +88,7 @@ public partial class Train : Node2D
         var currentLead = LeadPosition!;
 
         var newLead = _track!.Move(currentLead, distance);
+        
 
         if (ActiveEnd == TrainEnd.A)
             AEndPosition = newLead;
@@ -101,6 +102,16 @@ public partial class Train : Node2D
             BEndPosition = newRear;
         else
             AEndPosition = newRear;
+        
+        if (newLead.IsAtFaceNode())
+        {
+            var nextEdge = newLead.Face.GetNextEdge(newLead.Edge.Id, _track!.State!);
+            if (nextEdge is null)
+            {
+                // True terminus
+                FlipActiveEnd();
+            }
+        }
 
         SyncVisual();
     }

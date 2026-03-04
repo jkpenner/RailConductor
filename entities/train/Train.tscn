@@ -2,13 +2,18 @@
 
 [ext_resource type="Script" uid="uid://d3c2or76iytl1" path="res://entities/train/Train.cs" id="1_k05ly"]
 [ext_resource type="Texture2D" uid="uid://djuh3tra4ijeq" path="res://assets/textures/Circle.png" id="2_v6bau"]
-[ext_resource type="Texture2D" uid="uid://cmh1kqiwj7hcq" path="res://assets/textures/9Sliced.png" id="3_v6bau"]
+[ext_resource type="Texture2D" uid="uid://benm1i63kisx2" path="res://assets/textures/Square.png" id="3_v6bau"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_v6bau"]
+size = Vector2(64, 22)
 
 [node name="Train" type="Node2D" unique_id=995265002]
 script = ExtResource("1_k05ly")
+TrainLength = 64.0
 
 [node name="Lead" type="Sprite2D" parent="." unique_id=959906166]
 modulate = Color(0, 0.20392157, 0.84313726, 1)
+position = Vector2(-32, 0)
 scale = Vector2(0.05, 0.05)
 texture = ExtResource("2_v6bau")
 
@@ -18,7 +23,11 @@ position = Vector2(31.999998, -0.99999994)
 scale = Vector2(0.05, 0.05)
 texture = ExtResource("2_v6bau")
 
-[node name="Visual" type="Sprite2D" parent="." unique_id=1689173695]
-visible = false
+[node name="Visual" type="Area2D" parent="." unique_id=725661869]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Visual" unique_id=557545003]
+shape = SubResource("RectangleShape2D_v6bau")
+
+[node name="Visual" type="Sprite2D" parent="Visual" unique_id=1689173695]
 scale = Vector2(0.3, 0.1)
 texture = ExtResource("3_v6bau")
